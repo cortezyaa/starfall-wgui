@@ -29,11 +29,10 @@ Element.static.validate = function( self )
     error( "Element is not valid" )
 end
 
+--[[
 -- Function for recalculating the position, size, docking of an element when changing
 Element.static.calculate = function( self, ignore )
 
-    
-    --[[
         Я В РОТ ЭТОГО ЕБАЛ
         БЕЗ ПИВА НЕ РАЗОБРАТЬСЯ
 
@@ -106,12 +105,9 @@ Element.static.calculate = function( self, ignore )
     for _, child in pairs( self.__data.children ) do
         if child == ignore then return end
         Element.static.calculate( child, self )
-    end]]--
-
-
-
-    
+    end
 end
+]]--
 
 
 -- Initialization function
@@ -120,7 +116,8 @@ Element.initialize = function( self, elementName )
 
     self.__wgui = true
     self.__valid = true
-     
+    self.__shouldRecalculate = false
+    
     -- Element data
     self.__data = {}
 
@@ -148,10 +145,19 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingRight = 0
     self.__data.dockPaddingBottom = 0
 
-    -- ? Element callbacks
+    -- Element callbacks
     self.__callbacks = {}
 
     -- Aliases
+        -- пока без
+    self.setPos = self.setPosition
+    self.getPos = self.getPosition
+    self.getPosGlobal = self.getPositionGlobal
+end
+
+-- Valid
+Element.isValid = function( self )
+    return self.__valid
 end
 
 -- Remove
@@ -174,20 +180,17 @@ Element.remove = function( self )
     self.__valid = false
 end
 
--- Valid
-Element.isValid = function( self )
-    return self.__valid
-end
-
 -- Parent and children
 Element.setParent = function( self, parent )
     Element.static.validate( self )
     local _, parentType = checkType( parent, { "wgui", "nil" } )
     
     if parentType == "nil" then
-        table.removeByValue( self.__data.parent, self )
-        self.__data.parent = nil
-
+        if self.__data.parent then
+            table.removeByValue( self.__data.parent, self )
+            self.__data.parent = nil
+        end
+        
         return
     end
 
@@ -195,13 +198,13 @@ Element.setParent = function( self, parent )
 
     -- The universe almost exploded xd
     if table.hasValue( self.__data.children, parent ) then
-        error( "Cannot parent child element" )
+        error( "Element cannot be parented to its child element" )
     end
 
     table.insert( parent.__data.children, self )
     self.__data.parent = parent
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.getParent = function( self )
@@ -225,7 +228,7 @@ Element.setPosition = function( self, x, y )
     self.__data.positionLocal.x = x
     self.__data.positionLocal.y = y
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.getPosition = function( self )
@@ -249,7 +252,7 @@ Element.setSize = function( self, w, h )
     self.__data.sizeLocal.w = w
     self.__data.sizeLocal.h = h
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.getSize = function( self )
@@ -271,7 +274,7 @@ Element.setDock = function( self, dockType )
 
     self.__data.dockType = dockType
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.setDockMargin = function( self, left, top, right, bottom )
@@ -286,7 +289,7 @@ Element.setDockMargin = function( self, left, top, right, bottom )
     self.__data.dockMarginRight = right
     self.__data.dockMarginBottom = bottom
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.setDockPadding = function( self, left, top, right, bottom )
@@ -301,7 +304,7 @@ Element.setDockPadding = function( self, left, top, right, bottom )
     self.__data.dockPaddingRight = right
     self.__data.dockPaddingBottom = bottom
 
-    Element.static.calculate( self )
+    -- Element.static.calculate( self )
 end
 
 Element.getDock = function( self )

@@ -11,8 +11,7 @@ DOCK = {
 }
 
 RENDERSPACE = {
-    NONE = 0,
-    HUD = 1,
-    SCREEN = 2,
-    WORLD = 3,
+    HUD = 0,
+    SCREEN = 1,
+    WORLD = 2,
 }

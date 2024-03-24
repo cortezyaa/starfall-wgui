@@ -17,6 +17,8 @@ end
 -- Initialization function
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
+
+    -- ? self.cursor = { x = nil, y = nil }
 end
 
 -- Overwrite default methods
