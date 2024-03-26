@@ -23,92 +23,6 @@ Element.static.uid = function()
     return uid
 end
 
--- Function checks the validity of the element and if it is not valid, it raises an error
-Element.static.validate = function( self )
-    if self.__valid then return end
-    error( "Element is not valid" )
-end
-
---[[
--- Function for recalculating the position, size, docking of an element when changing
-Element.static.calculate = function( self, ignore )
-
-        Я В РОТ ЭТОГО ЕБАЛ
-        БЕЗ ПИВА НЕ РАЗОБРАТЬСЯ
-
-    if self.__data.dockType == DOCK.NODOCK then
-        self.__data.positionGlobal.x = self.__data.positionLocal.x + ( self.__data.parent and self.__data.parent.__data.positionGlobal.x or 0 )
-        self.__data.positionGlobal.y = self.__data.positionLocal.y + ( self.__data.parent and self.__data.parent.__data.positionGlobal.y or 0 )
-        self.__data.sizeGlobal.w = self.__data.sizeLocal.w
-        self.__data.sizeGlobal.h = self.__data.sizeLocal.h
-    else
-        if self.__data.parent ~= nil then
-            if self.__data.parent ~= ignore then
-                Element.static.calculate( self.__data.parent, self )
-            end
-        else
-            -- Element.static.calculate( self.__data.renderSpace, self )
-
-        end
-    end
-
-    local fillElements = {}
-    local space = { l = 0, t = 0, r = self.__data.sizeGlobal.w, b = self.__data.sizeGlobal.h }
-
-    if self.__data.parent then
-        space.l = space.l + self.__data.parent.__data.dockPaddingLeft
-        space.t = space.t + self.__data.parent.__data.dockPaddingTop
-        space.r = space.r - self.__data.parent.__data.dockPaddingRight
-        space.b = space.b - self.__data.parent.__data.dockPaddingBottom
-    end
-
-    for _, child in pairs( self.__data.children ) do
-
-
-        if child.__data.dockType == DOCK.FILL then
-            table.insert( fillElements, child )
-        elseif child.__data.dockType == DOCK.LEFT then
-            self.__data.sizeGlobal.w = self.__data.sizeLocal.w - self.__data.dockMarginLeft - self.__data.dockMarginRight
-            self.__data.sizeGlobal.h = space.b - space.t - self.__data.dockMarginTop - self.__data.dockMarginBottom
-            self.__data.positionGlobal.x = space.l + self.__data.dockMarginLeft
-            self.__data.positionGlobal.y = space.t + self.__data.dockMarginTop
-
-            space.l = space.l + self.__data.sizeLocal.w + self.__data.dockMarginLeft + self.__data.dockMarginRight
-        elseif child.__data.dockType == DOCK.RIGHT then
-            self.__data.sizeGlobal.w = self.__data.sizeLocal.w - self.__data.dockMarginLeft - self.__data.dockMarginRight
-            self.__data.sizeGlobal.h = space.b - space.t - self.__data.dockMarginTop - self.__data.dockMarginBottom
-            self.__data.positionGlobal.x = space.r - self.__data.dockMarginRight - self.__data.dockMarginLeft - self.__data.sizeGlobal.w
-            self.__data.positionGlobal.y = space.t + self.__data.dockMarginTop
-
-            space.r = space.r - self.__data.sizeGlobal.w - self.__data.dockMarginLeft - self.__data.dockMarginRight
-        elseif child.__data.dockType == DOCK.TOP then
-            self.__data.sizeGlobal.w = space.r - space.l - self.__data.dockMarginLeft - self.__data.dockMarginRight
-            self.__data.sizeGlobal.h = self.__data.sizeLocal.h - self.__data.dockMarginTop - self.__data.dockMarginBottom
-            self.__data.positionGlobal.x = space.l + self.__data.dockMarginLeft
-            self.__data.positionGlobal.y = space.t + self.__data.dockMarginTop
-
-            space.t = space.t + self.__data.sizeGlobal.h + self.__data.dockMarginTop + self.__data.dockMarginBottom
-        elseif child.__data.dockType == DOCK.BOTTOM then
-            self.__data.sizeGlobal.w = space.r - space.l - self.__data.dockMarginLeft - self.__data.dockMarginRight
-            self.__data.sizeGlobal.h = self.__data.sizeLocal.h - self.__data.dockMarginTop - self.__data.dockMarginBottom
-            self.__data.positionGlobal.x = space.l + self.__data.dockMarginLeft
-            self.__data.positionGlobal.y = space.b + self.__data.dockMarginTop - self.__data.dockMarginBottom - self.__data.sizeGlobal.h
-
-            space.b = space.b - self.__data.sizeGlobal.h - self.__data.dockMarginTop - self.__data.dockMarginBottom
-        end
-    end
-
-    for _, child in pairs( fillElements ) do
-        
-    end
-
-    for _, child in pairs( self.__data.children ) do
-        if child == ignore then return end
-        Element.static.calculate( child, self )
-    end
-end
-]]--
-
 
 -- Initialization function
 Element.initialize = function( self, elementName )
@@ -150,9 +64,32 @@ Element.initialize = function( self, elementName )
 
     -- Aliases
         -- пока без
-    self.setPos = self.setPosition
-    self.getPos = self.getPosition
-    self.getPosGlobal = self.getPositionGlobal
+    -- self.setPos = self.setPosition
+    -- self.getPos = self.getPosition
+    -- self.getPosGlobal = self.getPositionGlobal
+end
+
+-- Function checks the validity of the element and if it is not valid, it raises an error
+Element.fValidate = function( self )
+    if self.__valid then return end
+    error( "Element is not valid" )
+end
+
+-- call
+Element.fRecalculate = function( self )
+    self.__shouldRecalculate = true
+
+    if self.__data.parent and self.__data.dockType ~= DOCK.NODOCK then
+        child.__data.parent.__shouldRecalculate = true
+    end
+
+    for _, child in pairs( self.__data.children ) do
+        if child.__data.dockType ~= DOCK.NODOCK then
+            continue
+        end
+
+        child.__shouldRecalculate = true
+    end
 end
 
 -- Valid
@@ -162,35 +99,37 @@ end
 
 -- Remove
 Element.remove = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     for _, child in pairs( self.__data.children ) do
         child:remove()
     end
 
     if self.__data.parent then
-        table.removeByValue( self.__data.parent.__data.children, self )
+        table.removeByValue( self.__data.parent.children, self )
+        self.__data.parent:fRecalculate()
     else
         table.removeByValue( self.__data.renderSpace.__data.children, self )
     end
 
-    self.__callback = {}
-    self.__data = {}
-    
     self.__valid = false
+    self.__shouldRecalculate = false
+    
+    self.__data = {}
+    self.__callbacks = {}
 end
 
 -- Parent and children
 Element.setParent = function( self, parent )
-    Element.static.validate( self )
-    local _, parentType = checkType( parent, { "wgui", "nil" } )
+    Element:fValidate()
+    local _, parentT = checkType( parent, { "wgui", "nil" } )
     
     if parentType == "nil" then
         if self.__data.parent then
             table.removeByValue( self.__data.parent, self )
             self.__data.parent = nil
         end
-        
+
         return
     end
 
@@ -204,81 +143,81 @@ Element.setParent = function( self, parent )
     table.insert( parent.__data.children, self )
     self.__data.parent = parent
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.getParent = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.parent
 end
 
 Element.getChildren = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.children
 end
 
 -- Position
 Element.setPosition = function( self, x, y )
-    Element.static.validate( self )
+    Element:fValidate()
     checkType( x, "number" )
     checkType( y, "number" )
 
     self.__data.positionLocal.x = x
     self.__data.positionLocal.y = y
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.getPosition = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.positionLocal.x, self.__data.positionLocal.y
 end
 
 Element.getPositionGlobal = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.positionGlobal.x, self.__data.positionGlobal.y
 end
 
 -- Size
 Element.setSize = function( self, w, h )
-    Element.static.validate( self )
+    Element:fValidate()
     checkType( w, "number" )
     checkType( h, "number" )
 
     self.__data.sizeLocal.w = w
     self.__data.sizeLocal.h = h
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.getSize = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.sizeLocal.w, self.__data.sizeLocal.h
 end
 
 Element.getSizeGlobal = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.sizeGlobal.w, self.__data.sizeGlobal.h
 end
 
 -- Dock
 Element.setDock = function( self, dockType )
-    Element.static.validate( self )
+    Element:fValidate()
     checkType( dockType, "number" )
 
     self.__data.dockType = dockType
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.setDockMargin = function( self, left, top, right, bottom )
-    Element.static.validate( self )
+    Element:fValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
@@ -289,11 +228,11 @@ Element.setDockMargin = function( self, left, top, right, bottom )
     self.__data.dockMarginRight = right
     self.__data.dockMarginBottom = bottom
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.setDockPadding = function( self, left, top, right, bottom )
-    Element.static.validate( self )
+    Element:fValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
@@ -304,23 +243,23 @@ Element.setDockPadding = function( self, left, top, right, bottom )
     self.__data.dockPaddingRight = right
     self.__data.dockPaddingBottom = bottom
 
-    -- Element.static.calculate( self )
+    Element:fRecalculate()
 end
 
 Element.getDock = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.dockType
 end
 
 Element.getDockMargin = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.dockMarginLeft, self.__data.dockMarginTop, self.__data.dockMarginRight, self.__data.dockMarginBottom
 end
 
 Element.getDockPadding = function( self )
-    Element.static.validate( self )
+    Element:fValidate()
 
     return self.__data.dockPaddingLeft, self.__data.dockPaddingTop, self.__data.dockPaddingRight, self.__data.dockPaddingBottom
 end
