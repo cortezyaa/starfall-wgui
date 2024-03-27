@@ -1,7 +1,7 @@
 --@name wgui/u/utils
 --@author cortez
 
--- Overwrite functions
+-- Перезапись некоторых дефолных функций
 local old_type = type
 function type( object )
     local resoult = old_type( object )
@@ -22,7 +22,9 @@ function isValid( object )
     return old_isValid( object )
 end
 
--- Function for checking the type of an object returning a boolean value or error
+-- Функция сравнивает тип объекта с ожидаемым(и)
+-- Стандартно вызывает ошибку при их несоответствии
+-- Возвращает результат и тип объекта
 function checkType( object, expected, shouldError )
     shouldError = shouldError == nil and true or shouldError
  

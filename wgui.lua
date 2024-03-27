@@ -6,11 +6,6 @@
     todo list:
 
 
-    перерасчет элементов при изменении
-        ? self.__shouldRecalculate
-        чета надо придумать
-
-
     renderSpaceWorld
         придумать реализацию
 
@@ -34,14 +29,14 @@
 ]]
 
 
--- Including utils
+-- Инклюдинг утилит
 requiredir( "./utils/" ) --@includedir ../utils/
 
 
--- Creating main table
+-- Создание основной таблицы
 wgui = {}
 
--- Creating data table
+-- Создание таблицы для данных
 wgui.__data = {}
 
 wgui.__data.registred = {}
@@ -58,7 +53,7 @@ wgui.__data.rsScreenMat:setInt("$flags", 0)
 wgui.__data.rsWorld = {}
 
 
---
+-- Функция проверяет зарегестрирован ли элемент с указанным именем
 wgui.isRegistred = function( elementName )
     checkType( elementName, "string" )
 
@@ -66,7 +61,7 @@ wgui.isRegistred = function( elementName )
 end
 
 
---
+-- Функция регестрации элемента
 wgui.register = function( elementName, elementClass )
     checkType( elementName, "string" )
     checkType( elementClass, "table" )
@@ -79,7 +74,7 @@ wgui.register = function( elementName, elementClass )
 end
 
 
--- 
+-- Функция создания элемента
 wgui.create = function( elementName, parent )
     checkType( elementName, "string" )
     local _, parentT = checkType( parent, { "wgui", "number" } )
@@ -108,7 +103,7 @@ wgui.create = function( elementName, parent )
 end
 
 
--- Including elements
+-- Инклюдинг элементов и дальнейшая их регистрация
 --@includedir ./elements/
 local function registerIncludedElements()
     local custom = {
@@ -136,7 +131,7 @@ end
 registerIncludedElements()
 
 
---
+-- Функция выполняющая перерасчет элементов
 local function elementRecalculation( self )
     -- пока так. потом посмотрим
     
@@ -167,9 +162,6 @@ local function elementRecalculation( self )
 
         for _, child in pairs( self.__data.children ) do
             local dockType = child.__data.dockType
-
-            -- я сам не могу понять, что я тут нашкодил
-            -- 😰
 
             -- наверн надо добавить ограничение,
             -- чтоб значения в минус не улетали
@@ -220,6 +212,8 @@ local function elementRecalculation( self )
     end
 end
 
+
+--[[
 hook.add( "think", "wgui:hook:think", function()
     elementRecalculation( wgui.__data.rsHud )
     elementRecalculation( wgui.__data.rsScreen )
@@ -227,7 +221,48 @@ hook.add( "think", "wgui:hook:think", function()
     -- world
         -- ?
 end )
+]]
 
+-- Рендер элементов рисующихся на экране
+hook.add( "renderoffscreen", "wgui:hook:renderoffscreen", function()
+    render.selectRenderTarget( wgui.__data.rsScreenRTname )
+    render.clear()
+
+    -- рендер элементов
+
+    render.crea
+end )
+
+hook.add( "render", "wgui:hook:render", function()
+
+end )
+
+
+
+
+--[[
+    hook.add( "renderoffscreen", "x", function()
+    render.selectRenderTarget( wgui.__data.rsScreenRTname )
+    render.clear()
+    
+    e1:render()
+    e2:render()
+    e3:render()
+    e4:render()
+    e5:render()
+    e6:render()
+    
+    e1:setSize( 300 + math.sin( timer.curtime() * 5 ) * 100, 100 )
+    e5:setSize( 40, 100 + math.cos( timer.curtime() * 5 ) * 100 )
+end )
+
+hook.add( "render", "x", function()
+    local w, h = render.getResolution()
+    
+    render.setRenderTargetTexture( wgui.__data.rsScreenRTname )
+    render.drawTexturedRect( 0, 0, w, h )
+end )
+]]
 
 --
 return wgui

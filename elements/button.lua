@@ -2,22 +2,22 @@
 --@author cortez
 
 
--- Creating an Element class
+-- Создание класса элемента
 local BaseElement = require( "./baseElement.lua" ) --@include ./baseElement.lua
 local Element = class( "wgui/e/button", BaseElement )
 Element.static.elementName = "button"
 
 
--- Initialization function
+-- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 end
 
--- Paint
+-- Функция рисования элемента
 Element.paint = function( self )
     -- painting here
 end
 
 
--- Return an Element class
+-- Возвращаем класс элемента
 return Element

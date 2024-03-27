@@ -2,15 +2,16 @@
 --@author cortez
 
 
--- Including utils
+-- Инклюдинг утилит
 requiredir( "../utils/" ) --@includedir ../utils/
 
 
--- Creating an Element class
+-- Создание класса элемента
 local Element = class( "wgui/e/baseElement" )
 Element.static.elementName = "baseElement"
 
--- Function for generating uid
+-- Функция генерирующая уникальный id элемента
+-- Пока не знаю зачем он нужен, но пусть будет xdd
 Element.static.chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 Element.static.charsLength = string.len( Element.static.chars )
 Element.static.uid = function()
@@ -24,7 +25,7 @@ Element.static.uid = function()
 end
 
 
--- Initialization function
+-- Инитиализация
 Element.initialize = function( self, elementName )
     checkType( elementName, "string" )
 
@@ -32,7 +33,7 @@ Element.initialize = function( self, elementName )
     self.__valid = true
     self.__shouldRecalculate = false
     
-    -- Element data
+    -- Данные элемента
     self.__data = {}
 
     self.__data.uid = Element.static.uid()
@@ -59,23 +60,24 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingRight = 0
     self.__data.dockPaddingBottom = 0
 
-    -- Element callbacks
+    -- Коллбеки
     self.__callbacks = {}
 
-    -- Aliases
+    -- Алиасы функций
         -- пока без
     -- self.setPos = self.setPosition
     -- self.getPos = self.getPosition
     -- self.getPosGlobal = self.getPositionGlobal
 end
 
--- Function checks the validity of the element and if it is not valid, it raises an error
+-- Функция проверяет валидность элемента и при отсутствии вызывает ошибку
 Element.fValidate = function( self )
     if self.__valid then return end
     error( "Element is not valid" )
 end
 
--- call
+-- Функция добавляет элементу, его дочерним элементам и родительскому ( при необходимости )
+-- Параметр __shouldRecalculate, который в дальнейшем используется для выполнения перерасчета
 Element.fRecalculate = function( self )
     self.__shouldRecalculate = true
 
@@ -92,12 +94,12 @@ Element.fRecalculate = function( self )
     end
 end
 
--- Valid
+-- Валидность
 Element.isValid = function( self )
     return self.__valid
 end
 
--- Remove
+-- Удаление
 Element.remove = function( self )
     self:fValidate()
 
@@ -119,7 +121,7 @@ Element.remove = function( self )
     self.__callbacks = {}
 end
 
--- Parent and children
+-- Паренты 
 Element.setParent = function( self, parent )
     self:fValidate()
     local _, parentT = checkType( parent, { "wgui", "nil" } )
@@ -135,7 +137,6 @@ Element.setParent = function( self, parent )
 
     if parent == self.__data.parent then return end
 
-    -- The universe almost exploded xd
     if table.hasValue( self.__data.children, parent ) then
         error( "Element cannot be parented to its child element" )
     end
@@ -158,7 +159,7 @@ Element.getChildren = function( self )
     return self.__data.children
 end
 
--- Position
+-- Позиция
 Element.setPosition = function( self, x, y )
     self:fValidate()
     checkType( x, "number" )
@@ -182,7 +183,7 @@ Element.getPositionGlobal = function( self )
     return self.__data.positionGlobal.x, self.__data.positionGlobal.y
 end
 
--- Size
+-- Размер
 Element.setSize = function( self, w, h )
     self:fValidate()
     checkType( w, "number" )
@@ -206,7 +207,7 @@ Element.getSizeGlobal = function( self )
     return self.__data.sizeGlobal.w, self.__data.sizeGlobal.h
 end
 
--- Dock
+-- Докинг
 Element.setDock = function( self, dockType )
     self:fValidate()
     checkType( dockType, "number" )
@@ -264,12 +265,12 @@ Element.getDockPadding = function( self )
     return self.__data.dockPaddingLeft, self.__data.dockPaddingTop, self.__data.dockPaddingRight, self.__data.dockPaddingBottom
 end
 
--- Paint
+-- Функция рисования элемента
 Element.paint = function( self )
     return
 end
 
--- Render
+-- Рендер
 Element.render = function( self )
     if not self.__valid then return end
 
@@ -277,5 +278,5 @@ Element.render = function( self )
 end
 
 
--- Return an Element class
+-- Возвращаем класс элемента
 return Element

@@ -2,26 +2,26 @@
 --@author cortez
 
 
--- Creating an Element class
+-- Создание класса элемента
 local BaseElement = require( "./baseElement.lua" ) --@include ./baseElement.lua
 local Element = class( "wgui/e/renderSpace", BaseElement )
 Element.static.elementName = "renderSpace"
 
--- Function causes an error when someone tries to interact with the element
+-- Функция вызывающая ошибку при попытке взаимодействия с элементом
 Element.static.interactionFailure = function( self )
     error( "You cannot interact with 'renderSpace' element" )
     return nil
 end
 
 
--- Initialization function
+-- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     -- ? self.cursor = { x = nil, y = nil }
 end
 
--- Overwrite default methods
+-- Перезапись методов суперкласса
 local function overwriteMethods()
     local whitelist = {
         [ "initialize" ] = true,
@@ -37,5 +37,5 @@ end
 overwriteMethods()
 
 
--- Return an Element class
+-- Возвращаем класс элемента
 return Element
