@@ -79,16 +79,16 @@ end
 Element.fRecalculate = function( self )
     self.__shouldRecalculate = true
 
-    if self.__data.parent and self.__data.dockType ~= DOCK.NODOCK then
-        self.__data.parent.__shouldRecalculate = true
+    if self.__data.dockType ~= DOCK.NODOCK then
+        if self.__data.parent then
+            self.__data.parent.__shouldRecalculate = true
+        else
+            self.__data.renderSpace.__shouldRecalculate = true
+        end
     end
 
     for _, child in pairs( self.__data.children ) do
-        if child.__data.dockType ~= DOCK.NODOCK then
-            continue
-        end
-
-        child.__shouldRecalculate = true
+        child:fRecalculate()
     end
 end
 

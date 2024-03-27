@@ -25,14 +25,6 @@
             добавить возможность рендера на изогнутых поверхностях
             выбор хука где рендерить
 
-
-    Dock
-        небольшая справочка а то я далбаеб забываю скил исуе
-            padding - внутренний отступ
-            margin - внешний отступ
-        
-        реализация примерно должна быть как в gmod'е
-    
     
     hook'и
         -- ?
@@ -59,8 +51,9 @@ wgui.__data.rsHud = nil
 wgui.__data.rsScreen = nil
 wgui.__data.rsScreenRTname = "wguirsscreenrt"
 wgui.__data.rsScreenRT = render.createRenderTarget( wgui.__data.rsScreenRTname )
-wgui.__data.rsScreenMat = material.create( "gmodscreenspace" )
+wgui.__data.rsScreenMat = material.create( "UnlitGeneric" ) -- material.create( "gmodscreenspace" )
 wgui.__data.rsScreenMat:setTextureRenderTarget( "$basetexture", wgui.__data.rsScreenRTname )
+wgui.__data.rsScreenMat:setInt("$flags", 0)
 
 wgui.__data.rsWorld = {}
 
@@ -122,7 +115,10 @@ local function registerIncludedElements()
         [ "baseElement" ] = function( elementClass ) end,
         [ "renderSpace" ] = function( elementClass )
             wgui.__data.rsHud = elementClass:new()
+
             wgui.__data.rsScreen = elementClass:new()
+            wgui.__data.rsScreen.__data.sizeLocal = { w = 1024, h = 1024 }
+            wgui.__data.rsScreen.__data.sizeGlobal = { w = 1024, h = 1024 }
         end,
     }
 
