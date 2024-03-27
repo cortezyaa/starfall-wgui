@@ -80,7 +80,7 @@ Element.fRecalculate = function( self )
     self.__shouldRecalculate = true
 
     if self.__data.parent and self.__data.dockType ~= DOCK.NODOCK then
-        child.__data.parent.__shouldRecalculate = true
+        self.__data.parent.__shouldRecalculate = true
     end
 
     for _, child in pairs( self.__data.children ) do
@@ -99,7 +99,7 @@ end
 
 -- Remove
 Element.remove = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     for _, child in pairs( self.__data.children ) do
         child:remove()
@@ -121,7 +121,7 @@ end
 
 -- Parent and children
 Element.setParent = function( self, parent )
-    Element:fValidate()
+    self:fValidate()
     local _, parentT = checkType( parent, { "wgui", "nil" } )
     
     if parentType == "nil" then
@@ -143,81 +143,81 @@ Element.setParent = function( self, parent )
     table.insert( parent.__data.children, self )
     self.__data.parent = parent
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.getParent = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.parent
 end
 
 Element.getChildren = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.children
 end
 
 -- Position
 Element.setPosition = function( self, x, y )
-    Element:fValidate()
+    self:fValidate()
     checkType( x, "number" )
     checkType( y, "number" )
 
     self.__data.positionLocal.x = x
     self.__data.positionLocal.y = y
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.getPosition = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.positionLocal.x, self.__data.positionLocal.y
 end
 
 Element.getPositionGlobal = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.positionGlobal.x, self.__data.positionGlobal.y
 end
 
 -- Size
 Element.setSize = function( self, w, h )
-    Element:fValidate()
+    self:fValidate()
     checkType( w, "number" )
     checkType( h, "number" )
 
     self.__data.sizeLocal.w = w
     self.__data.sizeLocal.h = h
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.getSize = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.sizeLocal.w, self.__data.sizeLocal.h
 end
 
 Element.getSizeGlobal = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.sizeGlobal.w, self.__data.sizeGlobal.h
 end
 
 -- Dock
 Element.setDock = function( self, dockType )
-    Element:fValidate()
+    self:fValidate()
     checkType( dockType, "number" )
 
     self.__data.dockType = dockType
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.setDockMargin = function( self, left, top, right, bottom )
-    Element:fValidate()
+    self:fValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
@@ -228,11 +228,11 @@ Element.setDockMargin = function( self, left, top, right, bottom )
     self.__data.dockMarginRight = right
     self.__data.dockMarginBottom = bottom
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.setDockPadding = function( self, left, top, right, bottom )
-    Element:fValidate()
+    self:fValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
@@ -243,23 +243,23 @@ Element.setDockPadding = function( self, left, top, right, bottom )
     self.__data.dockPaddingRight = right
     self.__data.dockPaddingBottom = bottom
 
-    Element:fRecalculate()
+    self:fRecalculate()
 end
 
 Element.getDock = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.dockType
 end
 
 Element.getDockMargin = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.dockMarginLeft, self.__data.dockMarginTop, self.__data.dockMarginRight, self.__data.dockMarginBottom
 end
 
 Element.getDockPadding = function( self )
-    Element:fValidate()
+    self:fValidate()
 
     return self.__data.dockPaddingLeft, self.__data.dockPaddingTop, self.__data.dockPaddingRight, self.__data.dockPaddingBottom
 end

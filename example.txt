@@ -1,7 +1,0 @@
---@name wgui example
---@author cortez
-
--- prevent from 
-if SERVER then return end
-if player() ~= owner() then return end
-

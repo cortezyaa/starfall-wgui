@@ -164,12 +164,10 @@ local function elementRecalculation( self )
             bottom = self.__data.sizeGlobal.h
         }
 
-        if self.__data.parent then
-            space.left = space.left + self.__data.parent.__data.dockPaddingLeft
-            space.top = space.top + self.__data.parent.__data.dockPaddingTop
-            space.right = space.right - self.__data.parent.__data.dockPaddingRight
-            space.bottom = space.bottom - self.__data.parent.__data.dockPaddingBottom
-        end
+        space.left = space.left + self.__data.dockPaddingLeft
+        space.top = space.top + self.__data.dockPaddingTop
+        space.right = space.right - self.__data.dockPaddingRight
+        space.bottom = space.bottom - self.__data.dockPaddingBottom
 
         for _, child in pairs( self.__data.children ) do
             local dockType = child.__data.dockType
@@ -187,46 +185,42 @@ local function elementRecalculation( self )
                 table.insert( fill, child )
                 continue
             elseif dockType == DOCK.LEFT then
-                child.__data.sizeGlobal.w = child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
+                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
+                child.__data.sizeGlobal.w = child.__data.sizeLocal.w
                 child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                child.__data.positionGlobal.x = space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = space.top + child.__data.dockMarginTop
-
                 space.left = space.left + child.__data.sizeLocal.w + child.__data.dockMarginLeft + child.__data.dockMarginRight
             elseif dockType == DOCK.TOP then
+                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
                 child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
-                child.__data.sizeGlobal.h = child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                child.__data.positionGlobal.x = space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = space.top + child.__data.dockMarginTop
-
+                child.__data.sizeGlobal.h = child.__data.sizeLocal.h
                 space.top = space.top + child.__data.sizeLocal.h + child.__data.dockMarginTop + child.__data.dockMarginBottom
             elseif dockType == DOCK.RIGHT then
-                child.__data.sizeGlobal.w = child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
+                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.right - child.__data.sizeLocal.w - child.__data.dockMarginRight
+                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
+                child.__data.sizeGlobal.w = child.__data.sizeLocal.w
                 child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                child.__data.positionGlobal.x = space.right - child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
-                child.__data.positionGlobal.y = space.top + child.__data.dockMarginTop
-
                 space.right = space.right - child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
             elseif dockType == DOCK.BOTTOM then
+                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.bottom - child.__data.sizeLocal.h - child.__data.dockMarginBottom
                 child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
-                child.__data.sizeGlobal.h = child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                child.__data.positionGlobal.x = space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = space.bottom - child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
-
-                space.bottom = sapce.bottom - child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
+                child.__data.sizeGlobal.h = child.__data.sizeLocal.h
+                space.bottom = space.bottom - child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
             end
-
-            elementRecalculation( child )
         end
 
         for _, child in pairs( fill ) do
-            child.__data.sizeGlobal.w = space.right - space.left
-            child.__data.sizeGlobal.h = space.bottom - space.top
-            child.__data.positionGlobal.x = space.left
-            child.__data.positionGlobal.y = space.top
-            
-            elementRecalculation( child )
+            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
+            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginRight
+            child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
+            child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
         end
+    end
+    
+    for _, child in pairs( self.__data.children ) do
+        elementRecalculation( child )
     end
 end
 
