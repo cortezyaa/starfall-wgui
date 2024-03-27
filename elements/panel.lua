@@ -17,8 +17,6 @@ end
 
 -- Функция рисования элемента
 Element.paint = function( self )
-    -- painting here
-
     render.setRGBA( self.__data.color.r, self.__data.color.g, self.__data.color.b, self.__data.color.a )
     render.drawRect( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
 end

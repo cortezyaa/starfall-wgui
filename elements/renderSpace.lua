@@ -18,7 +18,7 @@ end
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    -- ? self.cursor = { x = nil, y = nil }
+    self.__data.cursor = { x = nil, y = nil }
 end
 
 -- Перезапись методов суперкласса

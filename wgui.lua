@@ -46,7 +46,8 @@ wgui.__data.rsHud = nil
 wgui.__data.rsScreen = nil
 wgui.__data.rsScreenRTname = "wguirsscreenrt"
 wgui.__data.rsScreenRT = render.createRenderTarget( wgui.__data.rsScreenRTname )
-wgui.__data.rsScreenMat = material.create( "UnlitGeneric" ) -- material.create( "gmodscreenspace" )
+-- wgui.__data.rsScreenMat = material.create( "gmodscreenspace" )
+wgui.__data.rsScreenMat = material.create( "UnlitGeneric" )
 wgui.__data.rsScreenMat:setTextureRenderTarget( "$basetexture", wgui.__data.rsScreenRTname )
 wgui.__data.rsScreenMat:setInt("$flags", 0)
 
@@ -213,7 +214,6 @@ local function elementRecalculation( self )
 end
 
 
---[[
 hook.add( "think", "wgui:hook:think", function()
     elementRecalculation( wgui.__data.rsHud )
     elementRecalculation( wgui.__data.rsScreen )
@@ -221,48 +221,39 @@ hook.add( "think", "wgui:hook:think", function()
     -- world
         -- ?
 end )
-]]
 
--- Рендер элементов рисующихся на экране
+
+-- Рендер элементов на сф экране
+local function elementRender( self )
+    self:render()
+
+    for _, child in pairs( self.__data.children ) do
+        elementRender( child )
+    end
+end
+
 hook.add( "renderoffscreen", "wgui:hook:renderoffscreen", function()
     render.selectRenderTarget( wgui.__data.rsScreenRTname )
     render.clear()
 
-    -- рендер элементов
+    for _, child in pairs( wgui.__data.rsScreen.__data.children ) do
+        elementRender( child )
+    end
 
-    render.crea
+    render.selectRenderTarget()
 end )
 
 hook.add( "render", "wgui:hook:render", function()
+    local scrw, scrh = render.getResolution()
+    local crsx, crsy = render.cursorPos()
 
-end )
+    wgui.__data.rsScreen.__data.cursor.x = crsx ~= nil and 1024 / scrw * crsx or nil
+    wgui.__data.rsScreen.__data.cursor.y = crsy ~= nil and 1024 / scrh * crsy or nil
 
-
-
-
---[[
-    hook.add( "renderoffscreen", "x", function()
-    render.selectRenderTarget( wgui.__data.rsScreenRTname )
-    render.clear()
-    
-    e1:render()
-    e2:render()
-    e3:render()
-    e4:render()
-    e5:render()
-    e6:render()
-    
-    e1:setSize( 300 + math.sin( timer.curtime() * 5 ) * 100, 100 )
-    e5:setSize( 40, 100 + math.cos( timer.curtime() * 5 ) * 100 )
-end )
-
-hook.add( "render", "x", function()
-    local w, h = render.getResolution()
-    
     render.setRenderTargetTexture( wgui.__data.rsScreenRTname )
-    render.drawTexturedRect( 0, 0, w, h )
+    render.setRGBA( 255, 255, 255, 255 )
+    render.drawTexturedRect( 0, 0, scrw, scrh )
 end )
-]]
 
---
+
 return wgui
