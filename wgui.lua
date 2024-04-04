@@ -25,7 +25,7 @@
         -- ?
     
         
-    позже: render, cursor, hover, drag & drop, callback'и, анимации
+    позже: render, drag & drop, анимации
 ]]
 
 
@@ -215,16 +215,15 @@ local function elementRecalculation( self )
 end
 
 
--- Рендер элементов
+-- Экран
 local function elementRender( self )
     self:render()
-
+    
     for _, child in pairs( self.__data.children ) do
         elementRender( child )
     end
 end
 
--- Экран
 local focusScreen = false
 
 local function elementLogicScreen( self )

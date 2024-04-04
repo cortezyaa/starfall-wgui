@@ -112,7 +112,7 @@ Element.remove = function( self )
     self.__shouldRecalculate = false
     
     self.__data = {}
-    self.__callbacks = {}
+    self.__events = {}
 end
 
 -- Паренты 
@@ -124,6 +124,8 @@ Element.setParent = function( self, parent )
         if self.__data.parent then
             table.removeByValue( self.__data.parent, self )
             self.__data.parent = nil
+
+            table.insert( self.__data.renderSpace.__data.children, self )
         end
 
         return
@@ -136,6 +138,7 @@ Element.setParent = function( self, parent )
     end
 
     table.insert( parent.__data.children, self )
+    self.__data.renderSpace = parent.__data.renderSpace
     self.__data.parent = parent
 
     self:fRecalculate()
@@ -261,6 +264,7 @@ end
 
 -- Ивенты
 Element.eventAdd = function( self, name, func )
+    self:fValidate()
     checkType( name, "string" )
     checkType( func, "function" )
 
@@ -268,12 +272,14 @@ Element.eventAdd = function( self, name, func )
 end
 
 Element.eventRemove = function( self, name )
+    self:fValidate()
     checkType( name, "string" )
 
     self.__events[ name ] = nil
 end
 
 Element.eventCall = function( self, name, ... )
+    self:fValidate()
     checkType( name, "string" )
     
     if self.__events[ name ] then
