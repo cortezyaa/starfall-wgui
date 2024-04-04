@@ -60,14 +60,8 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingRight = 0
     self.__data.dockPaddingBottom = 0
 
-    -- Коллбеки
-    self.__callbacks = {}
-
-    -- Алиасы функций
-        -- пока без
-    -- self.setPos = self.setPosition
-    -- self.getPos = self.getPosition
-    -- self.getPosGlobal = self.getPositionGlobal
+    -- Ивенты
+    self.__events = {}
 end
 
 -- Функция проверяет валидность элемента и при отсутствии вызывает ошибку
@@ -263,6 +257,28 @@ Element.getDockPadding = function( self )
     self:fValidate()
 
     return self.__data.dockPaddingLeft, self.__data.dockPaddingTop, self.__data.dockPaddingRight, self.__data.dockPaddingBottom
+end
+
+-- Ивенты
+Element.eventAdd = function( self, name, func )
+    checkType( name, "string" )
+    checkType( func, "function" )
+
+    self.__events[ name ] = func
+end
+
+Element.eventRemove = function( self, name )
+    checkType( name, "string" )
+
+    self.__events[ name ] = nil
+end
+
+Element.eventCall = function( self, name, ... )
+    checkType( name, "string" )
+    
+    if self.__events[ name ] then
+        self.__events[ name ]( self, ... )
+    end
 end
 
 -- Функция рисования элемента

@@ -44,12 +44,13 @@ wgui.__data.registred = {}
 wgui.__data.rsHud = nil
 
 wgui.__data.rsScreen = nil
-wgui.__data.rsScreenRTname = "wguirsscreenrt"
-wgui.__data.rsScreenRT = render.createRenderTarget( wgui.__data.rsScreenRTname )
+wgui.__data.rsScreenRT = "wguirsscreenrt"
+if render.renderTargetExists( wgui.__data.rsScreenRT ) then render.destroyRenderTarget( wgui.__data.rsScreenRT ) end
+render.createRenderTarget( wgui.__data.rsScreenRT )
 -- wgui.__data.rsScreenMat = material.create( "gmodscreenspace" )
-wgui.__data.rsScreenMat = material.create( "UnlitGeneric" )
-wgui.__data.rsScreenMat:setTextureRenderTarget( "$basetexture", wgui.__data.rsScreenRTname )
-wgui.__data.rsScreenMat:setInt("$flags", 0)
+-- wgui.__data.rsScreenMat = material.create( "UnlitGeneric" )
+-- wgui.__data.rsScreenMat:setTextureRenderTarget( "$basetexture", wgui.__data.rsScreenRT )
+-- wgui.__data.rsScreenMat:setInt("$flags", 0)
 
 wgui.__data.rsWorld = {}
 
@@ -214,16 +215,7 @@ local function elementRecalculation( self )
 end
 
 
-hook.add( "think", "wgui:hook:think", function()
-    elementRecalculation( wgui.__data.rsHud )
-    elementRecalculation( wgui.__data.rsScreen )
-
-    -- world
-        -- ?
-end )
-
-
--- Рендер элементов на сф экране
+-- Рендер элементов
 local function elementRender( self )
     self:render()
 
@@ -232,9 +224,54 @@ local function elementRender( self )
     end
 end
 
+-- Экран
+local focusScreen = false
+
+local function elementLogicScreen( self )
+    for _, child in pairs( table.reverse( self.__data.children ) ) do
+        elementLogicScreen( child )
+    end
+
+    if not focusScreen then
+        local cx = wgui.__data.rsScreen.__data.cursor.x
+        local cy = wgui.__data.rsScreen.__data.cursor.y
+
+        local x = self.__data.positionGlobal.x
+        local y = self.__data.positionGlobal.y
+        local w = self.__data.sizeGlobal.w
+        local h = self.__data.sizeGlobal.h
+
+        if cx ~= nil and cy ~= nil and cx >= x and cx <= x + w and cy >= y and cy <= y + h then
+            focusScreen = true
+
+            if wgui.__data.rsScreen.__data.focus ~= self then
+                if wgui.__data.rsScreen.__data.focus then
+                    wgui.__data.rsScreen.__data.focus:eventCall( "hoverOff" )
+                end
+
+                wgui.__data.rsScreen.__data.focus = self
+                wgui.__data.rsScreen.__data.focus:eventCall( "hoverOn" )
+            end
+
+            wgui.__data.rsScreen.__data.focus:eventCall( "hover" )
+        end
+    end
+end
+
 hook.add( "renderoffscreen", "wgui:hook:renderoffscreen", function()
-    render.selectRenderTarget( wgui.__data.rsScreenRTname )
+    render.selectRenderTarget( wgui.__data.rsScreenRT )
     render.clear()
+
+    focusScreen = false
+
+    for _, child in pairs( table.reverse( wgui.__data.rsScreen.__data.children ) ) do
+        elementLogicScreen( child )
+    end
+
+    if not focusScreen and wgui.__data.rsScreen.__data.focus then
+        wgui.__data.rsScreen.__data.focus:eventCall( "hoverOff" )
+        wgui.__data.rsScreen.__data.focus = nil
+    end
 
     for _, child in pairs( wgui.__data.rsScreen.__data.children ) do
         elementRender( child )
@@ -247,10 +284,12 @@ hook.add( "render", "wgui:hook:render", function()
     local scrw, scrh = render.getResolution()
     local crsx, crsy = render.cursorPos()
 
+    elementRecalculation( wgui.__data.rsScreen )
+
     wgui.__data.rsScreen.__data.cursor.x = crsx ~= nil and 1024 / scrw * crsx or nil
     wgui.__data.rsScreen.__data.cursor.y = crsy ~= nil and 1024 / scrh * crsy or nil
 
-    render.setRenderTargetTexture( wgui.__data.rsScreenRTname )
+    render.setRenderTargetTexture( wgui.__data.rsScreenRT )
     render.setRGBA( 255, 255, 255, 255 )
     render.drawTexturedRect( 0, 0, scrw, scrh )
 end )
