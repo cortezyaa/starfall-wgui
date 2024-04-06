@@ -1,0 +1,5 @@
+небольшая справка для любимого меня
+
+https://andersenlab.gitbook.io/javascript/js-in-browser/events
+
+https://itwiki.dev/ru/front-end/css-reference/properties/overflow

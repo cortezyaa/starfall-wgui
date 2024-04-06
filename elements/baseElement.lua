@@ -60,6 +60,9 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingRight = 0
     self.__data.dockPaddingBottom = 0
 
+    self.__data.overflow = OVERFLOW.VISIBLE
+    self.__data.overflowRender = { x = 0, y = 0, w = 0, h = 0 }
+
     -- Ивенты
     self.__events = {}
 end
@@ -208,6 +211,7 @@ end
 Element.setDock = function( self, dockType )
     self:fValidate()
     checkType( dockType, "number" )
+    checkEnum( dockType, "DOCK" )
 
     self.__data.dockType = dockType
 
@@ -285,6 +289,21 @@ Element.eventCall = function( self, name, ... )
     if self.__events[ name ] then
         self.__events[ name ]( self, ... )
     end
+end
+
+-- Оверфлоу ( почти как в CSS )
+Element.setOverflow = function( self, overflow )
+    self:fValidate()
+    checkType( overflow, "number" )
+    checkEnum( overflow, "OVERFLOW" )
+
+    self:fRecalculate()
+end
+
+Element.getOverflow = function( self )
+    self:fValidate()
+
+    return self.__data.overflow
 end
 
 -- Функция рисования элемента

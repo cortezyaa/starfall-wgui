@@ -88,6 +88,8 @@ wgui.create = function( elementName, parent )
     local element = wgui.__data.registred[ elementName ]:new()
 
     if parentT == "number" then
+        checkEnum( parent, "RENDERSPACE" )
+        
         if parent == RENDERSPACE.HUD then
             element.__data.renderSpace = wgui.__data.rsHud
             table.insert( wgui.__data.rsHud.__data.children, element )
@@ -231,7 +233,7 @@ local function elementLogicScreen( self )
         elementLogicScreen( child )
     end
 
-    if not focusScreen then
+    if not focusScreen and wgui.__data.rsScreen.__data.active then
         local cx = wgui.__data.rsScreen.__data.cursor.x
         local cy = wgui.__data.rsScreen.__data.cursor.y
 
@@ -240,7 +242,7 @@ local function elementLogicScreen( self )
         local w = self.__data.sizeGlobal.w
         local h = self.__data.sizeGlobal.h
 
-        if cx ~= nil and cy ~= nil and cx >= x and cx <= x + w and cy >= y and cy <= y + h then
+        if cx >= x and cx <= x + w and cy >= y and cy <= y + h then
             focusScreen = true
 
             if wgui.__data.rsScreen.__data.focus ~= self then
@@ -287,11 +289,28 @@ hook.add( "render", "wgui:hook:render", function()
 
     wgui.__data.rsScreen.__data.cursor.x = crsx ~= nil and 1024 / scrw * crsx or nil
     wgui.__data.rsScreen.__data.cursor.y = crsy ~= nil and 1024 / scrh * crsy or nil
+    wgui.__data.rsScreen.__data.active = crsx ~= nil and crsy ~= nil
 
     render.setRenderTargetTexture( wgui.__data.rsScreenRT )
     render.setRGBA( 255, 255, 255, 255 )
     render.drawTexturedRect( 0, 0, scrw, scrh )
 end )
+
+
+--[[ сделаю позже
+Логика курсора
+hook.add( "keypress", "wgui:hook:keypress", function( ply, key )
+    if not isFirstTimePredicted() then return end
+    if ply ~= player() then return end
+    
+    --if key ~= IN_KEY.ATTACK and key ~= IN_KEY.USE then return end
+end )
+
+hook.add( "keyrelease", "wgui:hook:keyrelease", function( ply, key )
+    if not isFirstTimePredicted() then return end
+    if ply ~= player() then return end
+end )
+]]--
 
 
 return wgui

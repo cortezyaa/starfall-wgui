@@ -15,3 +15,9 @@ RENDERSPACE = {
     SCREEN = 1,
     WORLD = 2,
 }
+
+OVERFLOW = {
+    VISIBLE = 0,
+    HIDDEN = 1,
+    SCROLL = 2,
+}
