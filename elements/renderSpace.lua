@@ -28,6 +28,7 @@ local function overwriteMethods()
     local whitelist = {
         [ "initialize" ] = true,
         [ "__tostring" ] = true,
+        [ "render" ] = true,
     }
 
     for methodName, methodFunction in pairs( BaseElement.__declaredMethods ) do
@@ -38,6 +39,10 @@ end
 
 overwriteMethods()
 
+
+Element.paint = function( self )
+    return
+end
 
 -- Возвращаем класс элемента
 return Element

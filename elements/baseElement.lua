@@ -61,10 +61,14 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingBottom = 0
 
     self.__data.overflow = OVERFLOW.VISIBLE
-    self.__data.overflowRender = { x = 0, y = 0, w = 0, h = 0 }
+    self.__data.overflowSpace = { x = 0, y = 0, w = 0, h = 0 }
+    self.__data.shouldDraw = false
 
     -- Ивенты
     self.__events = {}
+
+    -- Перерасчёт
+    self:fRecalculate()
 end
 
 -- Функция проверяет валидность элемента и при отсутствии вызывает ошибку
@@ -297,6 +301,8 @@ Element.setOverflow = function( self, overflow )
     checkType( overflow, "number" )
     checkEnum( overflow, "OVERFLOW" )
 
+    self.__data.overflow = overflow
+
     self:fRecalculate()
 end
 
@@ -315,7 +321,13 @@ end
 Element.render = function( self )
     if not self.__valid then return end
 
-    self:paint()
+    if self.__data.shouldDraw then
+        self:paint()
+    end
+
+    for _, child in pairs( self.__data.children ) do
+        child:render()
+    end
 end
 
 

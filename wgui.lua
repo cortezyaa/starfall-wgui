@@ -89,7 +89,7 @@ wgui.create = function( elementName, parent )
 
     if parentT == "number" then
         checkEnum( parent, "RENDERSPACE" )
-        
+
         if parent == RENDERSPACE.HUD then
             element.__data.renderSpace = wgui.__data.rsHud
             table.insert( wgui.__data.rsHud.__data.children, element )
@@ -109,15 +109,19 @@ end
 
 -- Инклюдинг элементов и дальнейшая их регистрация
 --@includedir ./elements/
-local function registerIncludedElements()
+local function registerIncludedElements()9
     local custom = {
         [ "baseElement" ] = function( elementClass ) end,
         [ "renderSpace" ] = function( elementClass )
+            local scrw, scrh = render.getGameResolution()
+            
             wgui.__data.rsHud = elementClass:new()
+            wgui.__data.rsHud.__data.sizeLocal = { w = scrw, h = scrh }
+            wgui.__data.rsHud.__data.overflowSpace = { x = 0, y = 0, w = scrw, h = scrh }
 
             wgui.__data.rsScreen = elementClass:new()
             wgui.__data.rsScreen.__data.sizeLocal = { w = 1024, h = 1024 }
-            wgui.__data.rsScreen.__data.sizeGlobal = { w = 1024, h = 1024 }
+            wgui.__data.rsScreen.__data.overflowSpace = { x = 0, y = 0, w = 1024, h = 1024 }
         end,
     }
 
@@ -149,27 +153,49 @@ local function elementRecalculation( self )
             self.__data.sizeGlobal.h = self.__data.sizeLocal.h
         end
 
+        if self.__data.parent or self.__data.renderSpace then
+            self.__data.overflowSpace.x = self.__data.parent and self.__data.parent.__data.overflowSpace.x or self.__data.renderSpace.__data.overflowSpace.x
+            self.__data.overflowSpace.y = self.__data.parent and self.__data.parent.__data.overflowSpace.y or self.__data.renderSpace.__data.overflowSpace.y
+            self.__data.overflowSpace.w = self.__data.parent and self.__data.parent.__data.overflowSpace.w or self.__data.renderSpace.__data.overflowSpace.w
+            self.__data.overflowSpace.h = self.__data.parent and self.__data.parent.__data.overflowSpace.h or self.__data.renderSpace.__data.overflowSpace.h
+        end
+
+        local x = self.__data.positionGlobal.x
+        local y = self.__data.positionGlobal.y
+        local w = self.__data.sizeGlobal.w
+        local h = self.__data.sizeGlobal.h
+
+        local ox = self.__data.overflowSpace.x
+        local oy = self.__data.overflowSpace.y
+        local ow = self.__data.overflowSpace.w
+        local oh = self.__data.overflowSpace.h
+
+        if self.__data.parent and ( self.__data.parent.__data.overflow == OVERFLOW.HIDDEN or self.__data.parent.__data.overflow == OVERFLOW.SCROLL ) then
+            self.__data.overflowSpace.x = math.max( x, ox )
+            self.__data.overflowSpace.y = math.max( y, oy )
+            self.__data.overflowSpace.w = math.min( x + w, ow )
+            self.__data.overflowSpace.h = math.min( y + h, oh )
+        end
+
+        self.__data.shouldDraw = x >= ox or y >= oy or x + w <= ox + ow or y + h <= oy + oh
+
         if table.count( self.__data.children ) == 0 then return end
 
         local fill = {}
         local space = {
-            left = 0,
-            top = 0,
-            right = self.__data.sizeGlobal.w,
-            bottom = self.__data.sizeGlobal.h
+            x = 0,
+            y = 0,
+            w = self.__data.sizeGlobal.w,
+            h = self.__data.sizeGlobal.h
         }
 
-        space.left = space.left + self.__data.dockPaddingLeft
-        space.top = space.top + self.__data.dockPaddingTop
-        space.right = space.right - self.__data.dockPaddingRight
-        space.bottom = space.bottom - self.__data.dockPaddingBottom
+        space.x = space.x + self.__data.dockPaddingLeft
+        space.y = space.y + self.__data.dockPaddingTop
+        space.w = space.w - self.__data.dockPaddingRight
+        space.h = space.h - self.__data.dockPaddingBottom
 
         for _, child in pairs( self.__data.children ) do
             local dockType = child.__data.dockType
-
-            -- наверн надо добавить ограничение,
-            -- чтоб значения в минус не улетали
-            -- надо будет затестить 
 
             if dockType == DOCK.NODOCK then
                 -- ~skip
@@ -177,37 +203,37 @@ local function elementRecalculation( self )
                 table.insert( fill, child )
                 continue
             elseif dockType == DOCK.LEFT then
-                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
+                child.__data.positionGlobal.x = x + space.x + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = y + space.y + child.__data.dockMarginTop
                 child.__data.sizeGlobal.w = child.__data.sizeLocal.w
-                child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                space.left = space.left + child.__data.sizeLocal.w + child.__data.dockMarginLeft + child.__data.dockMarginRight
+                child.__data.sizeGlobal.h = space.h - space.y - child.__data.dockMarginTop - child.__data.dockMarginBottom
+                space.x = space.x + child.__data.sizeLocal.w + child.__data.dockMarginLeft + child.__data.dockMarginRight
             elseif dockType == DOCK.TOP then
-                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
-                child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
+                child.__data.positionGlobal.x = x + space.x + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = y + space.y + child.__data.dockMarginTop
+                child.__data.sizeGlobal.w = space.w - space.x - child.__data.dockMarginLeft - child.__data.dockMarginRight
                 child.__data.sizeGlobal.h = child.__data.sizeLocal.h
-                space.top = space.top + child.__data.sizeLocal.h + child.__data.dockMarginTop + child.__data.dockMarginBottom
+                space.y = space.y + child.__data.sizeLocal.h + child.__data.dockMarginTop + child.__data.dockMarginBottom
             elseif dockType == DOCK.RIGHT then
-                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.right - child.__data.sizeLocal.w - child.__data.dockMarginRight
-                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginTop
+                child.__data.positionGlobal.x = x + space.w - child.__data.sizeLocal.w - child.__data.dockMarginRight
+                child.__data.positionGlobal.y = y + space.y + child.__data.dockMarginTop
                 child.__data.sizeGlobal.w = child.__data.sizeLocal.w
-                child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
-                space.right = space.right - child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
+                child.__data.sizeGlobal.h = space.h - space.y - child.__data.dockMarginTop - child.__data.dockMarginBottom
+                space.w = space.w - child.__data.sizeLocal.w - child.__data.dockMarginLeft - child.__data.dockMarginRight
             elseif dockType == DOCK.BOTTOM then
-                child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
-                child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.bottom - child.__data.sizeLocal.h - child.__data.dockMarginBottom
-                child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
+                child.__data.positionGlobal.x = x + space.x + child.__data.dockMarginLeft
+                child.__data.positionGlobal.y = y + space.h - child.__data.sizeLocal.h - child.__data.dockMarginBottom
+                child.__data.sizeGlobal.w = space.w - space.x - child.__data.dockMarginLeft - child.__data.dockMarginRight
                 child.__data.sizeGlobal.h = child.__data.sizeLocal.h
-                space.bottom = space.bottom - child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
+                space.h = space.h - child.__data.sizeLocal.h - child.__data.dockMarginTop - child.__data.dockMarginBottom
             end
         end
 
         for _, child in pairs( fill ) do
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMarginLeft
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMarginRight
-            child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMarginLeft - child.__data.dockMarginRight
-            child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMarginTop - child.__data.dockMarginBottom
+            child.__data.positionGlobal.x = x + space.x + child.__data.dockMarginLeft
+            child.__data.positionGlobal.y = y + space.y + child.__data.dockMarginRight
+            child.__data.sizeGlobal.w = space.w - space.x - child.__data.dockMarginLeft - child.__data.dockMarginRight
+            child.__data.sizeGlobal.h = space.h - space.y - child.__data.dockMarginTop - child.__data.dockMarginBottom
         end
     end
     
@@ -218,14 +244,6 @@ end
 
 
 -- Экран
-local function elementRender( self )
-    self:render()
-    
-    for _, child in pairs( self.__data.children ) do
-        elementRender( child )
-    end
-end
-
 local focusScreen = false
 
 local function elementLogicScreen( self )
@@ -274,9 +292,7 @@ hook.add( "renderoffscreen", "wgui:hook:renderoffscreen", function()
         wgui.__data.rsScreen.__data.focus = nil
     end
 
-    for _, child in pairs( wgui.__data.rsScreen.__data.children ) do
-        elementRender( child )
-    end
+    wgui.__data.rsScreen:render()
 
     render.selectRenderTarget()
 end )
