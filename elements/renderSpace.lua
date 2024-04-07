@@ -26,8 +26,9 @@ end
 -- Перезапись методов суперкласса
 local function overwriteMethods()
     local whitelist = {
-        [ "initialize" ] = true,
         [ "__tostring" ] = true,
+        [ "initialize" ] = true,
+        [ "fRecalculate" ] = true,
         [ "render" ] = true,
     }
 

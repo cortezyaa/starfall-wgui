@@ -61,7 +61,8 @@ Element.initialize = function( self, elementName )
     self.__data.dockPaddingBottom = 0
 
     self.__data.overflow = OVERFLOW.VISIBLE
-    self.__data.overflowSpace = { x = 0, y = 0, w = 0, h = 0 }
+    self.__data.overflowSpace = { left = 0, top = 0, right = 0, bottom = 0 }
+    
     self.__data.shouldDraw = false
 
     -- Ивенты
@@ -169,8 +170,8 @@ Element.setPosition = function( self, x, y )
     checkType( x, "number" )
     checkType( y, "number" )
 
-    self.__data.positionLocal.x = x
-    self.__data.positionLocal.y = y
+    self.__data.positionLocal.x = math.round( x )
+    self.__data.positionLocal.y = math.round( y )
 
     self:fRecalculate()
 end
