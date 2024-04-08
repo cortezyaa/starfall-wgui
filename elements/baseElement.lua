@@ -64,6 +64,7 @@ Element.initialize = function( self, elementName )
     self.__data.overflowSpace = { left = 0, top = 0, right = 0, bottom = 0 }
     
     self.__data.shouldDraw = false
+    self.__data.shouldDrawWithStencil = false
 
     -- Ивенты
     self.__events = {}
@@ -323,7 +324,35 @@ Element.render = function( self )
     if not self.__valid then return end
 
     if self.__data.shouldDraw then
-        self:paint()
+        if self.__data.shouldDrawWithStencil then
+            render.setStencilEnable( true )
+            render.clearStencil()
+            render.setStencilTestMask( 255 )
+            render.setStencilWriteMask( 255 )
+            render.setStencilPassOperation( STENCIL.KEEP )
+            render.setStencilZFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.NEVER )
+            render.setStencilReferenceValue( 1 )
+            render.setStencilFailOperation( STENCIL.REPLACE )
+
+            -- маска
+            render.drawRectFast( 
+                self.__data.overflowSpace.left, 
+                self.__data.overflowSpace.top, 
+                self.__data.overflowSpace.right - self.__data.overflowSpace.left,
+                self.__data.overflowSpace.bottom - self.__data.overflowSpace.top
+            )
+
+            render.setStencilFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.EQUAL )
+
+            -- рисовка элемента
+            self:paint()
+
+            render.setStencilEnable( false )
+        else
+            self:paint()
+        end
     end
 
     for _, child in pairs( self.__data.children ) do

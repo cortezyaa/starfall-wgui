@@ -181,6 +181,8 @@ local function elementRecalculation( self )
             ( x > self.__data.overflowSpace.left and x < self.__data.overflowSpace.right and y + h > self.__data.overflowSpace.top and y + h < self.__data.overflowSpace.bottom ) or
             ( x + w > self.__data.overflowSpace.left and x + w < self.__data.overflowSpace.right and y + h > self.__data.overflowSpace.top and y + h < self.__data.overflowSpace.bottom )
         
+        self.__data.shouldDrawWithStencil = not ( x > self.__data.overflowSpace.left and x + w < self.__data.overflowSpace.right and y > self.__data.overflowSpace.top and y + h < self.__data.overflowSpace.bottom )
+        
         if table.count( self.__data.children ) == 0 then return end
 
         local fill = {}
