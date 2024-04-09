@@ -48,6 +48,8 @@ Element.initialize = function( self, elementName )
     self.__data.sizeGlobal = { w = 0, h = 0 }
     self.__data.sizeLocal = { w = 0, h = 0 }
 
+    self.__data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
+
     self.__data.dockType = DOCK.NODOCK
 
     self.__data.dockMarginLeft = 0
@@ -335,7 +337,6 @@ Element.render = function( self )
             render.setStencilReferenceValue( 1 )
             render.setStencilFailOperation( STENCIL.REPLACE )
 
-            -- маска
             render.drawRectFast( 
                 self.__data.overflowSpace.left, 
                 self.__data.overflowSpace.top, 
@@ -346,7 +347,6 @@ Element.render = function( self )
             render.setStencilFailOperation( STENCIL.KEEP )
             render.setStencilCompareFunction( STENCIL.EQUAL )
 
-            -- рисовка элемента
             self:paint()
 
             render.setStencilEnable( false )

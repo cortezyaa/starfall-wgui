@@ -54,6 +54,11 @@ render.createRenderTarget( wgui.__data.rsScreenRT )
 
 wgui.__data.rsWorld = {}
 
+wgui.__data.cursor = {}
+wgui.__data.cursor.click = false
+wgui.__data.cursor.clickTime = 0
+wgui.__data.cursor.space = 0
+
 
 -- Функция проверяет зарегестрирован ли элемент с указанным именем
 wgui.isRegistred = function( elementName )
@@ -158,7 +163,7 @@ local function elementRecalculation( self )
             self.__data.overflowSpace.bottom = self.__data.parent and self.__data.parent.__data.overflowSpace.bottom or self.__data.renderSpace.__data.overflowSpace.bottom
         end
 
-        if self.__data.parent and ( self.__data.parent.__data.overflow == OVERFLOW.HIDDEN or self.__data.parent.__data.overflow == OVERFLOW.SCROLL ) then
+        if self.__data.parent and self.__data.parent.__data.overflow == OVERFLOW.HIDDEN then
             local px = self.__data.parent.__data.positionGlobal.x
             local py = self.__data.parent.__data.positionGlobal.y
             local pw = self.__data.parent.__data.sizeGlobal.w
@@ -183,7 +188,10 @@ local function elementRecalculation( self )
         
         self.__data.shouldDrawWithStencil = not ( x > self.__data.overflowSpace.left and x + w < self.__data.overflowSpace.right and y > self.__data.overflowSpace.top and y + h < self.__data.overflowSpace.bottom )
         
-        if table.count( self.__data.children ) == 0 then return end
+        self.__data.hitbox.left = math.clamp( math.max( x, self.__data.overflowSpace.left ), self.__data.overflowSpace.left, self.__data.overflowSpace.right )
+        self.__data.hitbox.top = math.clamp( math.max( y, self.__data.overflowSpace.top ), self.__data.overflowSpace.top, self.__data.overflowSpace.bottom )
+        self.__data.hitbox.right = math.clamp( math.min( x + w, self.__data.overflowSpace.right ), self.__data.overflowSpace.left, self.__data.overflowSpace.right )
+        self.__data.hitbox.bottom = math.clamp( math.min( y + h, self.__data.overflowSpace.bottom ), self.__data.overflowSpace.top, self.__data.overflowSpace.bottom )
 
         local fill = {}
         local space = {
@@ -255,16 +263,11 @@ local function elementLogicScreen( self )
         elementLogicScreen( child )
     end
 
-    if not focusScreen and wgui.__data.rsScreen.__data.active then
+    if not focusScreen and wgui.__data.rsScreen.__data.active and self.__data.shouldDraw then
         local cx = wgui.__data.rsScreen.__data.cursor.x
         local cy = wgui.__data.rsScreen.__data.cursor.y
 
-        local x = self.__data.positionGlobal.x
-        local y = self.__data.positionGlobal.y
-        local w = self.__data.sizeGlobal.w
-        local h = self.__data.sizeGlobal.h
-
-        if cx >= x and cx <= x + w and cy >= y and cy <= y + h then
+        if cx >= self.__data.hitbox.left and cx <= self.__data.hitbox.right and cy >= self.__data.hitbox.top and cy <= self.__data.hitbox.bottom then
             focusScreen = true
 
             if wgui.__data.rsScreen.__data.focus ~= self then
@@ -307,9 +310,9 @@ hook.add( "render", "wgui:hook:render", function()
 
     elementRecalculation( wgui.__data.rsScreen )
 
+    wgui.__data.rsScreen.__data.active = crsx ~= nil and crsy ~= nil
     wgui.__data.rsScreen.__data.cursor.x = crsx ~= nil and 1024 / scrw * crsx or nil
     wgui.__data.rsScreen.__data.cursor.y = crsy ~= nil and 1024 / scrh * crsy or nil
-    wgui.__data.rsScreen.__data.active = crsx ~= nil and crsy ~= nil
 
     render.setRenderTargetTexture( wgui.__data.rsScreenRT )
     render.setRGBA( 255, 255, 255, 255 )
@@ -318,20 +321,66 @@ hook.add( "render", "wgui:hook:render", function()
 end )
 
 
---[[ сделаю позже
-Логика курсора
+-- Худ
+hook.add( "drawhud", "wgui:hook:drawhud", function()
+    local crsx, crsy = input.getCursorPos()
+
+    elementRecalculation( wgui.__data.rsHud )
+    
+    wgui.__data.rsHud.__data.active = input.getCursorVisible()
+    wgui.__data.rsHud.__data.cursor.x = wgui.__data.rsHud.__data.active and crsx or nil
+    wgui.__data.rsHud.__data.cursor.y = wgui.__data.rsHud.__data.active and crsy or nil
+    
+    for _, child in pairs( table.reverse( wgui.__data.rsHud.__data.children ) ) do
+        -- elementLogicHud( child )
+    end
+
+    wgui.__data.rsHud:render()
+end )
+
+
+-- Логика курсора
 hook.add( "keypress", "wgui:hook:keypress", function( ply, key )
     if not isFirstTimePredicted() then return end
     if ply ~= player() then return end
-    
-    --if key ~= IN_KEY.ATTACK and key ~= IN_KEY.USE then return end
+
+    local keyUse = key == IN_KEY.USE
+    local keyAttack = key == IN_KEY.ATTACK
+    local keyAttack2 = key == IN_KEY.ATTACK2
+
+    if wgui.__data.rsHud.__data.active and keyAttack then
+        -- hud click logic
+    elseif wgui.__data.rsScreen.__data.active and ( keyUse or keyAttack ) then
+        local clickTimeOld = wgui.__data.cursor.clickTime
+
+        wgui.__data.cursor.space = RENDERSPACE.SCREEN
+        wgui.__data.cursor.click = true
+        wgui.__data.cursor.clickTime = timer.systime()
+
+        local double = wgui.__data.cursor.clickTime < clickTimeOld + 0.25
+
+        -- mousedown
+        -- click
+    end
 end )
 
 hook.add( "keyrelease", "wgui:hook:keyrelease", function( ply, key )
     if not isFirstTimePredicted() then return end
     if ply ~= player() then return end
+
+    local keyUse = key == IN_KEY.USE
+    local keyAttack = key == IN_KEY.ATTACK
+    local keyAttack2 = key == IN_KEY.ATTACK2
+
+    if wgui.__data.rsHud.__data.active and keyAttack then
+        -- hud click logic
+    elseif wgui.__data.rsScreen.__data.active and ( keyUse or keyAttack ) then
+        wgui.__data.cursor.space = 0
+        wgui.__data.cursor.click = false
+
+        -- mouseup
+    end
 end )
-]]--
 
 
 return wgui

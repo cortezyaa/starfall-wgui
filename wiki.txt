@@ -1,5 +1,57 @@
 небольшая справка для любимого меня
 
-https://andersenlab.gitbook.io/javascript/js-in-browser/events
-
 https://itwiki.dev/ru/front-end/css-reference/properties/overflow
+
+https://andersenlab.gitbook.io/javascript/js-in-browser/events
+https://www.tutorialstonight.com/js/events-in-javascript
+
+
+Window events in javascript
+
+onload	webpage loaded	The onload event is triggered when the page is loaded.
+onresize	resizing browser tab	event is triggered when the browser window is resized.
+onresize	scrolling browser tab	event is triggered when the browser window is scrolled.
+onbeforeunload	before closing browser tab	event is triggered when the browser window is about to be closed.
+onoffline	when the browser is offline	event is triggered when the browser is offline.
+ononline	when the browser is online	event is triggered when the browser is online.
+
+
+Mouse events in javascript
+
+click	Mouse click	when the mouse is clicked over an element
+dblclick	Mouse double click	Mouse double clickwhen the mouse is double-clicked over an element
+mouseover	Mouse over	Triggered when the user moves the mouse over an element
+mouseout	Mouse out	Triggered when the user moves the mouse out of an element
+mousedown	Mouse button down	Triggered when the user presses the mouse button.
+mouseup	Mouse button up	Triggered when the user releases the mouse button.
+mousemove	Mouse move	Triggered when the user moves the mouse over an element
+mouseenter	Mouse enter	Triggered when the user moves the mouse over an element
+mouseleave	Mouse leave	Triggered when the user moves the mouse out of an element
+
+
+Keyboard events in javascript
+
+onkeydown	Button Down	event is fired when any keyboard button is down
+onkeyup	Button released	event is fired when any keyboard button is released
+onkeypress	Button pressed	event is fired when any keyboard button is pressed
+
+
+Form events in javascript
+
+submit	onsubmit	event is fired when the form is submitted
+focus	onfocus	event is fired when the cursor is focused on form
+blur	Focus Removed	event is fired when the focus is removed from input section
+change	onchange	event is fired when the value of the input is changed
+reset	onreset	event is fired when the form is reset
+select	onselect	event is fired when a selection is made
+
+
+Drag Events in JavaScript
+
+ondrag	Triggered when an element is being dragged
+ondragend	event occurs when an element stops being dragged
+ondragenter	event occurs when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
+ondragleave	event occurs when an element or text selection leaves a valid drop target.
+ondragover	event occurs when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
+ondragstart	event occurs when an element is being dragged
+ondrop	event occurs when an element or text selection is being dropped on a valid drop target.

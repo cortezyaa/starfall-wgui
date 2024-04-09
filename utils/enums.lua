@@ -19,5 +19,4 @@ RENDERSPACE = {
 OVERFLOW = {
     VISIBLE = 0,
     HIDDEN = 1,
-    SCROLL = 2,
 }
