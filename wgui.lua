@@ -6,7 +6,7 @@
 
 
 -- Включение утилит
-requiredir( "./utils/" ) 
+requiredir( "./utils/" )
 
 
 

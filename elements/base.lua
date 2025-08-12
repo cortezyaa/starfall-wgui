@@ -203,55 +203,17 @@ Element.setParent = function( self, parent )
     self.__data.parent = nil
     
     if parentType ~= "nil" then
-        
-    end
-
-    self:__recalculate()
-
-    --[[
-    -- unparent
-    if parentType == "nil" then
-        if self.__data.parent then
-            table.removeByValue( self.__data.parent.__data.children, self )
-            self.__data.parent:__recalculate()
-            self.__data.parent = nil
-
-            table.insert( self.__data.renderSpace, self )
-            self:__recalculate()
-        end
-
-        return
-    end
-
-    -- renderspace
-    if parent.__data.rs then
-        if self.__data.parent then
-            table.removeByValue( self.__data.parent.__data.children, self )
-            self.__data.parent:__recalculate()
+        if parent.__data.rs then
+            self.__data.renderSpace = parent
         else
-            table.removeByValue( self.__data.renderSpace.__data.children, self )
-            self.__data.renderSpace:__recalculate()
+            self.__data.parent = parent
+            self.__data.renderSpace = parent.__data.renderSpace
         end
-
-        self.__data.parent = nil
-
-        self.__data.renderSpace = parent
-        table.insert( parent.__data.children, self )
-        self:__recalculate()
         
-        return
+        table.insert( parent.__data.children, self )
     end
 
-    -- element
-    if self.__data.parent == parent then
-        return
-    end
-
-    self.__data.parent = parent
-    self.__data.renderSpace = parent.__data.renderSpace
-    table.insert( self.__data.parent.children, self )
     self:__recalculate()
-    --]]
 end
 
 -- Получение родительского элемента
