@@ -1,5 +1,8 @@
 небольшая справка для любимого меня
 
+ИСПОЛЬЗОВАТЬ !!! - render.setRGBA
+
+
 https://itwiki.dev/ru/front-end/css-reference/properties/overflow
 
 https://andersenlab.gitbook.io/javascript/js-in-browser/events

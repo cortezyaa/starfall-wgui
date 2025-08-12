@@ -1,7 +1,7 @@
 --@name wgui/u/utils
---@author cortez
 
--- Перезапись некоторых дефолных функций
+
+-- Перезапись некоторых функции
 local old_type = type
 function type( object )
     local resoult = old_type( object )
@@ -22,93 +22,40 @@ function isValid( object )
     return old_isValid( object )
 end
 
--- Функция сравнивает тип объекта с ожидаемым(и)
--- Стандартно вызывает ошибку при их несоответствии
--- Возвращает результат и тип объекта
+
+-- Функция сравнивания типа объекта с ожидаемым
 function checkType( object, expected, shouldError )
-    shouldError = shouldError == nil and true or shouldError
- 
     local objectType = type( object )
     local expectedType = type( expected )
     local shouldErrorType = type( shouldError )
 
-    if expectedType ~= "string" and expectedType ~= "table" then
-        error( "Expected string or table got " .. expectedType )
-    end
+    if expectedType ~= "string" and expectedType ~= "table" then throw( "Expected string or table got " .. expectedType ) end
+    if shouldErrorType ~= "nil" and shouldErrorType ~= "boolean" then throw( "Expected boolean got " .. shouldErrorType ) end
 
-    if shouldErrorType ~= "boolean" then
-        error( "Expected boolean got " .. shouldErrorType )
-    end
+    shouldError = shouldError == nil and true or shouldError
 
     local resoult = false
-    local estring = ""
+    local expectedString = ""
 
     if expectedType == "string" then
         resoult = objectType == expected
-        estring = expected
+        expectedString = expected
     else
-        local lexpected = table.count( expected )
-        for index, exp in pairs( expected ) do
-            estring = estring .. ( index == 1 and "" or ( index == lexpected and " or " or ", " ) ) .. exp
-
-            if exp == objectType then
+        for index, rexpected in pairs( expected ) do
+            if rexpected == objectType then
                 resoult = true
+                break
             end
+
+            expectedString = expectedString .. ( index == 1 and rexpected or ( index == #expected and ( " or " .. rexpected ) or ( ", " .. rexpected ) ) )
         end
     end
 
     if shouldError and not resoult then
-        error( "Expected " .. estring .. " got " .. objectType )
+        throw( "Expected " .. expectedString .. " got " .. objectType )
     end
 
     return resoult, objectType
 end
 
 
--- Функция проверяет наличие значения (object) в ENUM'е
--- Стандартно вызывает ошибку при его отсутствии
-function checkEnum( object, enum, shouldError )
-    shouldError = shouldError == nil and true or shouldError
-
-    local objectType = type( object )
-    local enumType = type( enum )
-    local shouldErrorType = type( shouldError )
-
-    if objectType ~= "number" then
-        error( "Expected number got " .. objectType )
-    end
-
-    if enumType ~= "string" then
-        error( "Expected string got " .. enumType )
-    end
-    
-    if shouldErrorType ~= "boolean" then
-        error( "Expected boolean got " .. shouldErrorType )
-    end
-
-    local resoult = false
-    local estring = ""
-
-    local enumTable = _G[ enum ]
-
-    if not enumTable then
-        estring = "Enum with the specified name (" .. enum .. ") was not found"
-    else
-        estring = "The specified value (" .. object .. ") was not found in the enum table"
-
-        for key, value in pairs( enumTable ) do
-            if value ~= object then
-                continue
-            end
-
-            resoult = true
-            break
-        end
-    end
-
-    if shouldError and not resoult then
-        error( estring )
-    end
-
-    return resoult
-end

@@ -1,12 +1,13 @@
 --@name wgui/u/enums
---@author cortez
 
+
+-- Создание новых enum таблиц
 DOCK = {
     NODOCK = 0,
     FILL = 1,
     LEFT = 2,
-    RIGHT = 3,
-    TOP = 4,
+    TOP = 3,
+    RIGHT = 4,
     BOTTOM = 5,
 }
 

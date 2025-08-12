@@ -1,9 +1,8 @@
 --@name wgui/e/panel
---@author cortez
 
 
 -- Создание класса элемента
-local BaseElement = require( "./baseElement.lua" ) --@include ./baseElement.lua
+local BaseElement = require( "./base.lua" ) --@include ./base.lua
 local Element = class( "wgui/e/panel", BaseElement )
 Element.static.elementName = "panel"
 
