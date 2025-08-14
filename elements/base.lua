@@ -112,7 +112,7 @@ Element.__recalculation = function( self )
         end
     end
 
-    for _, child in pairs( self.__data.children )
+    for _, child in pairs( self.__data.children ) do
         if table.hasValue( fill, child ) then
             child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMargin.left
             child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMargin.top
@@ -151,6 +151,14 @@ end
 -- Системная функция вызываемая для перерасчета элемента
 Element.__recalculate = function( self )
     -- Вызывается перерасчет родительского (рендер спейса) элемента
+
+    -- ПЕРЕДЕЛАТЬ!!!
+
+    if self.__data.parent then
+        self.__data.parent:__recalculation()
+    else
+        self.__data.renderSpace:__recalculation()
+    end
 end
 
 
@@ -192,27 +200,52 @@ Element.setParent = function( self, parent )
     self:__validate()
     local _, parentType = checkType( parent, { "wgui", "nil" } )
 
-    if parent.__data.rs and self.__data.renderSpace == parent then return end
-    if self.__data.parent == parent then return end
-
-    -- unparent section
-    local oldparent = self.__data.parent or self.__data.renderSpace
-
-    table.removeByValue( oldparent.__data.children, self )
-    oldparent:__recalculate()
-    self.__data.parent = nil
-    
-    if parentType ~= "nil" then
-        if parent.__data.rs then
-            self.__data.renderSpace = parent
-        else
-            self.__data.parent = parent
-            self.__data.renderSpace = parent.__data.renderSpace
+    -- unparent
+    if parentType == "nil" then
+        if self.__data.parent then
+            table.removeByValue( self.__data.parent.__data.children, self )
+            self.__data.parent:__recalculate()
+            self.__data.parent = nil
+            table.insert( self.__data.renderSpace.__data.children, self )
+            self:__recalculate()
         end
-        
-        table.insert( parent.__data.children, self )
+
+        return
     end
 
+    -- renderSpace
+    if parent.__data.rs then
+        if self.__data.renderSpace == parent then return end
+
+        local oldparent = self.__data.parent or self.__data.renderSpace
+
+        if oldparent then
+            table.removeByValue( oldparent.__data.children, self )
+            oldparent:__recalculate()
+            self.__data.parent = nil
+        end
+
+        self.__data.renderSpace = parent
+        table.insert( parent.__data.children, self )
+        self:__recalculate()
+
+        return
+    end
+
+    -- element
+    if self.__data.parent == parent then return end
+
+    local oldparent = self.__data.parent or self.__data.renderSpace
+
+    if oldparent then
+        table.removeByValue( oldparent.__data.children, self )
+        oldparent:__recalculate()
+        self.__data.parent = nil
+    end
+    
+    self.__data.renderSpace = parent.__data.renderSpace
+    self.__data.parent = parent
+    table.insert( parent.__data.children, self )
     self:__recalculate()
 end
 

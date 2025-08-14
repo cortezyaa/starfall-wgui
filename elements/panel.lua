@@ -11,7 +11,8 @@ Element.static.elementName = "panel"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.__data.color = Color( 255, 255, 255, 255 )
+    -- debug
+    self.__data.color = Color( math.random( 0, 255 ), math.random( 0, 255 ), math.random( 0, 255 ), 255 )
 end
 
 -- Функция рисования элемента

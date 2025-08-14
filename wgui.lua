@@ -12,8 +12,8 @@ requiredir( "./utils/" )
 
 -- Создание таблиц библиотеки
 wgui = {}
-wgui.__data = {}
-wgui.__data.registred = {}
+wgui.__registred = {}
+wgui.__renderSpace = {}
 
 
 -- Функция создания элемента
@@ -25,20 +25,16 @@ wgui.create = function( elementName, parent )
         throw( "Specified element is not registred" )
     end
 
-    local element = wgui.__data.registred[ elementName ]:new()
+    local element = wgui.__registred[ elementName ]:new()
 
     if parentType == "number" then
         if parent == RENDERSPACE.HUD then
-            -- hud
+            element:setParent( wgui.__renderSpace.hud )
         elseif parent == RENDERSPACE.SCREEN then
-            -- screen
+            element:setParent( wgui.__renderSpace.screen )
         end
     else
-        if parent.__data.rs then
-            -- parent to render space
-        else
-            -- parent to element
-        end
+        element:setParent( parent )
     end
 
     return element
@@ -48,7 +44,7 @@ end
 -- Функция проверки зарегестрирован элемент или нет
 wgui.isRegister = function( elementName )
     checkType( elementName, "string" )
-    return not not wgui.__data.registred[ elementName ]
+    return not not wgui.__registred[ elementName ]
 end
 
 
@@ -57,7 +53,7 @@ wgui.register = function( elementName, elementClass )
     checkType( elementName, "string" )
     checkType( elementClass, "table" )
 
-    wgui.__data.registred[ elementName ] = elementClass
+    wgui.__registred[ elementName ] = elementClass
 end
 
 
@@ -68,17 +64,45 @@ end
 
 -- Регистрация элементов
 local function registerIncludedElements()
+    local custom = {
+        [ "base" ] = function() end,
+        [ "renderSpace" ] = function( elementClass )
+            -- hud
+            wgui.__renderSpace.hud = elementClass:new()
+            local scrw, scrh = render.getGameResolution()
+            wgui.__renderSpace.hud.__data.overflowBox = { left = 0, top = 0, right = scrw, bottom = scrh }
+            wgui.__renderSpace.hud.__data.hitbox = { left = 0, top = 0, right = scrw, bottom = scrh }
+            wgui.__renderSpace.hud.__data.sizeLocal = { w = scrw, h = scrh }
+            wgui.__renderSpace.hud.__data.sizeGlobal = { w = scrw, h = scrh }
+
+            -- screen
+            wgui.__renderSpace.screen = elementClass:new()
+            wgui.__renderSpace.screen.__data.overflowBox = { left = 0, top = 0, right = 1024, bottom = 1024 }
+            wgui.__renderSpace.screen.__data.hitbox = { left = 0, top = 0, right = 1024, bottom = 1024 }
+            wgui.__renderSpace.hud.__data.sizeLocal = { w = 1024, h = 1024 }
+            wgui.__renderSpace.hud.__data.sizeGlobal = { w = 1024, h = 1024 }
+        end
+    }
+
     for _, elementClass in pairs( requiredir( "./elements/" ) ) do
         local elementName = elementClass.static.elementName
+
+        if custom[ elementName ] then
+            custom[ elementName ]( elementClass )
+            continue
+        end
+
         wgui.register( elementName, elementClass )
     end
 end
 
-registerInludedElements()
+registerIncludedElements()
 
 
-
-
+-- debug
+hook.add( "drawhud", "wgui:hook:drawhud", function()
+    wgui.__renderSpace.hud:render()
+end )
 
 
 return wgui

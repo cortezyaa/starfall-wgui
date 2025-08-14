@@ -15,5 +15,28 @@ Element.initialize = function( self )
 end
 
 
+-- Защита элемента от взаимодействий
+-- local function overwriteDeclaredMethods()
+--     local whitelist = {
+--         [ "initialize" ] = true,
+--         [ "render" ] = true,
+--     }
+
+--     for methodName, methodFunciton in pairs( BaseElement.__declaredMethods ) do
+--         if string.left( methodName, 2 ) == "__" then continue end
+--         if whitelist[ methodName ] then continue end
+--         Element[ methodName ] = function() throw( "You cannot interact with 'renderSpace' element" ) end
+--     end
+-- end
+
+-- overwriteDeclaredMethods()
+
+
+-- Системная функция вызываемая для перерасчета элемента
+Element.__recalculate = function( self )
+    self:__recalculation()
+end
+
+
 -- Возвращаем класс элемента
 return Element
