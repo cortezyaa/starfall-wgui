@@ -66,6 +66,7 @@ local function registerIncludedElements()
 
             -- hud
             wgui.__renderSpace.hud = elementClass:new()
+            wgui.__renderSpace.hud.__data.hud = true
             wgui.__renderSpace.hud.__data.sizeLocal = { w = scrw, h = scrh }
             wgui.__renderSpace.hud:__recalculate()
 
@@ -99,7 +100,7 @@ end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()
     wgui.__renderSpace.hud:render()
-    -- wgui.__renderSpace.hud:cursorProcess()
+    wgui.__renderSpace.hud:cursorProcess()
 
     wgui.__renderSpace.hud:debugrender()
 end )

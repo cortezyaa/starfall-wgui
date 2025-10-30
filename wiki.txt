@@ -58,3 +58,11 @@ ondragleave	event occurs when an element or text selection leaves a valid drop t
 ondragover	event occurs when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
 ondragstart	event occurs when an element is being dragged
 ondrop	event occurs when an element or text selection is being dropped on a valid drop target.
+
+
+
+
+
+todo
+
+функция регистрации колбэков (ивентов)

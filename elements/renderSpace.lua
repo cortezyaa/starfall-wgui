@@ -12,11 +12,19 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.__data.rs = true
+    self.__data.hud = false
+
+    self.__data.hoverElement = nil
 
     -- cursor
     self.__cursor = {}
     self.__cursor.enabled = false
     self.__cursor.position = { x = 0, y = 0 }
+
+    -- events
+    self.__events.cursorMoved = function( x, y ) end
+    self.__events.cursorPressed = function( key ) end
+    self.__events.cursorReleased = function( key ) end
 end
 
 
@@ -52,7 +60,83 @@ Element.setCursorEnabled = function( self, enabled )
     self:__validate()
 
     self.__cursor.enabled = enabled
-    input.enableCursor( enabled )
+
+    if self.__data.hud then
+        input.enableCursor( enabled )
+
+        -- тут какая та хуйня наддо продумать нормально
+
+        hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
+            if not self.__cursor.enabled then return end
+            if not self.__data.hoverElement then return end
+
+            if key == 107 then
+                self.__data.hoverElement.__events.click( self.__data.hoverElement )
+            end
+            
+            -- print( key )
+            -- 107 108 109 -- m1 m2 m3
+        end )
+
+        hook.add( "MouseWheeled", "wgui:hook:MouseWheeled", function( delta )
+            -- print( delta )
+            -- 1 vverh -- -1 vniz ) 
+        end )
+    end
+end
+
+
+-- cursor pos
+Element.getCursorPos = function( self )
+    self:__validate()
+    
+    return self.__cursor.position.x, self.__cursor.position.y
+end
+
+
+-- process
+local processHover = false
+
+local function hoverProcess( self, elem, x, y )
+    for _, child in pairs( table.reverse( elem.__data.children ) ) do
+        hoverProcess( self, child, x, y )
+    end
+    
+    if not processHover and x >= elem.__data.hitbox.left and x <= elem.__data.hitbox.right and y >= elem.__data.hitbox.top and y <= elem.__data.hitbox.bottom then
+        processHover = true
+
+        if self.__data.hoverElement ~= elem then
+            if self.__data.hoverElement ~= nil then
+                self.__data.hoverElement.__data.hover = false
+                self.__data.hoverElement.__events.hoverOff( self.__data.hoverElement )
+            end
+
+            if self ~= elem then
+                self.__data.hoverElement = elem
+                self.__data.hoverElement.__data.hover = true
+                self.__data.hoverElement.__events.hoverOn( self.__data.hoverElement )
+            else
+                self.__data.hoverElement = nil
+            end
+        end
+    end
+end
+
+Element.cursorProcess = function( self )
+    self:__validate()
+
+    -- hud
+    if self.__data.hud and self.__cursor.enabled then
+        local x, y = input.getCursorPos()
+
+        if x ~= self.__cursor.position.x or y ~= self.__cursor.position.y then
+            self.__cursor.position.x, self.__cursor.position.y = x, y
+            self.__events.cursorMoved( x, y )
+        end
+    end
+
+    processHover = false
+    hoverProcess( self, self, self.__cursor.position.x, self.__cursor.position.y )
 end
 
 

@@ -13,13 +13,14 @@ Element.static.elementName = "base"
 Element.initialize = function( self, elementName )
     checkType( elementName, "string" )
 
-    self.__wgui = true 
-    self.__valid = true 
+    self.__wgui = true
+    self.__valid = true
 
     -- Данные элемента
     self.__data = {}
     
     self.__data.elementName = elementName
+    self.__data.uid = math.random( 11111111, 99999999 )
 
     self.__data.parent = nil
     self.__data.renderSpace = nil
@@ -42,8 +43,13 @@ Element.initialize = function( self, elementName )
 
     self.__data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
 
+    self.__data.hover = false
+
     -- Ивенты
     self.__events = {}
+    self.__events.hoverOn = function( self ) end
+    self.__events.hoverOff = function( self ) end
+    self.__events.click = function( self ) end
 end
 
 
@@ -406,13 +412,6 @@ Element.render = function( self )
     for _, child in pairs( self.__data.children ) do
         child:render()
     end
-
-    -- debug
-    if wgui.debug then
-        render.setRGBA( 255, 255, 255, 255 )
-        render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
-        render.drawSimpleText( self.__data.positionGlobal.x + 2, self.__data.positionGlobal.y, self.__data.elementName)
-    end
 end
 
 
@@ -425,9 +424,14 @@ Element.debugrender = function( self )
     end
 
     -- debug
+    render.setRGBA( 0, 0, 0, 255 )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 1, self.__data.elementName )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, self.__data.uid )
+
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
-    render.drawSimpleText( self.__data.positionGlobal.x + 2, self.__data.positionGlobal.y, self.__data.elementName)
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y, self.__data.elementName )
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, self.__data.uid )
 end
 
 
