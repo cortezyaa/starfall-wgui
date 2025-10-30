@@ -59,3 +59,16 @@ function checkType( object, expected, shouldError )
 end
 
 
+-- onScreenSizeChanged hook ( https://wiki.facepunch.com/gmod/GM:OnScreenSizeChanged )
+local hookscrw, hookscrh = render.getGameResolution()
+
+local z = timer.create( "hook:onScreenSizeChanged", 10, 0, function()
+    local w, h = render.getGameResolution()
+
+    if hookscrw ~= w or hookscrh ~= h then
+        hookscrw = w
+        hookscrh = h
+
+        hook.run( "onScreenSizeChanged", w, h )
+    end
+end )

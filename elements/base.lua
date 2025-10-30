@@ -406,10 +406,32 @@ Element.render = function( self )
     for _, child in pairs( self.__data.children ) do
         child:render()
     end
+
+    -- debug
+    if wgui.debug then
+        render.setRGBA( 255, 255, 255, 255 )
+        render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
+        render.drawSimpleText( self.__data.positionGlobal.x + 2, self.__data.positionGlobal.y, self.__data.elementName)
+    end
 end
 
 
--- Функция рисования элемента
+-- Функции рендера элемента (debug)
+Element.debugrender = function( self )
+    if not self.__valid then return end
+
+    for _, child in pairs( self.__data.children ) do
+        child:debugrender()
+    end
+
+    -- debug
+    render.setRGBA( 255, 255, 255, 255 )
+    render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
+    render.drawSimpleText( self.__data.positionGlobal.x + 2, self.__data.positionGlobal.y, self.__data.elementName)
+end
+
+
+-- Функция отрисовки элемента
 Element.paint = function( self )
     -- Тут ничего не будет 🍷🗿
 end

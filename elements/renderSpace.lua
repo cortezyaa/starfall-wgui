@@ -12,6 +12,11 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.__data.rs = true
+
+    -- cursor
+    self.__cursor = {}
+    self.__cursor.enabled = false
+    self.__cursor.position = { x = 0, y = 0 }
 end
 
 
@@ -34,7 +39,20 @@ end
 
 -- Системная функция вызываемая для перерасчета элемента
 Element.__recalculate = function( self )
+    wgui.__renderSpace.hud.__data.sizeGlobal = { w = wgui.__renderSpace.hud.__data.sizeLocal.w, h = wgui.__renderSpace.hud.__data.sizeLocal.h } 
+    wgui.__renderSpace.hud.__data.overflowBox = { left = 0, top = 0, right = wgui.__renderSpace.hud.__data.sizeLocal.w, bottom = wgui.__renderSpace.hud.__data.sizeLocal.h }
+    wgui.__renderSpace.hud.__data.hitbox = { left = 0, top = 0, right = wgui.__renderSpace.hud.__data.sizeLocal.w, bottom = wgui.__renderSpace.hud.__data.sizeLocal.h }
+
     self:__recalculation()
+end
+
+
+-- cursor funcitons
+Element.setCursorEnabled = function( self, enabled )
+    self:__validate()
+
+    self.__cursor.enabled = enabled
+    input.enableCursor( enabled )
 end
 
 

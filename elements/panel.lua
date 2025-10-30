@@ -15,7 +15,7 @@ Element.initialize = function( self )
     self.__data.color = Color( math.random( 0, 255 ), math.random( 0, 255 ), math.random( 0, 255 ), 255 )
 end
 
--- Функция рисования элемента
+-- Функция отрисовки элемента
 Element.paint = function( self )
     render.setRGBA( self.__data.color.r, self.__data.color.g, self.__data.color.b, self.__data.color.a )
     render.drawRect( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )

@@ -57,30 +57,22 @@ wgui.register = function( elementName, elementClass )
 end
 
 
-
-
-
-
-
 -- Регистрация элементов
 local function registerIncludedElements()
     local custom = {
         [ "base" ] = function() end,
         [ "renderSpace" ] = function( elementClass )
+            local scrw, scrh = render.getGameResolution()
+
             -- hud
             wgui.__renderSpace.hud = elementClass:new()
-            local scrw, scrh = render.getGameResolution()
-            wgui.__renderSpace.hud.__data.overflowBox = { left = 0, top = 0, right = scrw, bottom = scrh }
-            wgui.__renderSpace.hud.__data.hitbox = { left = 0, top = 0, right = scrw, bottom = scrh }
             wgui.__renderSpace.hud.__data.sizeLocal = { w = scrw, h = scrh }
-            wgui.__renderSpace.hud.__data.sizeGlobal = { w = scrw, h = scrh }
+            wgui.__renderSpace.hud:__recalculate()
 
             -- screen
             wgui.__renderSpace.screen = elementClass:new()
-            wgui.__renderSpace.screen.__data.overflowBox = { left = 0, top = 0, right = 1024, bottom = 1024 }
-            wgui.__renderSpace.screen.__data.hitbox = { left = 0, top = 0, right = 1024, bottom = 1024 }
-            wgui.__renderSpace.hud.__data.sizeLocal = { w = 1024, h = 1024 }
-            wgui.__renderSpace.hud.__data.sizeGlobal = { w = 1024, h = 1024 }
+            wgui.__renderSpace.screen.__data.sizeLocal = { w = 1024, h = 1024 }
+            wgui.__renderSpace.screen:__recalculate()
         end
     }
 
@@ -99,10 +91,19 @@ end
 registerIncludedElements()
 
 
--- debug
+-- hud
+hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
+    wgui.__renderSpace.hud.__data.sizeLocal = { w = w, h = h }
+    wgui.__renderSpace.hud:__recalculate()
+end )
+
 hook.add( "drawhud", "wgui:hook:drawhud", function()
     wgui.__renderSpace.hud:render()
+    -- wgui.__renderSpace.hud:cursorProcess()
+
+    wgui.__renderSpace.hud:debugrender()
 end )
+
 
 
 return wgui
