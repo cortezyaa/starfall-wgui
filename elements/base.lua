@@ -13,6 +13,8 @@ Element.static.elementName = "base"
 Element.initialize = function( self, elementName )
     checkType( elementName, "string" )
 
+    self.__uid = math.random( 111111111, 999999999 )
+
     self.__wgui = true
     self.__valid = true
 
@@ -20,7 +22,6 @@ Element.initialize = function( self, elementName )
     self.__data = {}
     
     self.__data.elementName = elementName
-    self.__data.uid = math.random( 11111111, 99999999 )
 
     self.__data.parent = nil
     self.__data.renderSpace = nil
@@ -426,12 +427,12 @@ Element.debugrender = function( self )
     -- debug
     render.setRGBA( 0, 0, 0, 255 )
     render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 1, self.__data.elementName )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, self.__data.uid )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, self.__uid )
 
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
     render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y, self.__data.elementName )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, self.__data.uid )
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, self.__uid )
 end
 
 

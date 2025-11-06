@@ -99,10 +99,7 @@ hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h
 end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()
-    wgui.__renderSpace.hud:render()
-    wgui.__renderSpace.hud:cursorProcess()
-
-    wgui.__renderSpace.hud:debugrender()
+    wgui.__renderSpace.hud:process()
 end )
 
 

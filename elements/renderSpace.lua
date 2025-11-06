@@ -95,48 +95,57 @@ end
 
 
 -- process
-local processHover = false
-
-local function hoverProcess( self, elem, x, y )
-    for _, child in pairs( table.reverse( elem.__data.children ) ) do
-        hoverProcess( self, child, x, y )
+local cursorProcessDone = false
+local function cursorProcess( rs, self, x, y )
+    for _, child in pairs( table.reverse( self.__data.children ) ) do
+        if cursorProcessDone then break end
+        cursorProcess( rs, child, x, y )
     end
     
-    if not processHover and x >= elem.__data.hitbox.left and x <= elem.__data.hitbox.right and y >= elem.__data.hitbox.top and y <= elem.__data.hitbox.bottom then
-        processHover = true
+    if cursorProcessDone then return end
+    if x >= self.__data.hitbox.left and x <= self.__data.hitbox.right and y >= self.__data.hitbox.top and y <= self.__data.hitbox.bottom then
+        cursorProcessDone = true
 
-        if self.__data.hoverElement ~= elem then
-            if self.__data.hoverElement ~= nil then
-                self.__data.hoverElement.__data.hover = false
-                self.__data.hoverElement.__events.hoverOff( self.__data.hoverElement )
+        if rs.__data.hoverElement ~= self then
+            if rs.__data.hoverElement ~= nil then
+                rs.__data.hoverElement.__data.hover = false
+                rs.__data.hoverElement.__events.hoverOff( rs.__data.hoverElement )
             end
 
-            if self ~= elem then
-                self.__data.hoverElement = elem
-                self.__data.hoverElement.__data.hover = true
-                self.__data.hoverElement.__events.hoverOn( self.__data.hoverElement )
+            if self == rs then
+                rs.__data.hoverElement = nil
             else
-                self.__data.hoverElement = nil
+                rs.__data.hoverElement = self
+                rs.__data.hoverElement.__data.hover = true
+                rs.__data.hoverElement.__events.hoverOn( rs.__data.hoverElement )
             end
         end
     end
 end
 
-Element.cursorProcess = function( self )
-    self:__validate()
+Element.process = function( self )
+    if self.__cursor.enabled then
+        if self.__data.hud then
+            local x, y = input.getCursorPos()
 
-    -- hud
-    if self.__data.hud and self.__cursor.enabled then
-        local x, y = input.getCursorPos()
-
-        if x ~= self.__cursor.position.x or y ~= self.__cursor.position.y then
-            self.__cursor.position.x, self.__cursor.position.y = x, y
-            self.__events.cursorMoved( x, y )
+            if x ~= self.__cursor.position.x or y ~= self.__cursor.position.y then
+                self.__cursor.position.x, self.__cursor.position.y = x, y
+                self.__events.cursorMoved( x, y )
+            end
+        else
+            -- starfall screen
         end
+
+        cursorProcessDone = false
+        cursorProcess( self, self, self.__cursor.position.x, self.__cursor.position.y )
     end
 
-    processHover = false
-    hoverProcess( self, self, self.__cursor.position.x, self.__cursor.position.y )
+    self:render()
+
+    -- debug
+    wgui.__renderSpace.hud:debugrender()
+    render.drawCircle( self.__cursor.position.x, self.__cursor.position.y, 4 )
+    render.drawSimpleText( self.__cursor.position.x + 6, self.__cursor.position.y, self.__data.hoverElement and self.__data.hoverElement.__uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
 end
 
 
