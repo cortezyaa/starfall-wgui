@@ -22,9 +22,6 @@ Element.initialize = function( self )
     self.__cursor.position = { x = 0, y = 0 }
 
     -- events
-    self.__events.cursorMoved = function( x, y ) end
-    self.__events.cursorPressed = function( key ) end
-    self.__events.cursorReleased = function( key ) end
 end
 
 
@@ -64,24 +61,42 @@ Element.setCursorEnabled = function( self, enabled )
     if self.__data.hud then
         input.enableCursor( enabled )
 
-        -- тут какая та хуйня наддо продумать нормально
+        if enabled then
+            -- тут какая та хуйня наддо продумать нормально
 
-        hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-            if not self.__cursor.enabled then return end
-            if not self.__data.hoverElement then return end
+            hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
+                if not self.__cursor.enabled then return end
+                if not self.__data.hoverElement then return end
 
-            if key == 107 then
-                self.__data.hoverElement.__events.click( self.__data.hoverElement )
-            end
-            
-            -- print( key )
-            -- 107 108 109 -- m1 m2 m3
-        end )
+                if key == 107 then
+                    -- ивент сюда
+                elseif key == 108 then
+                    -- ивент сюда
+                end
+            end )
 
-        hook.add( "MouseWheeled", "wgui:hook:MouseWheeled", function( delta )
-            -- print( delta )
-            -- 1 vverh -- -1 vniz ) 
-        end )
+            hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
+                if not self.__cursor.enabled then return end
+                if not self.__data.hoverElement then return end
+                
+                if key == 107 then
+                    -- ивент сюда
+                elseif key == 108 then
+                    -- ивент сюда
+                end
+            end )
+
+            hook.add( "MouseWheeled", "wgui:hook:MouseWheeled", function( delta )
+                if not self.__cursor.enabled then return end
+                if not self.__data.hoverElement then return end
+                
+                -- ивент сюда
+            end )
+        else
+            hook.remove( "InputPressed", "wgui:hook:InputPressed" )
+            hook.remove( "InputReleased", "wgui:hook:InputReleased" )
+            hook.remove( "MouseWheeled", "wgui:hook:MouseWheeled" )
+        end
     end
 end
 
@@ -109,15 +124,14 @@ local function cursorProcess( rs, self, x, y )
         if rs.__data.hoverElement ~= self then
             if rs.__data.hoverElement ~= nil then
                 rs.__data.hoverElement.__data.hover = false
-                rs.__data.hoverElement.__events.hoverOff( rs.__data.hoverElement )
+                -- ивент сюда
+                rs.__data.hoverElement = nil
             end
 
-            if self == rs then
-                rs.__data.hoverElement = nil
-            else
+            if self ~= rs then
                 rs.__data.hoverElement = self
                 rs.__data.hoverElement.__data.hover = true
-                rs.__data.hoverElement.__events.hoverOn( rs.__data.hoverElement )
+                -- ивент сюда
             end
         end
     end
@@ -130,7 +144,7 @@ Element.process = function( self )
 
             if x ~= self.__cursor.position.x or y ~= self.__cursor.position.y then
                 self.__cursor.position.x, self.__cursor.position.y = x, y
-                self.__events.cursorMoved( x, y )
+                -- ивент сюда
             end
         else
             -- starfall screen

@@ -16,6 +16,25 @@ wgui.__registred = {}
 wgui.__renderSpace = {}
 
 
+-- Cтандартная таблица цветов
+wgui.__style = {}
+wgui.__style.transitionLevel = 0 -- Не трогать
+wgui.__style.transitionTime = 0.25 -- Трогать ❤
+wgui.__style.palette = {
+    fill = Color( 20, 20, 20, 255 ),
+    border = Color( 130, 50, 255, 255 ),
+
+    button = Color( 40, 40, 40, 255 ),
+    button_hover = Color( 80, 80, 80, 255 ),
+
+    button_text = Color( 180, 180, 180, 255 ),
+    button_text_hover = Color( 255, 255, 255, 255 ),
+
+    button_selected = Color( 130, 50, 255, 255 ),
+    button_selected_hover = Color( 190, 110, 255, 255 ),
+}
+
+
 -- Функция создания элемента
 wgui.create = function( elementName, parent )
     checkType( elementName, "string" )

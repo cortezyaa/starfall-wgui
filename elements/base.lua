@@ -18,6 +18,9 @@ Element.initialize = function( self, elementName )
     self.__wgui = true
     self.__valid = true
 
+    -- Стиль элемента
+    self.__style = table.copy( wgui.__style )
+
     -- Данные элемента
     self.__data = {}
     
@@ -45,12 +48,12 @@ Element.initialize = function( self, elementName )
     self.__data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
 
     self.__data.hover = false
+    self.__data.hoverTime = timer.curtime()
+
+    self.__data.value = false
 
     -- Ивенты
     self.__events = {}
-    self.__events.hoverOn = function( self ) end
-    self.__events.hoverOff = function( self ) end
-    self.__events.click = function( self ) end
 end
 
 
@@ -407,6 +410,11 @@ Element.render = function( self )
 
     -- Добавить проверку должен ли рендерится элемент
     -- Или использовать стенцилы
+    -- ААААААААААААААААААААААААААААААААААААААААААААААА
+    -- Я НЕ ЗАБЫЛ ( да да )
+
+    self.__style.transitionLevel = math.lerp( self.__style.transitionLevel + ( self.__data.hover and 1 or -1 ) * ( ( timer.curtime() - self.__data.hoverTime ) / self.__style.transitionTime ), 0, 1 )
+    self.__data.hoverTime = timer.curtime()
     
     self:paint()
 
@@ -426,19 +434,31 @@ Element.debugrender = function( self )
 
     -- debug
     render.setRGBA( 0, 0, 0, 255 )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 1, self.__data.elementName )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, self.__uid )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 1, "element : " .. tostring( self.__data.elementName ) )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, "uid : " .. tostring( self.__uid ) )
+    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 25, "transition : " .. tostring( self.__style.transitionLevel ) )
 
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y, self.__data.elementName )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, self.__uid )
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y, "element : " .. tostring( self.__data.elementName ) )
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, "uid : " .. tostring( self.__uid ) )
+    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 24, "transition : " .. tostring( self.__style.transitionLevel ) )
 end
 
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
     -- Тут ничего не будет 🍷🗿
+end
+
+
+-- Ивенты
+Element.addEventListener = function( self, event, callback )
+    -- пока них... нет
+end
+
+Element.removeEventListener = function( self, event )
+    -- пока них... нет
 end
 
 
