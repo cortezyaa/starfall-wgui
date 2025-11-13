@@ -15,13 +15,13 @@ end
 -- Функция отрисовки элемента
 Element.paint = function( self )
     render.setRGBA( 
-        math.lerp( self.__style.transitionLevel, self.__style.palette.button.r, self.__style.palette.button_hover.r ), 
-        math.lerp( self.__style.transitionLevel, self.__style.palette.button.g, self.__style.palette.button_hover.g ), 
-        math.lerp( self.__style.transitionLevel, self.__style.palette.button.b, self.__style.palette.button_hover.b ), 
-        math.lerp( self.__style.transitionLevel, self.__style.palette.button.a, self.__style.palette.button_hover.a )
+        math.lerp( self.style.transitionLevel, self.style.palette.button.r, self.style.palette.button_hover.r ), 
+        math.lerp( self.style.transitionLevel, self.style.palette.button.g, self.style.palette.button_hover.g ), 
+        math.lerp( self.style.transitionLevel, self.style.palette.button.b, self.style.palette.button_hover.b ), 
+        math.lerp( self.style.transitionLevel, self.style.palette.button.a, self.style.palette.button_hover.a )
     )
 
-    render.drawRect( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
+    render.drawRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 

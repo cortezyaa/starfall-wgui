@@ -14,8 +14,8 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.__style.palette.fill.r, self.__style.palette.fill.g, self.__style.palette.fill.b, self.__style.palette.fill.a )
-    render.drawRect( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
+    render.setRGBA( self.style.palette.fill.r, self.style.palette.fill.g, self.style.palette.fill.b, self.style.palette.fill.a )
+    render.drawRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 

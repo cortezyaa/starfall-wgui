@@ -10,29 +10,27 @@ Element.static.elementName = "buttonSelected"
 -- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
-
-    -- events
 end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    if self.__data.value then
+    if self.data.value then
         render.setRGBA( 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button_selected.r, self.__style.palette.button_selected_hover.r ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button_selected.g, self.__style.palette.button_selected_hover.g ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button_selected.b, self.__style.palette.button_selected_hover.b ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button_selected.a, self.__style.palette.button_selected_hover.a )
+            math.lerp( self.style.transitionLevel, self.style.palette.button_selected.r, self.style.palette.button_selected_hover.r ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button_selected.g, self.style.palette.button_selected_hover.g ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button_selected.b, self.style.palette.button_selected_hover.b ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button_selected.a, self.style.palette.button_selected_hover.a )
         )
     else
         render.setRGBA( 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button.r, self.__style.palette.button_hover.r ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button.g, self.__style.palette.button_hover.g ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button.b, self.__style.palette.button_hover.b ), 
-            math.lerp( self.__style.transitionLevel, self.__style.palette.button.a, self.__style.palette.button_hover.a )
+            math.lerp( self.style.transitionLevel, self.style.palette.button.r, self.style.palette.button_hover.r ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button.g, self.style.palette.button_hover.g ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button.b, self.style.palette.button_hover.b ), 
+            math.lerp( self.style.transitionLevel, self.style.palette.button.a, self.style.palette.button_hover.a )
         )
     end
 
-    render.drawRect( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
+    render.drawRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 

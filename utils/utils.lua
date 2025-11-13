@@ -6,7 +6,7 @@ local old_type = type
 function type( object )
     local resoult = old_type( object )
 
-    if resoult == "table" and object.__wgui then
+    if resoult == "table" and object.wgui then
         return "wgui"
     end
 
@@ -15,7 +15,7 @@ end
 
 local old_isValid = isValid
 function isValid( object )
-    if object.__wgui then
+    if object.wgui then
         return object:isValid()
     end
 

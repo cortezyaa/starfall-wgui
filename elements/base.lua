@@ -13,54 +13,54 @@ Element.static.elementName = "base"
 Element.initialize = function( self, elementName )
     checkType( elementName, "string" )
 
-    self.__uid = math.random( 111111111, 999999999 )
+    self.uid = math.random( 111111111, 999999999 )
 
-    self.__wgui = true
-    self.__valid = true
+    self.wgui = true
+    self.valid = true
 
     -- Стиль элемента
-    self.__style = table.copy( wgui.__style )
+    self.style = table.copy( wgui.style )
 
     -- Данные элемента
-    self.__data = {}
+    self.data = {}
     
-    self.__data.elementName = elementName
+    self.data.elementName = elementName
 
-    self.__data.parent = nil
-    self.__data.renderSpace = nil
-    self.__data.children = {}
+    self.data.parent = nil
+    self.data.renderSpace = nil
+    self.data.children = {}
 
-    self.__data.positionLocal = { x = 0, y = 0 }
-    self.__data.positionGlobal = { x = 0, y = 0 }
+    self.data.positionLocal = { x = 0, y = 0 }
+    self.data.positionGlobal = { x = 0, y = 0 }
 
-    self.__data.sizeLocal = { w = 0, h = 0 }
-    self.__data.sizeGlobal = { w = 0, h = 0 }
+    self.data.sizeLocal = { w = 0, h = 0 }
+    self.data.sizeGlobal = { w = 0, h = 0 }
 
-    self.__data.dock = DOCK.NODOCK
-    self.__data.dockMargin = { left = 0, top = 0, right = 0, bottom = 0 }
-    self.__data.dockPadding = { left = 0, top = 0, right = 0, bottom = 0 }
+    self.data.dock = DOCK.NODOCK
+    self.data.dockMargin = { left = 0, top = 0, right = 0, bottom = 0 }
+    self.data.dockPadding = { left = 0, top = 0, right = 0, bottom = 0 }
 
-    self.__data.overflow = OVERFLOW.VISIBLE
-    self.__data.overflowBox = { left = 0, top = 0, right = 0, bottom = 0 }
+    self.data.overflow = OVERFLOW.VISIBLE
+    self.data.overflowBox = { left = 0, top = 0, right = 0, bottom = 0 }
 
-    self.__data.shouldUseStencil = false
+    self.data.shouldUseStencil = false
 
-    self.__data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
+    self.data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
 
-    self.__data.hover = false
-    self.__data.hoverTime = timer.curtime()
+    self.data.hover = false
+    self.data.hoverTime = timer.curtime()
 
-    self.__data.value = false
+    self.data.value = false
 
     -- Ивенты
-    self.__events = {}
+    self.events = {}
 end
 
 
 -- Системныя функция проверки действительности элемента
 -- Если элемент не действителен, то вызывается ошибка
-Element.__validate = function( self )
-    if self.__valid then
+Element.sysValidate = function( self )
+    if self.valid then
         return
     end
 
@@ -69,356 +69,356 @@ end
 
 
 -- Системная функция перерасчета элемента
-Element.__recalculation = function( self )
+Element.sysRecalculation = function( self )
     local fill = {}
     local space = {
-        left = self.__data.dockPadding.left,
-        top = self.__data.dockPadding.top,
-        right = self.__data.sizeGlobal.w - self.__data.dockPadding.right,
-        bottom = self.__data.sizeGlobal.h - self.__data.dockPadding.bottom
+        left = self.data.dockPadding.left,
+        top = self.data.dockPadding.top,
+        right = self.data.sizeGlobal.w - self.data.dockPadding.right,
+        bottom = self.data.sizeGlobal.h - self.data.dockPadding.bottom
     }
 
-    for _, child in pairs( self.__data.children ) do
-        if child.__data.dock == DOCK.NODOCK then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + child.__data.positionLocal.x
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + child.__data.positionLocal.y
+    for _, child in pairs( self.data.children ) do
+        if child.data.dock == DOCK.NODOCK then
+            child.data.positionGlobal.x = self.data.positionGlobal.x + child.data.positionLocal.x
+            child.data.positionGlobal.y = self.data.positionGlobal.y + child.data.positionLocal.y
 
-            child.__data.sizeGlobal.w = child.__data.sizeLocal.w
-            child.__data.sizeGlobal.h = child.__data.sizeLocal.h
-        elseif child.__data.dock == DOCK.FILL then
+            child.data.sizeGlobal.w = child.data.sizeLocal.w
+            child.data.sizeGlobal.h = child.data.sizeLocal.h
+        elseif child.data.dock == DOCK.FILL then
             table.insert( fill, child )
-        elseif child.__data.dock == DOCK.LEFT then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMargin.left
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMargin.top
+        elseif child.data.dock == DOCK.LEFT then
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
 
-            child.__data.sizeGlobal.w = child.__data.sizeLocal.w
-            child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMargin.top - child.__data.dockMargin.bottom
+            child.data.sizeGlobal.w = child.data.sizeLocal.w
+            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
-            space.left = space.left + child.__data.sizeGlobal.w + child.__data.dockMargin.left + child.__data.dockMargin.right
-        elseif child.__data.dock == DOCK.TOP then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMargin.left
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMargin.top
+            space.left = space.left + child.data.sizeGlobal.w + child.data.dockMargin.left + child.data.dockMargin.right
+        elseif child.data.dock == DOCK.TOP then
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
 
-            child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMargin.left - child.__data.dockMargin.right
-            child.__data.sizeGlobal.h = child.__data.sizeLocal.h
+            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
+            child.data.sizeGlobal.h = child.data.sizeLocal.h
 
-            space.top = space.top + child.__data.sizeGlobal.h + child.__data.dockMargin.top + child.__data.dockMargin.bottom
-        elseif child.__data.dock == DOCK.RIGHT then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.right - child.__data.sizeLocal.w - child.__data.dockMargin.right
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMargin.top
+            space.top = space.top + child.data.sizeGlobal.h + child.data.dockMargin.top + child.data.dockMargin.bottom
+        elseif child.data.dock == DOCK.RIGHT then
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeLocal.w - child.data.dockMargin.right
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
                 
-            child.__data.sizeGlobal.w = child.__data.sizeLocal.w
-            child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMargin.top - child.__data.dockMargin.bottom
+            child.data.sizeGlobal.w = child.data.sizeLocal.w
+            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
                 
-            space.right = space.right - child.__data.sizeGlobal.w - child.__data.dockMargin.left - child.__data.dockMargin.right
-        elseif child.__data.dock == DOCK.BOTTOM then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMargin.left
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.bottom - child.__data.sizeLocal.h - child.__data.dockMargin.bottom
+            space.right = space.right - child.data.sizeGlobal.w - child.data.dockMargin.left - child.data.dockMargin.right
+        elseif child.data.dock == DOCK.BOTTOM then
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeLocal.h - child.data.dockMargin.bottom
                 
-            child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMargin.left - child.__data.dockMargin.right
-            child.__data.sizeGlobal.h = child.__data.sizeLocal.h
+            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
+            child.data.sizeGlobal.h = child.data.sizeLocal.h
                 
-            space.bottom = space.bottom - child.__data.sizeGlobal.h - child.__data.dockMargin.top - child.__data.dockMargin.bottom
+            space.bottom = space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.top - child.data.dockMargin.bottom
         end
     end
 
-    for _, child in pairs( self.__data.children ) do
+    for _, child in pairs( self.data.children ) do
         if table.hasValue( fill, child ) then
-            child.__data.positionGlobal.x = self.__data.positionGlobal.x + space.left + child.__data.dockMargin.left
-            child.__data.positionGlobal.y = self.__data.positionGlobal.y + space.top + child.__data.dockMargin.top
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
             
-            child.__data.sizeGlobal.w = space.right - space.left - child.__data.dockMargin.left - child.__data.dockMargin.right
-            child.__data.sizeGlobal.h = space.bottom - space.top - child.__data.dockMargin.top - child.__data.dockMargin.bottom
+            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
+            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
         end
 
-        local x = child.__data.positionGlobal.x
-        local y = child.__data.positionGlobal.y
-        local w = child.__data.sizeGlobal.w
-        local h = child.__data.sizeGlobal.h
+        local x = child.data.positionGlobal.x
+        local y = child.data.positionGlobal.y
+        local w = child.data.sizeGlobal.w
+        local h = child.data.sizeGlobal.h
 
-        if child.__data.overflow == OVERFLOW.VISIBLE then
-            child.__data.overflowBox.left = self.__data.overflowBox.left
-            child.__data.overflowBox.top = self.__data.overflowBox.top
-            child.__data.overflowBox.right = self.__data.overflowBox.right
-            child.__data.overflowBox.bottom = self.__data.overflowBox.bottom
+        if child.data.overflow == OVERFLOW.VISIBLE then
+            child.data.overflowBox.left = self.data.overflowBox.left
+            child.data.overflowBox.top = self.data.overflowBox.top
+            child.data.overflowBox.right = self.data.overflowBox.right
+            child.data.overflowBox.bottom = self.data.overflowBox.bottom
         else
-            child.__data.overflowBox.left = math.max( x, self.__data.overflowBox.left )
-            child.__data.overflowBox.top = math.max( y, self.__data.overflowBox.top )
-            child.__data.overflowBox.right = math.min( x + w, self.__data.overflowBox.right )
-            child.__data.overflowBox.bottom = math.min( y + h, self.__data.overflowBox.bottom )
+            child.data.overflowBox.left = math.max( x, self.data.overflowBox.left )
+            child.data.overflowBox.top = math.max( y, self.data.overflowBox.top )
+            child.data.overflowBox.right = math.min( x + w, self.data.overflowBox.right )
+            child.data.overflowBox.bottom = math.min( y + h, self.data.overflowBox.bottom )
         end
 
-        child.__data.hitbox.left = math.clamp( math.max( x, child.__data.overflowBox.left ), child.__data.overflowBox.left, child.__data.overflowBox.right )
-        child.__data.hitbox.top = math.clamp( math.max( y, child.__data.overflowBox.top ), child.__data.overflowBox.top, child.__data.overflowBox.bottom )
-        child.__data.hitbox.right = math.clamp( math.min( x + w, child.__data.overflowBox.right ), child.__data.overflowBox.left, child.__data.overflowBox.right )
-        child.__data.hitbox.bottom = math.clamp( math.min( y + h, child.__data.overflowBox.bottom ), child.__data.overflowBox.top, child.__data.overflowBox.bottom )
+        child.data.hitbox.left = math.clamp( math.max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.top = math.clamp( math.max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.right = math.clamp( math.min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.bottom = math.clamp( math.min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
 
-        child:__recalculation()
+        child:sysRecalculation()
     end
 end
 
 
 -- Системная функция вызываемая для перерасчета элемента
-Element.__recalculate = function( self )
+Element.sysRecalculate = function( self )
     -- Вызывается перерасчет родительского (рендер спейса) элемента
 
     -- ПЕРЕДЕЛАТЬ!!!
 
-    if self.__data.parent then
-        self.__data.parent:__recalculation()
+    if self.data.parent then
+        self.data.parent:sysRecalculation()
     else
-        self.__data.renderSpace:__recalculation()
+        self.data.renderSpace:sysRecalculation()
     end
 end
 
 
 -- Cистемная функция удаления элемента
-Element.__remove = function( self )
-    self:__validate()
+Element.sysRemove = function( self )
+    self:sysValidate()
 
-    for _, element in pairs( self.__data.children ) do
-        element:__remove()
+    for _, element in pairs( self.data.children ) do
+        element:sysRemove()
     end
 
-    self.__valid = false
-    self.__data = {}
-    self.__events = {}
+    self.valid = false
+    self.data = {}
+    self.events = {}
 end
 
 
 -- Функция проверки действительности элемента
 Element.isValid = function( self )
-    return self.__valid
+    return self.valid
 end
 
 
 -- Функция удаления элемента
 Element.remove = function( self )
-    self:__validate()
+    self:sysValidate()
 
-    local parent = self.__data.parent or self.__data.renderSpace
+    local parent = self.data.parent or self.data.renderSpace
 
-    table.removeByValue( parent.__data.children, self )
-    self:__remove()
-    parent:__recalculate()
+    table.removeByValue( parent.data.children, self )
+    self:sysRemove()
+    parent:sysRecalculate()
 end
 
 
 -- Функции связанные с управление родительскими элементами
 -- Установка родительского элемента
 Element.setParent = function( self, parent )
-    self:__validate()
+    self:sysValidate()
     local _, parentType = checkType( parent, { "wgui", "nil" } )
 
     -- unparent
     if parentType == "nil" then
-        if self.__data.parent then
-            table.removeByValue( self.__data.parent.__data.children, self )
-            self.__data.parent:__recalculate()
-            self.__data.parent = nil
-            table.insert( self.__data.renderSpace.__data.children, self )
-            self:__recalculate()
+        if self.data.parent then
+            table.removeByValue( self.data.parent.data.children, self )
+            self.data.parent:sysRecalculate()
+            self.data.parent = nil
+            table.insert( self.data.renderSpace.data.children, self )
+            self:sysRecalculate()
         end
 
         return
     end
 
     -- renderSpace
-    if parent.__data.rs then
-        if self.__data.renderSpace == parent then return end
+    if parent.data.rs then
+        if self.data.renderSpace == parent then return end
 
-        local oldparent = self.__data.parent or self.__data.renderSpace
+        local oldparent = self.data.parent or self.data.renderSpace
 
         if oldparent then
-            table.removeByValue( oldparent.__data.children, self )
-            oldparent:__recalculate()
-            self.__data.parent = nil
+            table.removeByValue( oldparent.data.children, self )
+            oldparent:sysRecalculate()
+            self.data.parent = nil
         end
 
-        self.__data.renderSpace = parent
-        table.insert( parent.__data.children, self )
-        self:__recalculate()
+        self.data.renderSpace = parent
+        table.insert( parent.data.children, self )
+        self:sysRecalculate()
 
         return
     end
 
     -- element
-    if self.__data.parent == parent then return end
+    if self.data.parent == parent then return end
 
-    local oldparent = self.__data.parent or self.__data.renderSpace
+    local oldparent = self.data.parent or self.data.renderSpace
 
     if oldparent then
-        table.removeByValue( oldparent.__data.children, self )
-        oldparent:__recalculate()
-        self.__data.parent = nil
+        table.removeByValue( oldparent.data.children, self )
+        oldparent:sysRecalculate()
+        self.data.parent = nil
     end
     
-    self.__data.renderSpace = parent.__data.renderSpace
-    self.__data.parent = parent
-    table.insert( parent.__data.children, self )
-    self:__recalculate()
+    self.data.renderSpace = parent.data.renderSpace
+    self.data.parent = parent
+    table.insert( parent.data.children, self )
+    self:sysRecalculate()
 end
 
 -- Получение родительского элемента
 Element.getParent = function( self )
-    self:__validate()
-    return self.__data.parent
+    self:sysValidate()
+    return self.data.parent
 end
 
 -- Получение дочерних элементов
 Element.getChildren = function( self )
-    self:__validate()
-    return self.__data.children
+    self:sysValidate()
+    return self.data.children
 end
 
 
 -- Функции связанные с позиционированием элемента
 -- Установка позиции
 Element.setPos = function( self, x, y )
-    self:__validate()
+    self:sysValidate()
     checkType( x, "number" )
     checkType( y, "number" )
 
-    self.__data.positionLocal.x = x
-    self.__data.positionLocal.y = y
+    self.data.positionLocal.x = x
+    self.data.positionLocal.y = y
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Получение локальной позиции
 Element.getPos = function( self )
-    self:__validate()
-    return self.__data.positionLocal.x, self.__data.positionLocal.y
+    self:sysValidate()
+    return self.data.positionLocal.x, self.data.positionLocal.y
 end
 
 -- Получение глобальной позиции
 Element.getPosGlobal = function( self )
-    self:__validate()
-    return self.__data.positionGlobal.x, self.__data.positionGlobal.y
+    self:sysValidate()
+    return self.data.positionGlobal.x, self.data.positionGlobal.y
 end
 
 
 -- Функции связанные с размером элемента
 -- Установка размера
 Element.setSize = function( self, w, h )
-    self:__validate()
+    self:sysValidate()
     checkType( w, "number" )
     checkType( h, "number" )
 
-    self.__data.sizeLocal.w = w
-    self.__data.sizeLocal.h = h
+    self.data.sizeLocal.w = w
+    self.data.sizeLocal.h = h
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Получение локального размера
 Element.getSize = function( self )
-    self:__validate()
-    return self.__data.sizeLocal.w, self.__data.sizeLocal.h
+    self:sysValidate()
+    return self.data.sizeLocal.w, self.data.sizeLocal.h
 end
 
 -- Получение глобального размера
 Element.getSizeGlobal = function( self )
-    self:__validate()
-    return self.__data.sizeGlobal.w, self.__data.sizeGlobal.h
+    self:sysValidate()
+    return self.data.sizeGlobal.w, self.data.sizeGlobal.h
 end
 
 
 -- Функции связанные с докингом элемента
 -- Установка типа дока для элемента
 Element.dock = function( self, dockType )
-    self:__validate()
+    self:sysValidate()
     checkType( dockType, "number" )
 
-    self.__data.dock = dockType
+    self.data.dock = dockType
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Установка внешнего отступа элемента
 Element.dockMargin = function( self, left, top, right, bottom )
-    self:__validate()
+    self:sysValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
     checkType( bottom, "number" )
 
-    self.__data.dockMargin.left = left
-    self.__data.dockMargin.top = top
-    self.__data.dockMargin.right = right
-    self.__data.dockMargin.bottom = bottom
+    self.data.dockMargin.left = left
+    self.data.dockMargin.top = top
+    self.data.dockMargin.right = right
+    self.data.dockMargin.bottom = bottom
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Установка внутреннего отступа элемента
 Element.dockPadding = function( self, left, top, right, bottom )
-    self:__validate()
+    self:sysValidate()
     checkType( left, "number" )
     checkType( top, "number" )
     checkType( right, "number" )
     checkType( bottom, "number" )
 
-    self.__data.dockPadding.left = left
-    self.__data.dockPadding.top = top
-    self.__data.dockPadding.right = right
-    self.__data.dockPadding.bottom = bottom
+    self.data.dockPadding.left = left
+    self.data.dockPadding.top = top
+    self.data.dockPadding.right = right
+    self.data.dockPadding.bottom = bottom
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Получение дока жлемента
 Element.getDock = function( self )
-    self:__validate()
-    return self.__data.dock
+    self:sysValidate()
+    return self.data.dock
 end
 
 -- Получение внешнего отступа элемента
 Element.getDockMargin = function( self )
-    self:__validate()
-    return self.__data.dockMargin.left, self.__data.dockMargin.top, self.__data.dockMargin.right, self.__data.dockMargin.bottom
+    self:sysValidate()
+    return self.data.dockMargin.left, self.data.dockMargin.top, self.data.dockMargin.right, self.data.dockMargin.bottom
 end
 
 -- Получение внутреннего отступа элемента
 Element.getDockPadding = function( self )
-    self:__validate()
-    return self.__data.dockPadding.left, self.__data.dockPadding.top, self.__data.dockPadding.right, self.__data.dockPadding.bottom
+    self:sysValidate()
+    return self.data.dockPadding.left, self.data.dockPadding.top, self.data.dockPadding.right, self.data.dockPadding.bottom
 end
 
 
 -- Функции управления параметром overflow
 -- Установка параметра
 Element.setOverflow = function( self, overflow )
-    self:__validate()
+    self:sysValidate()
     checkType( validate, "number" )
 
-    self.__data.overflow = overflow
+    self.data.overflow = overflow
 
-    self:__recalculate()
+    self:sysRecalculate()
 end
 
 -- Получение параметра
 Element.getOverflow = function( self )
-    self:__validate()
-    return self.__data.overflow
+    self:sysValidate()
+    return self.data.overflow
 end
 
 
 -- Функции рендера элемента
 Element.render = function( self )
-    if not self.__valid then return end
+    if not self.valid then return end
 
     -- Добавить проверку должен ли рендерится элемент
     -- Или использовать стенцилы
     -- ААААААААААААААААААААААААААААААААААААААААААААААА
     -- Я НЕ ЗАБЫЛ ( да да )
 
-    self.__style.transitionLevel = math.lerp( self.__style.transitionLevel + ( self.__data.hover and 1 or -1 ) * ( ( timer.curtime() - self.__data.hoverTime ) / self.__style.transitionTime ), 0, 1 )
-    self.__data.hoverTime = timer.curtime()
+    self.style.transitionLevel = math.lerp( self.style.transitionLevel + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.style.transitionTime ), 0, 1 )
+    self.data.hoverTime = timer.curtime()
     
     self:paint()
 
-    for _, child in pairs( self.__data.children ) do
+    for _, child in pairs( self.data.children ) do
         child:render()
     end
 end
@@ -426,23 +426,23 @@ end
 
 -- Функции рендера элемента (debug)
 Element.debugrender = function( self )
-    if not self.__valid then return end
+    if not self.valid then return end
 
-    for _, child in pairs( self.__data.children ) do
+    for _, child in pairs( self.data.children ) do
         child:debugrender()
     end
 
     -- debug
     render.setRGBA( 0, 0, 0, 255 )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 1, "element : " .. tostring( self.__data.elementName ) )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 13, "uid : " .. tostring( self.__uid ) )
-    render.drawSimpleText( self.__data.positionGlobal.x + 5, self.__data.positionGlobal.y + 25, "transition : " .. tostring( self.__style.transitionLevel ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 1, "element : " .. tostring( self.data.elementName ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 13, "uid : " .. tostring( self.uid ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 25, "transition : " .. tostring( self.style.transitionLevel ) )
 
     render.setRGBA( 255, 255, 255, 255 )
-    render.drawRectOutline( self.__data.positionGlobal.x, self.__data.positionGlobal.y, self.__data.sizeGlobal.w, self.__data.sizeGlobal.h )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y, "element : " .. tostring( self.__data.elementName ) )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 12, "uid : " .. tostring( self.__uid ) )
-    render.drawSimpleText( self.__data.positionGlobal.x + 4, self.__data.positionGlobal.y + 24, "transition : " .. tostring( self.__style.transitionLevel ) )
+    render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y, "element : " .. tostring( self.data.elementName ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. tostring( self.uid ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.style.transitionLevel ) )
 end
 
 

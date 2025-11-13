@@ -11,15 +11,15 @@ Element.static.elementName = "renderSpace"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.__data.rs = true
-    self.__data.hud = false
+    self.data.rs = true
+    self.data.hud = false
 
-    self.__data.hoverElement = nil
+    self.data.hoverElement = nil
 
     -- cursor
-    self.__cursor = {}
-    self.__cursor.enabled = false
-    self.__cursor.position = { x = 0, y = 0 }
+    self.cursor = {}
+    self.cursor.enabled = false
+    self.cursor.position = { x = 0, y = 0 }
 
     -- events
 end
@@ -32,8 +32,8 @@ end
 --         [ "render" ] = true,
 --     }
 
---     for methodName, methodFunciton in pairs( BaseElement.__declaredMethods ) do
---         if string.left( methodName, 2 ) == "__" then continue end
+--     for methodName, methodFunciton in pairs( BaseElement.declaredMethods ) do
+--         if string.left( methodName, 2 ) == "" then continue end
 --         if whitelist[ methodName ] then continue end
 --         Element[ methodName ] = function() throw( "You cannot interact with 'renderSpace' element" ) end
 --     end
@@ -43,30 +43,30 @@ end
 
 
 -- Системная функция вызываемая для перерасчета элемента
-Element.__recalculate = function( self )
-    wgui.__renderSpace.hud.__data.sizeGlobal = { w = wgui.__renderSpace.hud.__data.sizeLocal.w, h = wgui.__renderSpace.hud.__data.sizeLocal.h } 
-    wgui.__renderSpace.hud.__data.overflowBox = { left = 0, top = 0, right = wgui.__renderSpace.hud.__data.sizeLocal.w, bottom = wgui.__renderSpace.hud.__data.sizeLocal.h }
-    wgui.__renderSpace.hud.__data.hitbox = { left = 0, top = 0, right = wgui.__renderSpace.hud.__data.sizeLocal.w, bottom = wgui.__renderSpace.hud.__data.sizeLocal.h }
+Element.sysRecalculate = function( self )
+    wgui.renderSpace.hud.data.sizeGlobal = { w = wgui.renderSpace.hud.data.sizeLocal.w, h = wgui.renderSpace.hud.data.sizeLocal.h } 
+    wgui.renderSpace.hud.data.overflowBox = { left = 0, top = 0, right = wgui.renderSpace.hud.data.sizeLocal.w, bottom = wgui.renderSpace.hud.data.sizeLocal.h }
+    wgui.renderSpace.hud.data.hitbox = { left = 0, top = 0, right = wgui.renderSpace.hud.data.sizeLocal.w, bottom = wgui.renderSpace.hud.data.sizeLocal.h }
 
-    self:__recalculation()
+    self:sysRecalculation()
 end
 
 
 -- cursor funcitons
 Element.setCursorEnabled = function( self, enabled )
-    self:__validate()
+    self:sysValidate()
 
-    self.__cursor.enabled = enabled
+    self.cursor.enabled = enabled
 
-    if self.__data.hud then
+    if self.data.hud then
         input.enableCursor( enabled )
 
         if enabled then
             -- тут какая та хуйня наддо продумать нормально
 
             hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-                if not self.__cursor.enabled then return end
-                if not self.__data.hoverElement then return end
+                if not self.cursor.enabled then return end
+                if not self.data.hoverElement then return end
 
                 if key == 107 then
                     -- ивент сюда
@@ -76,8 +76,8 @@ Element.setCursorEnabled = function( self, enabled )
             end )
 
             hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
-                if not self.__cursor.enabled then return end
-                if not self.__data.hoverElement then return end
+                if not self.cursor.enabled then return end
+                if not self.data.hoverElement then return end
                 
                 if key == 107 then
                     -- ивент сюда
@@ -87,8 +87,8 @@ Element.setCursorEnabled = function( self, enabled )
             end )
 
             hook.add( "MouseWheeled", "wgui:hook:MouseWheeled", function( delta )
-                if not self.__cursor.enabled then return end
-                if not self.__data.hoverElement then return end
+                if not self.cursor.enabled then return end
+                if not self.data.hoverElement then return end
                 
                 -- ивент сюда
             end )
@@ -103,34 +103,34 @@ end
 
 -- cursor pos
 Element.getCursorPos = function( self )
-    self:__validate()
+    self:sysValidate()
     
-    return self.__cursor.position.x, self.__cursor.position.y
+    return self.cursor.position.x, self.cursor.position.y
 end
 
 
 -- process
 local cursorProcessDone = false
 local function cursorProcess( rs, self, x, y )
-    for _, child in pairs( table.reverse( self.__data.children ) ) do
+    for _, child in pairs( table.reverse( self.data.children ) ) do
         if cursorProcessDone then break end
         cursorProcess( rs, child, x, y )
     end
     
     if cursorProcessDone then return end
-    if x >= self.__data.hitbox.left and x <= self.__data.hitbox.right and y >= self.__data.hitbox.top and y <= self.__data.hitbox.bottom then
+    if x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom then
         cursorProcessDone = true
 
-        if rs.__data.hoverElement ~= self then
-            if rs.__data.hoverElement ~= nil then
-                rs.__data.hoverElement.__data.hover = false
+        if rs.data.hoverElement ~= self then
+            if rs.data.hoverElement ~= nil then
+                rs.data.hoverElement.data.hover = false
                 -- ивент сюда
-                rs.__data.hoverElement = nil
+                rs.data.hoverElement = nil
             end
 
             if self ~= rs then
-                rs.__data.hoverElement = self
-                rs.__data.hoverElement.__data.hover = true
+                rs.data.hoverElement = self
+                rs.data.hoverElement.data.hover = true
                 -- ивент сюда
             end
         end
@@ -138,12 +138,12 @@ local function cursorProcess( rs, self, x, y )
 end
 
 Element.process = function( self )
-    if self.__cursor.enabled then
-        if self.__data.hud then
+    if self.cursor.enabled then
+        if self.data.hud then
             local x, y = input.getCursorPos()
 
-            if x ~= self.__cursor.position.x or y ~= self.__cursor.position.y then
-                self.__cursor.position.x, self.__cursor.position.y = x, y
+            if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
+                self.cursor.position.x, self.cursor.position.y = x, y
                 -- ивент сюда
             end
         else
@@ -151,15 +151,15 @@ Element.process = function( self )
         end
 
         cursorProcessDone = false
-        cursorProcess( self, self, self.__cursor.position.x, self.__cursor.position.y )
+        cursorProcess( self, self, self.cursor.position.x, self.cursor.position.y )
     end
 
     self:render()
 
     -- debug
-    wgui.__renderSpace.hud:debugrender()
-    render.drawCircle( self.__cursor.position.x, self.__cursor.position.y, 4 )
-    render.drawSimpleText( self.__cursor.position.x + 6, self.__cursor.position.y, self.__data.hoverElement and self.__data.hoverElement.__uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    wgui.renderSpace.hud:debugrender()
+    render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
+    render.drawSimpleText( self.cursor.position.x + 6, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
 end
 
 

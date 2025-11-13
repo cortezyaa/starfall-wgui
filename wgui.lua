@@ -12,15 +12,15 @@ requiredir( "./utils/" )
 
 -- Создание таблиц библиотеки
 wgui = {}
-wgui.__registred = {}
-wgui.__renderSpace = {}
+wgui.registred = {}
+wgui.renderSpace = {}
 
 
 -- Cтандартная таблица цветов
-wgui.__style = {}
-wgui.__style.transitionLevel = 0 -- Не трогать
-wgui.__style.transitionTime = 0.25 -- Трогать ❤
-wgui.__style.palette = {
+wgui.style = {}
+wgui.style.transitionLevel = 0 -- Не трогать
+wgui.style.transitionTime = 0.25 -- Трогать ❤
+wgui.style.palette = {
     fill = Color( 20, 20, 20, 255 ),
     border = Color( 130, 50, 255, 255 ),
 
@@ -44,13 +44,13 @@ wgui.create = function( elementName, parent )
         throw( "Specified element is not registred" )
     end
 
-    local element = wgui.__registred[ elementName ]:new()
+    local element = wgui.registred[ elementName ]:new()
 
     if parentType == "number" then
         if parent == RENDERSPACE.HUD then
-            element:setParent( wgui.__renderSpace.hud )
+            element:setParent( wgui.renderSpace.hud )
         elseif parent == RENDERSPACE.SCREEN then
-            element:setParent( wgui.__renderSpace.screen )
+            element:setParent( wgui.renderSpace.screen )
         end
     else
         element:setParent( parent )
@@ -63,7 +63,7 @@ end
 -- Функция проверки зарегестрирован элемент или нет
 wgui.isRegister = function( elementName )
     checkType( elementName, "string" )
-    return not not wgui.__registred[ elementName ]
+    return not not wgui.registred[ elementName ]
 end
 
 
@@ -72,7 +72,7 @@ wgui.register = function( elementName, elementClass )
     checkType( elementName, "string" )
     checkType( elementClass, "table" )
 
-    wgui.__registred[ elementName ] = elementClass
+    wgui.registred[ elementName ] = elementClass
 end
 
 
@@ -84,15 +84,15 @@ local function registerIncludedElements()
             local scrw, scrh = render.getGameResolution()
 
             -- hud
-            wgui.__renderSpace.hud = elementClass:new()
-            wgui.__renderSpace.hud.__data.hud = true
-            wgui.__renderSpace.hud.__data.sizeLocal = { w = scrw, h = scrh }
-            wgui.__renderSpace.hud:__recalculate()
+            wgui.renderSpace.hud = elementClass:new()
+            wgui.renderSpace.hud.data.hud = true
+            wgui.renderSpace.hud.data.sizeLocal = { w = scrw, h = scrh }
+            wgui.renderSpace.hud:sysRecalculate()
 
             -- screen
-            wgui.__renderSpace.screen = elementClass:new()
-            wgui.__renderSpace.screen.__data.sizeLocal = { w = 1024, h = 1024 }
-            wgui.__renderSpace.screen:__recalculate()
+            wgui.renderSpace.screen = elementClass:new()
+            wgui.renderSpace.screen.data.sizeLocal = { w = 1024, h = 1024 }
+            wgui.renderSpace.screen:sysRecalculate()
         end
     }
 
@@ -113,12 +113,12 @@ registerIncludedElements()
 
 -- hud
 hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
-    wgui.__renderSpace.hud.__data.sizeLocal = { w = w, h = h }
-    wgui.__renderSpace.hud:__recalculate()
+    wgui.renderSpace.hud.data.sizeLocal = { w = w, h = h }
+    wgui.renderSpace.hud:sysRecalculate()
 end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()
-    wgui.__renderSpace.hud:process()
+    wgui.renderSpace.hud:process()
 end )
 
 
