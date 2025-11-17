@@ -59,6 +59,12 @@ function checkType( object, expected, shouldError )
 end
 
 
+-- Функция возвращает 'true', если данный ввод является wgui
+function iswgui( object )
+    return type( object ) == "wgui"
+end
+
+
 -- onScreenSizeChanged hook ( https://wiki.facepunch.com/gmod/GM:OnScreenSizeChanged )
 local hookscrw, hookscrh = render.getGameResolution()
 

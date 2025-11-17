@@ -10,6 +10,11 @@ Element.static.elementName = "buttonSelected"
 -- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
+
+    -- events
+    self.events.click = function( self )
+        self.data.value = not self.data.value
+    end
 end
 
 -- Функция отрисовки элемента

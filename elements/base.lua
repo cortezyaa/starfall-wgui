@@ -43,9 +43,9 @@ Element.initialize = function( self, elementName )
     self.data.overflow = OVERFLOW.VISIBLE
     self.data.overflowBox = { left = 0, top = 0, right = 0, bottom = 0 }
 
-    self.data.shouldUseStencil = false
-
     self.data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
+
+    self.data.shouldUseStencil = false
 
     self.data.hover = false
     self.data.hoverTime = timer.curtime()
@@ -54,6 +54,17 @@ Element.initialize = function( self, elementName )
 
     -- Ивенты
     self.events = {}
+
+    -- Ивенты с кликом на элемент
+    self.events.click = function( self ) end
+    self.events.dblclick = function( self ) end
+    self.events.rightclick = function( self ) end
+
+    -- Ивенты с ховером
+    self.events.hoveron = function( self ) end
+    self.events.hoveroff = function( self ) end
+
+    -- self.events.holdclick = function() end -- input.isMouseDown(number key)
 end
 
 
