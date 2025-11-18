@@ -17,10 +17,7 @@ wgui.renderSpace = {}
 
 
 -- Cтандартная таблица цветов
-wgui.style = {}
-wgui.style.transitionLevel = 0 -- Не трогать
-wgui.style.transitionTime = 0.25 -- Трогать ❤
-wgui.style.palette = {
+wgui.palette = {
     fill = Color( 20, 20, 20, 255 ),
     border = Color( 130, 50, 255, 255 ),
 
@@ -87,12 +84,15 @@ local function registerIncludedElements()
             wgui.renderSpace.hud = elementClass:new()
             wgui.renderSpace.hud.data.hud = true
             wgui.renderSpace.hud.data.sizeLocal = { w = scrw, h = scrh }
+            wgui.renderSpace.hud.rstype = RENDERSPACE.HUD
             wgui.renderSpace.hud:sysRecalculate()
 
             -- screen
             wgui.renderSpace.screen = elementClass:new()
             wgui.renderSpace.screen.data.sizeLocal = { w = 1024, h = 1024 }
+            wgui.renderSpace.screen.rstype = RENDERSPACE.SCREEN
             wgui.renderSpace.screen:sysRecalculate()
+            wgui.renderSpace.screen.value = false
         end
     }
 
@@ -109,6 +109,49 @@ local function registerIncludedElements()
 end
 
 registerIncludedElements()
+
+
+-- hooks
+hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
+    for key, rs in pairs( wgui.renderSpace ) do
+        if not rs.value then continue end
+
+        if key == 107 then
+            
+        elseif key == 108 then
+            
+        end
+    end
+
+    -- if not self.cursor.enabled then return end
+    -- if not self.data.hoverElement then return end
+
+    -- local hover = self.data.hoverElement
+
+    -- if key == 107 then
+    --     if ( self.cursor.element == self.data.hoverElement ) and ( ( timer.curtime() - self.cursor.time ) < 0.2 ) then
+    --         hover.events.dblclick( hover )
+    --         self.cursor.time = 0
+    --         self.cursor.element = nil
+    --     else
+    --         hover.events.click( hover )
+    --         self.cursor.time = timer.curtime()
+    --         self.cursor.element = hover
+    --     end
+
+    --     self.cursor.keydown = true
+    -- elseif key == 108 then
+    --     hover.events.rightclick( hover )
+    -- end
+end )
+
+hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
+    for key, rs in pairs( wgui.renderSpace ) do
+        if not rs.value then continue end
+
+        -- a
+    end
+end )
 
 
 -- hud

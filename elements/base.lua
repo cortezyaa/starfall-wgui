@@ -18,9 +18,6 @@ Element.initialize = function( self, elementName )
     self.wgui = true
     self.valid = true
 
-    -- Стиль элемента
-    self.style = table.copy( wgui.style )
-
     -- Данные элемента
     self.data = {}
     
@@ -46,22 +43,33 @@ Element.initialize = function( self, elementName )
     self.data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
 
     self.data.shouldUseStencil = false
+    self.data.shouldDraw = true
+
+    self.data.value = false
 
     self.data.hover = false
     self.data.hoverTime = timer.curtime()
 
-    self.data.value = false
+    self.data.transition = 0
+    self.data.transitionTime = 0.25
+
+    self.data.palette = table.copy( wgui.palette )
+
+
 
     -- Ивенты
     self.events = {}
 
+    -- ЭТО ЗАЛУПА
     -- Ивенты с кликом на элемент
     self.events.click = function( self ) end
     self.events.dblclick = function( self ) end
     self.events.rightclick = function( self ) end
+    self.events.clickhover = function( self ) end
 
     -- Ивенты с ховером
-    self.events.hoveron = function( self ) end
+    self.events.hover = function( self ) end -- Вызывается каждый кадр, пока элемент находится в фокусе
+    self.events.hoveron = function( self ) end -- Вызывается когда 
     self.events.hoveroff = function( self ) end
 
     -- self.events.holdclick = function() end -- input.isMouseDown(number key)
@@ -424,7 +432,7 @@ Element.render = function( self )
     -- ААААААААААААААААААААААААААААААААААААААААААААААА
     -- Я НЕ ЗАБЫЛ ( да да )
 
-    self.style.transitionLevel = math.lerp( self.style.transitionLevel + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.style.transitionTime ), 0, 1 )
+    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
     self.data.hoverTime = timer.curtime()
     
     self:paint()
@@ -447,13 +455,13 @@ Element.debugrender = function( self )
     render.setRGBA( 0, 0, 0, 255 )
     render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 1, "element : " .. tostring( self.data.elementName ) )
     render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 13, "uid : " .. tostring( self.uid ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 25, "transition : " .. tostring( self.style.transitionLevel ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 25, "transition : " .. tostring( self.data.transition ) )
 
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y, "element : " .. tostring( self.data.elementName ) )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. tostring( self.uid ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.style.transitionLevel ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.data.transition ) )
 end
 
 

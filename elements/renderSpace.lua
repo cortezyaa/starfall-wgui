@@ -12,19 +12,27 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.data.rs = true
-    self.data.hud = false
+    self.data.rstype = RENDERSPACE.HUD // default
 
     self.data.hoverElement = nil
 
+    self.value = true
+
     -- cursor
+
+
+
+
+
     self.cursor = {}
     self.cursor.enabled = false
     self.cursor.position = { x = 0, y = 0 }
     self.cursor.time = 0
     self.cursor.element = nil
+    self.cursor.keydown = false
 
     -- events
-    self.events.cursormoved = function( self, x, y ) end
+    -- self.events.cursormoved = function( self, x, y ) end
 end
 
 
@@ -61,35 +69,8 @@ Element.setCursorEnabled = function( self, enabled )
 
     self.cursor.enabled = enabled
 
-    if self.data.hud then
+    if self.data.hud and input.getCursorVisible() ~= enabled then
         input.enableCursor( enabled )
-
-        if enabled then
-            -- тут какая та хуйня наддо продумать нормально
-
-            hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-                if not self.cursor.enabled then return end
-                if not self.data.hoverElement then return end
-
-                local hover = self.data.hoverElement
-
-                if key == 107 then
-                    if ( self.cursor.element == self.data.hoverElement ) and ( ( timer.curtime() - self.cursor.time ) < 0.2 ) then
-                        hover.events.dblclick( hover )
-                        self.cursor.time = 0
-                        self.cursor.element = nil
-                    else
-                        hover.events.click( hover )
-                        self.cursor.time = timer.curtime()
-                        self.cursor.element = hover
-                    end
-                elseif key == 108 then
-                    hover.events.rightclick( hover )
-                end
-            end )
-        else
-            hook.remove( "InputPressed", "wgui:hook:InputPressed" )
-        end
     end
 end
 
@@ -138,7 +119,7 @@ Element.process = function( self )
 
             if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
                 self.cursor.position.x, self.cursor.position.y = x, y
-                self.events.cursormoved( self, x, y )
+                -- self.events.cursormoved( self, x, y )
             end
         else
             -- starfall screen
@@ -146,6 +127,8 @@ Element.process = function( self )
 
         cursorProcessDone = false
         cursorProcess( self, self, self.cursor.position.x, self.cursor.position.y )
+
+
     end
 
     self:render()
@@ -153,7 +136,10 @@ Element.process = function( self )
     -- debug
     wgui.renderSpace.hud:debugrender()
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-    render.drawSimpleText( self.cursor.position.x + 6, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "a", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+
 end
 
 
