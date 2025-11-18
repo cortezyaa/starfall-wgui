@@ -58,9 +58,9 @@ Element.initialize = function( self, elementName )
 
 
     -- Ивенты
+    -- ! ЭТО ЗАЛУПА !
     self.events = {}
 
-    -- ЭТО ЗАЛУПА
     -- Ивенты с кликом на элемент
     self.events.click = function( self ) end
     self.events.dblclick = function( self ) end
@@ -405,11 +405,26 @@ Element.getDockPadding = function( self )
 end
 
 
+-- Функции управления значением элемента
+-- Установка значением
+Element.setValue = function( self, value )
+    self:sysValidate()
+
+    self.data.value = value
+end
+
+-- Получение значением
+Element.getValue = function( self )
+    self:sysValidate()
+    return self.data.value
+end
+
+
 -- Функции управления параметром overflow
 -- Установка параметра
 Element.setOverflow = function( self, overflow )
     self:sysValidate()
-    checkType( validate, "number" )
+    checkType( overflow, "number" )
 
     self.data.overflow = overflow
 
@@ -468,16 +483,6 @@ end
 -- Функция отрисовки элемента
 Element.paint = function( self )
     -- Тут ничего не будет 🍷🗿
-end
-
-
--- Ивенты
-Element.addEventListener = function( self, event, callback )
-    -- пока них... нет
-end
-
-Element.removeEventListener = function( self, event )
-    -- пока них... нет
 end
 
 

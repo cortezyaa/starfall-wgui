@@ -92,7 +92,6 @@ local function registerIncludedElements()
             wgui.renderSpace.screen.data.sizeLocal = { w = 1024, h = 1024 }
             wgui.renderSpace.screen.rstype = RENDERSPACE.SCREEN
             wgui.renderSpace.screen:sysRecalculate()
-            wgui.renderSpace.screen.value = false
         end
     }
 
@@ -114,7 +113,7 @@ registerIncludedElements()
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
     for key, rs in pairs( wgui.renderSpace ) do
-        if not rs.value then continue end
+        if not rs.data.value then continue end -- Проверка активен ли renderSpace
 
         if key == 107 then
             
@@ -153,8 +152,6 @@ hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
     end
 end )
 
-
--- hud
 hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
     wgui.renderSpace.hud.data.sizeLocal = { w = w, h = h }
     wgui.renderSpace.hud:sysRecalculate()
