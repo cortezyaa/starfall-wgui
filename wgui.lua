@@ -9,7 +9,6 @@
 requiredir( "./utils/" )
 
 
-
 -- Создание таблиц библиотеки
 wgui = {}
 wgui.registred = {}
@@ -84,13 +83,13 @@ local function registerIncludedElements()
             wgui.renderSpace.hud = elementClass:new()
             wgui.renderSpace.hud.data.hud = true
             wgui.renderSpace.hud.data.sizeLocal = { w = scrw, h = scrh }
-            wgui.renderSpace.hud.rstype = RENDERSPACE.HUD
+            wgui.renderSpace.hud.data.type = RENDERSPACE.HUD
             wgui.renderSpace.hud:sysRecalculate()
 
             -- screen
             wgui.renderSpace.screen = elementClass:new()
             wgui.renderSpace.screen.data.sizeLocal = { w = 1024, h = 1024 }
-            wgui.renderSpace.screen.rstype = RENDERSPACE.SCREEN
+            wgui.renderSpace.screen.data.type = RENDERSPACE.SCREEN
             wgui.renderSpace.screen:sysRecalculate()
         end
     }
@@ -113,42 +112,40 @@ registerIncludedElements()
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
     for key, rs in pairs( wgui.renderSpace ) do
-        if not rs.data.value then continue end -- Проверка активен ли renderSpace
+        if not rs.cursor.active then continue end -- Проверка активен ли курсор renderSpace
+        if not rs.data.hoverElement then continue end
+
+        local hover = rs.data.hoverElement
 
         if key == 107 then
-            
+            if ( rs.cursor.clickElement == hover ) and ( ( timer.curtime() - rs.cursor.clickTime ) < 0.2 ) then
+                -- event duble click
+                rs.cursor.clickTime = 0
+                rs.cursor.clickElement = nil
+            else
+                -- event left click
+                rs.cursor.clickTime = timer.curtime()
+                rs.cursor.clickElement = hover
+            end
+
+            rs.cursor.keyLeft = true
         elseif key == 108 then
-            
+            -- event right click
+
+            rs.cursor.keyRight = true
         end
     end
-
-    -- if not self.cursor.enabled then return end
-    -- if not self.data.hoverElement then return end
-
-    -- local hover = self.data.hoverElement
-
-    -- if key == 107 then
-    --     if ( self.cursor.element == self.data.hoverElement ) and ( ( timer.curtime() - self.cursor.time ) < 0.2 ) then
-    --         hover.events.dblclick( hover )
-    --         self.cursor.time = 0
-    --         self.cursor.element = nil
-    --     else
-    --         hover.events.click( hover )
-    --         self.cursor.time = timer.curtime()
-    --         self.cursor.element = hover
-    --     end
-
-    --     self.cursor.keydown = true
-    -- elseif key == 108 then
-    --     hover.events.rightclick( hover )
-    -- end
 end )
 
 hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
     for key, rs in pairs( wgui.renderSpace ) do
-        if not rs.value then continue end
+        if not rs.cursor.keyLeft or not rs.cursor.keyRight then continue end
 
-        -- a
+        if key == 107 then
+            rs.cursor.keyLeft = false
+        elseif key == 108 then
+            rs.cursor.keyRight = false
+        end
     end
 end )
 
@@ -160,7 +157,6 @@ end )
 hook.add( "drawhud", "wgui:hook:drawhud", function()
     wgui.renderSpace.hud:process()
 end )
-
 
 
 return wgui

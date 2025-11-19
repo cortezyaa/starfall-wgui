@@ -12,24 +12,20 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.data.rs = true
-    self.data.rstype = RENDERSPACE.HUD // default
+    self.data.type = RENDERSPACE.HUD // По стандарту созданный рендер спейс на худ ( пока что )
 
     self.data.hoverElement = nil
 
-    self.value = true
-
     -- cursor
-
-
-
-
-
     self.cursor = {}
     self.cursor.enabled = false
     self.cursor.position = { x = 0, y = 0 }
-    self.cursor.time = 0
-    self.cursor.element = nil
-    self.cursor.keydown = false
+
+    self.cursor.clickTime = 0
+    self.cursor.clickElement = nil
+
+    self.cursor.keyLeft = false
+    self.cursor.keyRight = false
 
     -- events
     -- self.events.cursormoved = function( self, x, y ) end
@@ -114,21 +110,22 @@ end
 
 Element.process = function( self )
     if self.cursor.enabled then
-        if self.data.hud then
-            local x, y = input.getCursorPos()
+        local x, y = 0, 0
 
-            if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
-                self.cursor.position.x, self.cursor.position.y = x, y
-                -- self.events.cursormoved( self, x, y )
-            end
+        if self.data.hud then
+            x, y = input.getCursorPos()
         else
-            -- starfall screen
+            x, y = render.cursorPos()
+            x, y = math.round( ( x * 2 ) or 0 ), math.round( ( y * 2 ) or 0 )
+        end
+
+        if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
+            self.cursor.position.x, self.cursor.position.y = x, y
+            -- self.events.cursormoved( self, x, y )
         end
 
         cursorProcessDone = false
         cursorProcess( self, self, self.cursor.position.x, self.cursor.position.y )
-
-
     end
 
     self:render()
@@ -136,10 +133,8 @@ Element.process = function( self )
     -- debug
     wgui.renderSpace.hud:debugrender()
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-    
     render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
     render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "a", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-
 end
 
 
