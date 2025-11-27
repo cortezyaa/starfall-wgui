@@ -113,25 +113,30 @@ registerIncludedElements()
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
     for _, rs in pairs( wgui.renderSpace ) do
         if not rs.cursor.enabled then continue end -- Проверка активен ли курсор renderSpace
-        if not rs.data.hoverElement then continue end
+        -- if not rs.data.hoverElement then continue end
 
         local hover = rs.data.hoverElement
 
         if key == 107 then
-            if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
-                -- event duble click
-                rs.cursor.dblclickTime = 0
-                rs.cursor.dblclickElement = nil
-            else
-                -- event left click
-                rs.cursor.dblclickTime = timer.curtime()
-                rs.cursor.dblclickElement = hover
+            if hover then
+                if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
+                    hover.events.dblclick( hover )
+                    rs.cursor.dblclickTime = 0
+                    rs.cursor.dblclickElement = nil
+                else
+                    hover.events.click( hover )
+                    rs.cursor.dblclickTime = timer.curtime()
+                    rs.cursor.dblclickElement = hover
+                end
             end
 
             rs.cursor.keyLeft = true
+            rs.cursor.clickTime = timer.curtime()
             rs.cursor.clickElement = hover
         elseif key == 108 then
-            -- event right click
+            if hover then
+                hover.events.rightclick( hover )
+            end
 
             rs.cursor.keyRight = true
         end

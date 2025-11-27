@@ -13,7 +13,7 @@ Element.static.elementName = "base"
 Element.initialize = function( self, elementName )
     checkType( elementName, "string" )
 
-    self.uid = math.random( 111111111, 999999999 )
+    self.uid = uidlib.generate()
 
     self.wgui = true
     self.valid = true
@@ -469,13 +469,13 @@ Element.debugrender = function( self )
     -- debug
     render.setRGBA( 0, 0, 0, 255 )
     render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 1, "element : " .. tostring( self.data.elementName ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 13, "uid : " .. tostring( self.uid ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 13, "uid : " .. self.uid )
     render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 25, "transition : " .. tostring( self.data.transition ) )
 
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y, "element : " .. tostring( self.data.elementName ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. tostring( self.uid ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. self.uid )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.data.transition ) )
 end
 

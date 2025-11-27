@@ -21,6 +21,7 @@ Element.initialize = function( self )
     self.cursor.enabled = false
     self.cursor.position = { x = 0, y = 0 }
 
+    self.cursor.clickTime = 0
     self.cursor.clickElement = nil
 
     self.cursor.dblclickTime = 0
@@ -136,9 +137,9 @@ Element.process = function( self )
         end
 
         local click = self.cursor.clickElement
-        
-        if self.cursor.keyLeft and click then
-            click.events.clickHover( click )
+
+        if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) and self.cursor.keyLeft and click then
+            click.events.clickhover( click )
         end
     end
 
@@ -147,8 +148,9 @@ Element.process = function( self )
     -- debug
     wgui.renderSpace.hud:debugrender()
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, tostring( self.cursor.keyLeft ) .. " / " .. tostring( self.cursor.keyRight ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 24, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
 end
 
 

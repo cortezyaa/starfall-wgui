@@ -1,0 +1,65 @@
+--@name test
+--@author cortez
+
+if SERVER then return end
+
+-- if player() ~= owner() then return end
+-- enableHud( player(), true )
+
+
+if player() ~= owner() then return end
+
+local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
+enableHud( player(), true )
+
+local e1 = wgui.create( "panel", RENDERSPACE.HUD )
+e1:setSize( 800, 450 )
+e1:setPos( 200, 400 )
+
+local e2 = wgui.create( "button", e1 )
+e2:setSize( 100, 100 )
+e2:dock( DOCK.LEFT )
+
+local e3 = wgui.create( "buttonSelected", e1 )
+e3:setSize( 100, 100 )
+e3:dock( DOCK.TOP )
+
+local d = RENDERSPACE.HUD
+for x = 1, 5 do
+    local n = wgui.create( "button", d )
+    n:setSize( 100, 100 )
+    n:setPos( 100, 5 )
+    
+    d = n
+end
+
+
+wgui.renderSpace.hud:setCursorEnabled( true )
+
+
+-- e2.events.hover = function( self ) print( "hover" ) end
+e2.events.hoveron = function( self ) print( "hoveron" ) end
+e2.events.hoveroff = function( self ) print( "hoveroff" ) end
+
+e2.events.click = function( self ) print( "click" ) end
+e2.events.dblclick = function( self ) print( "dblclick" ) end
+e2.events.rightclick = function( self ) print( "rightclick" ) end
+e2.events.clickhover = function( self ) print( "clickhover" ) end
+
+
+timer.simple( 2, function()
+    e2:setParent( nil )
+    timer.simple( 2, function()
+        e2:dock( DOCK.RIGHT )
+        e2:setParent( e1 )
+        timer.simple( 2, function()
+            e2:setParent( nil )
+            e2:setPos( 250, 450 )
+            e2:dock( DOCK.NODOCK )
+        end )
+    end )
+end )
+
+hook.add( "drawhud", "zzzzzalupaaa", function()
+    e2:setSize( 100 + math.abs( math.sin( timer.curtime() * 2 ) * 50 ), 100 )
+end )
