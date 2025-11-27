@@ -12,7 +12,7 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.data.rs = true
-    self.data.type = RENDERSPACE.HUD // По стандарту созданный рендер спейс на худ ( пока что )
+    self.data.type = RENDERSPACE.HUD -- По стандарту созданный рендер спейс на худ ( пока что )
 
     self.data.hoverElement = nil
 
@@ -21,14 +21,16 @@ Element.initialize = function( self )
     self.cursor.enabled = false
     self.cursor.position = { x = 0, y = 0 }
 
-    self.cursor.clickTime = 0
     self.cursor.clickElement = nil
+
+    self.cursor.dblclickTime = 0
+    self.cursor.dblclickElement = nil
 
     self.cursor.keyLeft = false
     self.cursor.keyRight = false
 
     -- events
-    -- self.events.cursormoved = function( self, x, y ) end
+    self.events.cursormoved = function( self, x, y ) end
 end
 
 
@@ -121,11 +123,23 @@ Element.process = function( self )
 
         if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
             self.cursor.position.x, self.cursor.position.y = x, y
-            -- self.events.cursormoved( self, x, y )
+            self.events.cursormoved( self, x, y )
         end
 
         cursorProcessDone = false
         cursorProcess( self, self, self.cursor.position.x, self.cursor.position.y )
+
+        local hover = self.data.hoverElement
+
+        if hover then
+            hover.events.hover( hover )
+        end
+
+        local click = self.cursor.clickElement
+        
+        if self.cursor.keyLeft and click then
+            click.events.clickHover( click )
+        end
     end
 
     self:render()
@@ -134,7 +148,7 @@ Element.process = function( self )
     wgui.renderSpace.hud:debugrender()
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
     render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, self.data.hoverElement and self.data.hoverElement.uid or "", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "a", TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, tostring( self.cursor.keyLeft ) .. " / " .. tostring( self.cursor.keyRight ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
 end
 
 

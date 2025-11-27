@@ -111,24 +111,25 @@ registerIncludedElements()
 
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-    for key, rs in pairs( wgui.renderSpace ) do
-        if not rs.cursor.active then continue end -- Проверка активен ли курсор renderSpace
+    for _, rs in pairs( wgui.renderSpace ) do
+        if not rs.cursor.enabled then continue end -- Проверка активен ли курсор renderSpace
         if not rs.data.hoverElement then continue end
 
         local hover = rs.data.hoverElement
 
         if key == 107 then
-            if ( rs.cursor.clickElement == hover ) and ( ( timer.curtime() - rs.cursor.clickTime ) < 0.2 ) then
+            if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
                 -- event duble click
-                rs.cursor.clickTime = 0
-                rs.cursor.clickElement = nil
+                rs.cursor.dblclickTime = 0
+                rs.cursor.dblclickElement = nil
             else
                 -- event left click
-                rs.cursor.clickTime = timer.curtime()
-                rs.cursor.clickElement = hover
+                rs.cursor.dblclickTime = timer.curtime()
+                rs.cursor.dblclickElement = hover
             end
 
             rs.cursor.keyLeft = true
+            rs.cursor.clickElement = hover
         elseif key == 108 then
             -- event right click
 
@@ -138,11 +139,12 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
 end )
 
 hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
-    for key, rs in pairs( wgui.renderSpace ) do
-        if not rs.cursor.keyLeft or not rs.cursor.keyRight then continue end
+    for _, rs in pairs( wgui.renderSpace ) do
+        if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
         if key == 107 then
             rs.cursor.keyLeft = false
+            rs.cursor.clickElement = nil
         elseif key == 108 then
             rs.cursor.keyRight = false
         end
@@ -152,6 +154,19 @@ end )
 hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
     wgui.renderSpace.hud.data.sizeLocal = { w = w, h = h }
     wgui.renderSpace.hud:sysRecalculate()
+end )
+
+hook.add( "RenderOffscreen", "wgui:hook:RenderOffscreen", function()
+    -- screen render
+    -- тута будет рендер рендерспейсав на рендертаргетах
+    -- у каждава рендерспейса СВОй рендертаргет
+    -- чооооо
+end )
+
+hook.add( "render", "wgui:hook:render", function()
+    -- screen render
+    -- а тут будит проста рендер рендертаргетов л о л
+    -- типа renderSpace:process() л о л
 end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()

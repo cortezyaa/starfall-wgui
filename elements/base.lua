@@ -449,7 +449,7 @@ Element.render = function( self )
 
     self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
     self.data.hoverTime = timer.curtime()
-    
+
     self:paint()
 
     for _, child in pairs( self.data.children ) do
