@@ -16,7 +16,7 @@ Element.initialize = function( self )
 
     self.data.hoverElement = nil
 
-    -- cursor
+    -- Курсор
     self.cursor = {}
     self.cursor.enabled = false
     self.cursor.position = { x = 0, y = 0 }
@@ -30,7 +30,7 @@ Element.initialize = function( self )
     self.cursor.keyLeft = false
     self.cursor.keyRight = false
 
-    -- events
+    -- Ивенты
     self.events.cursormoved = function( self, x, y ) end
 end
 
@@ -85,15 +85,23 @@ end
 -- process
 local cursorProcessDone = false
 local function cursorProcess( rs, self, x, y )
+    if self.data.noDraw then return end
+
     for _, child in pairs( table.reverse( self.data.children ) ) do
         if cursorProcessDone then break end
         cursorProcess( rs, child, x, y )
     end
     
     if cursorProcessDone then return end
-    if x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom then
-        cursorProcessDone = true
+    if self.data.hitIgnore then return end
 
+    if self.hitscan then
+        cursorProcessDone = self:hitscan( x, y )
+    else
+        cursorProcessDone = ( x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom )
+    end
+
+    if cursorProcessDone then
         if rs.data.hoverElement ~= self then
             if rs.data.hoverElement ~= nil then
                 local hover = rs.data.hoverElement
@@ -147,6 +155,7 @@ Element.process = function( self )
 
     -- debug
     wgui.renderSpace.hud:debugrender()
+    render.setRGBA( 255, 255, 255, 255 )
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
     render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
     render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )

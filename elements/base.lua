@@ -42,8 +42,11 @@ Element.initialize = function( self, elementName )
 
     self.data.hitbox = { left = 0, top = 0, right = 0, bottom = 0 }
 
-    self.data.shouldUseStencil = false
+    self.data.noDraw = false
+    self.data.hitIgnore = false
+
     self.data.shouldDraw = true
+    self.data.shouldUseStencil = false
 
     self.data.value = false
 
@@ -54,8 +57,6 @@ Element.initialize = function( self, elementName )
     self.data.transitionTime = 0.25
 
     self.data.palette = table.copy( wgui.palette )
-
-
 
     -- Ивенты
     -- ! ЭТО ЗАЛУПА !
@@ -71,8 +72,6 @@ Element.initialize = function( self, elementName )
     self.events.hover = function( self ) end -- Вызывается каждый кадр, пока элемент находится в фокусе
     self.events.hoveron = function( self ) end -- Вызывается когда 
     self.events.hoveroff = function( self ) end
-
-    -- self.events.holdclick = function() end -- input.isMouseDown(number key)
 end
 
 
@@ -171,6 +170,9 @@ Element.sysRecalculation = function( self )
         child.data.hitbox.top = math.clamp( math.max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
         child.data.hitbox.right = math.clamp( math.min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
         child.data.hitbox.bottom = math.clamp( math.min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+
+        child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
+        child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
 
         child:sysRecalculation()
     end
@@ -438,19 +440,76 @@ Element.getOverflow = function( self )
 end
 
 
+-- Устанавливает, следует ли рисовать элемент (и его дочерние) или нет
+-- Установка параметра
+Element.setNoDraw = function( self, noDraw )
+    self:sysValidate()
+    checkType( noDraw, "boolean" )
+
+    self.data.noDraw = noDraw
+end
+
+-- Получение параметра
+Element.getNoDraw = function( self )
+    self:sysValidate()
+    return self.data.noDraw
+end
+
+
+-- Устанавливает, следует ли игнорировать элемент при наведении на него курсора
+-- Установка параметра
+Element.setHitIgnore = function( self, hitIgnore )
+    self:sysValidate()
+    checkType( hitIgnore, "boolean" )
+
+    self.data.hitIgnore = hitIgnore
+end
+
+-- Получение параметра
+Element.getHitIgnore = function( self )
+    self:sysValidate()
+    return self.data.hitIgnore
+end
+
+
 -- Функции рендера элемента
 Element.render = function( self )
     if not self.valid then return end
-
-    -- Добавить проверку должен ли рендерится элемент
-    -- Или использовать стенцилы
-    -- ААААААААААААААААААААААААААААААААААААААААААААААА
-    -- Я НЕ ЗАБЫЛ ( да да )
+    
+    if self.data.noDraw then return end
 
     self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
     self.data.hoverTime = timer.curtime()
 
-    self:paint()
+    if self.data.shouldDraw then
+        if self.data.shouldUseStencil then
+            render.setStencilEnable( true )
+            render.clearStencil()
+            render.setStencilTestMask( 255 )
+            render.setStencilWriteMask( 255 )
+            render.setStencilPassOperation( STENCIL.KEEP )
+            render.setStencilZFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.NEVER )
+            render.setStencilReferenceValue( 1 )
+            render.setStencilFailOperation( STENCIL.REPLACE )
+
+            render.drawRectFast( 
+                self.data.overflowBox.left, 
+                self.data.overflowBox.top, 
+                self.data.overflowBox.right - self.data.overflowBox.left,
+                self.data.overflowBox.bottom - self.data.overflowBox.top
+            )
+
+            render.setStencilFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.EQUAL )
+
+            self:paint()
+
+            render.setStencilEnable( false )
+        else
+            self:paint()
+        end
+    end
 
     for _, child in pairs( self.data.children ) do
         child:render()
@@ -467,16 +526,28 @@ Element.debugrender = function( self )
     end
 
     -- debug
-    render.setRGBA( 0, 0, 0, 255 )
-    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 1, "element : " .. tostring( self.data.elementName ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 13, "uid : " .. self.uid )
-    render.drawSimpleText( self.data.positionGlobal.x + 5, self.data.positionGlobal.y + 25, "transition : " .. tostring( self.data.transition ) )
-
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y, "element : " .. tostring( self.data.elementName ) )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. self.uid )
     render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.data.transition ) )
+    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 36, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
+
+    render.setRGBA( 255, 0, 0, 255 )
+    render.drawRectOutline( 
+        self.data.hitbox.left + 1, 
+        self.data.hitbox.top + 1, 
+        self.data.hitbox.right - self.data.hitbox.left - 2, 
+        self.data.hitbox.bottom - self.data.hitbox.top - 2
+    )
+
+    render.setRGBA( 0, 0, 255, 255 )
+    render.drawRectOutline( 
+        self.data.overflowBox.left + 2, 
+        self.data.overflowBox.top + 2, 
+        self.data.overflowBox.right - self.data.overflowBox.left - 4, 
+        self.data.overflowBox.bottom - self.data.overflowBox.top - 4
+    )
 end
 
 

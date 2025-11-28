@@ -3,15 +3,34 @@
 
 if SERVER then return end
 
--- if player() ~= owner() then return end
--- enableHud( player(), true )
-
-
 if player() ~= owner() then return end
 
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
 enableHud( player(), true )
 
+
+wgui.renderSpace.hud:setCursorEnabled( true )
+
+
+local base = wgui.create( "panel", RENDERSPACE.HUD )
+base:setPos( 400, 200 )
+base:setSize( 1200, 600 )
+
+local btn1 = wgui.create( "button", base )
+btn1:setPos( 100, 100 )
+btn1:setSize( 200, 200 )
+btn1:setOverflow( OVERFLOW.HIDDEN )
+
+local btn2 = wgui.create( "buttonCircle", btn1 )
+btn2:setPos( 210, 210 )
+btn2:setSize( 100, 100 )
+
+local btn3 = wgui.create( "buttonCircle", btn2 )
+btn3:setPos( -100, -160 )
+btn3:setSize( 100, 100 )
+
+
+--[[
 local e1 = wgui.create( "panel", RENDERSPACE.HUD )
 e1:setSize( 800, 450 )
 e1:setPos( 200, 400 )
@@ -27,11 +46,13 @@ e3:dock( DOCK.TOP )
 local d = RENDERSPACE.HUD
 for x = 1, 5 do
     local n = wgui.create( "button", d )
-    n:setSize( 100, 100 )
-    n:setPos( 100, 5 )
+    n:setSize( 120, 120 )
+    n:setPos( 75, 20 )
     
     d = n
 end
+
+d.data.hitIgnore = true
 
 
 wgui.renderSpace.hud:setCursorEnabled( true )
@@ -45,6 +66,11 @@ e2.events.click = function( self ) print( "click" ) end
 e2.events.dblclick = function( self ) print( "dblclick" ) end
 e2.events.rightclick = function( self ) print( "rightclick" ) end
 e2.events.clickhover = function( self ) print( "clickhover" ) end
+
+
+local cst = wgui.create( "buttonCircle", RENDERSPACE.HUD )
+cst:setSize( 100, 100 )
+cst:setPos( 600, 350 )
 
 
 timer.simple( 2, function()
@@ -63,3 +89,5 @@ end )
 hook.add( "drawhud", "zzzzzalupaaa", function()
     e2:setSize( 100 + math.abs( math.sin( timer.curtime() * 2 ) * 50 ), 100 )
 end )
+]]--
+
