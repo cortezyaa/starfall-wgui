@@ -72,6 +72,10 @@ Element.initialize = function( self, elementName )
     self.events.hover = function( self ) end -- Вызывается каждый кадр, пока элемент находится в фокусе
     self.events.hoveron = function( self ) end -- Вызывается когда 
     self.events.hoveroff = function( self ) end
+
+
+    -- Анимации [ musthave ]
+    self.animations = {}
 end
 
 
@@ -350,6 +354,7 @@ end
 Element.dock = function( self, dockType )
     self:sysValidate()
     checkType( dockType, "number" )
+    checkEnum( dockType, "DOCK" )
 
     self.data.dock = dockType
 
@@ -427,6 +432,7 @@ end
 Element.setOverflow = function( self, overflow )
     self:sysValidate()
     checkType( overflow, "number" )
+    checkEnum( overflow, "OVERFLOW" )
 
     self.data.overflow = overflow
 
@@ -469,6 +475,21 @@ end
 Element.getHitIgnore = function( self )
     self:sysValidate()
     return self.data.hitIgnore
+end
+
+
+-- events
+Element.addEventListener = function( self, event, callback )
+    self:sysValidate()
+    checkType( event, "string" )
+    checkType( callback, "function" )
+
+    -- self.events[ event ] = callback
+end
+
+Element.callEvent = function( self, event, ... )
+    self:sysValidate()
+    checkType( event, "string" )
 end
 
 

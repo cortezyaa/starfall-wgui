@@ -43,6 +43,8 @@ wgui.create = function( elementName, parent )
     local element = wgui.registred[ elementName ]:new()
 
     if parentType == "number" then
+        checkEnum( parent, "RENDERSPACE" )
+
         if parent == RENDERSPACE.HUD then
             element:setParent( wgui.renderSpace.hud )
         elseif parent == RENDERSPACE.SCREEN then

@@ -59,6 +59,38 @@ function checkType( object, expected, shouldError )
 end
 
 
+-- Функция проверяет существует ли данное значение в указанной enumeration таблице
+function checkEnum( object, enum, shouldError )
+    checkType( object, "number" )
+    checkType( enum, "string" )
+    checkType( shouldError, { "boolean", "nil" } )
+
+    shouldError = shouldError == nil and true or shouldError
+
+    local enumTable = _G[ enum ]
+
+    if not enumTable then
+        if not shouldError then
+            return false
+        end
+
+        throw( "Enumerations with the specified name (" .. enum .. ") was not found" )
+    end
+
+    for _, value in pairs( enumTable ) do
+        if value == object then
+            return true
+        end
+    end
+
+    if not shouldError then
+        return false
+    end
+
+    throw( "The specified value (" .. object .. ") was not found in the enumeration table" )
+end
+
+
 -- Функция возвращает 'true', если данный ввод является wgui
 function iswgui( object )
     return type( object ) == "wgui"
