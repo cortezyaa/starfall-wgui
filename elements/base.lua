@@ -59,20 +59,7 @@ Element.initialize = function( self, elementName )
     self.data.palette = table.copy( wgui.palette )
 
     -- Ивенты
-    -- ! ЭТО ЗАЛУПА !
-    self.events = {}
-
-    -- Ивенты с кликом на элемент
-    self.events.click = function( self ) end
-    self.events.dblclick = function( self ) end
-    self.events.rightclick = function( self ) end
-    self.events.clickhover = function( self ) end
-
-    -- Ивенты с ховером
-    self.events.hover = function( self ) end -- Вызывается каждый кадр, пока элемент находится в фокусе
-    self.events.hoveron = function( self ) end -- Вызывается когда 
-    self.events.hoveroff = function( self ) end
-
+    self.events = { system = {} }
 
     -- Анимации [ musthave ]
     self.animations = {}
@@ -417,7 +404,10 @@ end
 Element.setValue = function( self, value )
     self:sysValidate()
 
+    local oldvalue = self.data.value
     self.data.value = value
+
+    self:callEvent( "valuechanged", value, oldvalue )
 end
 
 -- Получение значением
@@ -479,17 +469,25 @@ end
 
 
 -- events
-Element.addEventListener = function( self, event, callback )
+Element.addEvent = function( self, event, callback )
     self:sysValidate()
     checkType( event, "string" )
     checkType( callback, "function" )
 
-    -- self.events[ event ] = callback
+    self.events[ event ] = callback
 end
 
 Element.callEvent = function( self, event, ... )
     self:sysValidate()
     checkType( event, "string" )
+
+    if self.events.system[ event ] then
+        self.events.system[ event ]( self, ... )
+    end
+
+    if self.events[ event ] then
+        self.events[ event ]( self, ... )
+    end
 end
 
 

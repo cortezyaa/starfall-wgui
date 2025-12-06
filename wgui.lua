@@ -14,6 +14,8 @@ wgui = {}
 wgui.registred = {}
 wgui.renderSpace = {}
 
+-- debug
+wgui.debug = true
 
 -- Cтандартная таблица цветов
 wgui.palette = {
@@ -122,11 +124,11 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
         if key == 107 then
             if hover then
                 if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
-                    hover.events.dblclick( hover )
+                    hover:callEvent( "doubleclick" )
                     rs.cursor.dblclickTime = 0
                     rs.cursor.dblclickElement = nil
                 else
-                    hover.events.click( hover )
+                    hover:callEvent( "click" )
                     rs.cursor.dblclickTime = timer.curtime()
                     rs.cursor.dblclickElement = hover
                 end
@@ -137,7 +139,7 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
             rs.cursor.clickElement = hover
         elseif key == 108 then
             if hover then
-                hover.events.rightclick( hover )
+                hover:callEvent( "rightclick" )
             end
 
             rs.cursor.keyRight = true

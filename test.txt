@@ -8,10 +8,31 @@ if player() ~= owner() then return end
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
 enableHud( player(), true )
 
-
+wgui.debug = false
 wgui.renderSpace.hud:setCursorEnabled( true )
 
 
+
+local size = 800
+local count = 10
+
+local base = wgui.create( "panel", RENDERSPACE.HUD )
+base:setPos( 200, 200 )
+base:setSize( size, size )
+
+for x = 1, count do
+    local line = wgui.create( "panel", base )
+    line:setSize( size / count, size / count )
+    line:dock( DOCK.TOP )
+    
+    for y = 1, count do
+        local btn = wgui.create( "buttonSelected", line )
+        btn:setSize( size / count, size / count )
+        btn:dock( DOCK.LEFT )
+    end
+end
+
+--[[
 local base = wgui.create( "panel", RENDERSPACE.HUD )
 base:setPos( 400, 200 )
 base:setSize( 1200, 600 )

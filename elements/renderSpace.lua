@@ -29,9 +29,6 @@ Element.initialize = function( self )
 
     self.cursor.keyLeft = false
     self.cursor.keyRight = false
-
-    -- Ивенты
-    self.events.cursormoved = function( self, x, y ) end
 end
 
 
@@ -104,16 +101,16 @@ local function cursorProcess( rs, self, x, y )
     if cursorProcessDone then
         if rs.data.hoverElement ~= self then
             if rs.data.hoverElement ~= nil then
-                local hover = rs.data.hoverElement
+                local oldhover = rs.data.hoverElement
                 rs.data.hoverElement.data.hover = false
                 rs.data.hoverElement = nil
-                hover.events.hoveroff( hover )
+                oldhover:callEvent( "hoveroff" )
             end
 
             if self ~= rs then
                 rs.data.hoverElement = self
                 rs.data.hoverElement.data.hover = true
-                rs.data.hoverElement.events.hoveron( rs.data.hoverElement )
+                rs.data.hoverElement:callEvent( "hoveron" )
             end
         end
     end
@@ -132,7 +129,7 @@ Element.process = function( self )
 
         if x ~= self.cursor.position.x or y ~= self.cursor.position.y then
             self.cursor.position.x, self.cursor.position.y = x, y
-            self.events.cursormoved( self, x, y )
+            self:callEvent( "cursormoved", x, y )
         end
 
         cursorProcessDone = false
@@ -141,19 +138,20 @@ Element.process = function( self )
         local hover = self.data.hoverElement
 
         if hover then
-            hover.events.hover( hover )
+            hover:callEvent( "hover" )
         end
 
         local click = self.cursor.clickElement
 
         if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) and self.cursor.keyLeft and click then
-            click.events.clickhover( click )
+            click:callEvent( "clickhover" )
         end
     end
 
     self:render()
 
     -- debug
+    if not wgui.debug then return end
     wgui.renderSpace.hud:debugrender()
     render.setRGBA( 255, 255, 255, 255 )
     render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
