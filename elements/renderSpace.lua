@@ -16,6 +16,8 @@ Element.initialize = function( self )
 
     self.data.hoverElement = nil
 
+    self.data.recalculation = {}
+
     -- Курсор
     self.cursor = {}
     self.cursor.enabled = false
@@ -32,34 +34,26 @@ Element.initialize = function( self )
 end
 
 
--- Защита элемента от взаимодействий
--- local function overwriteDeclaredMethods()
---     local whitelist = {
---         [ "initialize" ] = true,
---         [ "render" ] = true,
---     }
-
---     for methodName, methodFunciton in pairs( BaseElement.declaredMethods ) do
---         if string.left( methodName, 2 ) == "" then continue end
---         if whitelist[ methodName ] then continue end
---         Element[ methodName ] = function() throw( "You cannot interact with 'renderSpace' element" ) end
---     end
--- end
-
--- overwriteDeclaredMethods()
-
-
 -- Системная функция вызываемая для перерасчета элемента
 Element.sysRecalculate = function( self )
-    wgui.renderSpace.hud.data.sizeGlobal = { w = wgui.renderSpace.hud.data.sizeLocal.w, h = wgui.renderSpace.hud.data.sizeLocal.h } 
-    wgui.renderSpace.hud.data.overflowBox = { left = 0, top = 0, right = wgui.renderSpace.hud.data.sizeLocal.w, bottom = wgui.renderSpace.hud.data.sizeLocal.h }
-    wgui.renderSpace.hud.data.hitbox = { left = 0, top = 0, right = wgui.renderSpace.hud.data.sizeLocal.w, bottom = wgui.renderSpace.hud.data.sizeLocal.h }
+    self.data.sizeGlobal.w = self.data.sizeLocal.w
+    self.data.sizeGlobal.h = self.data.sizeLocal.h
+
+    self.data.overflowBox.left = 0
+    self.data.overflowBox.top = 0
+    self.data.overflowBox.right = self.data.sizeLocal.w
+    self.data.overflowBox.bottom = self.data.sizeLocal.h
+
+    self.data.hitbox.left = 0
+    self.data.hitbox.top = 0
+    self.data.hitbox.right = self.data.sizeLocal.w
+    self.data.hitbox.bottom = self.data.sizeLocal.h
 
     self:sysRecalculation()
 end
 
 
--- cursor funcitons
+-- Функция включения/отключения курсора
 Element.setCursorEnabled = function( self, enabled )
     self:sysValidate()
 
@@ -71,11 +65,34 @@ Element.setCursorEnabled = function( self, enabled )
 end
 
 
--- cursor pos
+-- Функция получения позиции курсора
 Element.getCursorPos = function( self )
     self:sysValidate()
     
     return self.cursor.position.x, self.cursor.position.y
+end
+
+
+-- Функция для добавления элемента в список перерасчета
+Element.pushRecalculation = function( self, recalc )
+    self:sysValidate()
+
+    if table.hasValue( self.data.recalculation, recalc ) then
+        table.removeByValue( self.data.recalculation, recalc )
+    end
+
+    local should = true
+
+    for _, el in pairs( self.data.recalculation ) do
+        if table.hasValue( recalc.data.parentsTree, el ) then
+            should = false
+            break
+        end
+    end
+
+    if should then
+        table.insert( self.data.recalculation, recalc )
+    end
 end
 
 
@@ -148,16 +165,25 @@ Element.process = function( self )
         end
     end
 
+    for _, el in pairs( self.data.recalculation ) do
+        el:sysRecalculation()
+    end
+    self.data.recalculation = {}
+
     self:render()
 
     -- debug
-    if not wgui.debug then return end
-    wgui.renderSpace.hud:debugrender()
-    render.setRGBA( 255, 255, 255, 255 )
-    render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-    render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 24, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    if wgui.debug then
+        wgui.renderSpace.hud:debugrender()
+
+        local TAL, TAC = TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER
+        
+        render.setRGBA( 255, 255, 255, 255 )
+        render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 24, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
+    end
 end
 
 

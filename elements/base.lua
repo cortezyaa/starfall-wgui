@@ -26,6 +26,7 @@ Element.initialize = function( self, elementName )
     self.data.parent = nil
     self.data.renderSpace = nil
     self.data.children = {}
+    self.data.parentsTree = {}
 
     self.data.positionLocal = { x = 0, y = 0 }
     self.data.positionGlobal = { x = 0, y = 0 }
@@ -57,6 +58,10 @@ Element.initialize = function( self, elementName )
     self.data.transitionTime = 0.25
 
     self.data.palette = table.copy( wgui.palette )
+    self.data.colors = {}
+    self.data.colors.main = { r = 255, g = 255, b = 255, a = 255 }
+
+    self:sysColors()
 
     -- Ивенты
     self.events = { system = {} }
@@ -172,15 +177,7 @@ end
 
 -- Системная функция вызываемая для перерасчета элемента
 Element.sysRecalculate = function( self )
-    -- Вызывается перерасчет родительского (рендер спейса) элемента
-
-    -- ПЕРЕДЕЛАТЬ!!!
-
-    if self.data.parent then
-        self.data.parent:sysRecalculation()
-    else
-        self.data.renderSpace:sysRecalculation()
-    end
+    self.data.renderSpace:pushRecalculation( self.data.parent or self.data.renderSpace )
 end
 
 
@@ -188,13 +185,19 @@ end
 Element.sysRemove = function( self )
     self:sysValidate()
 
-    for _, element in pairs( self.data.children ) do
-        element:sysRemove()
+    for _, child in pairs( self.data.children ) do
+        child:sysRemove()
     end
 
     self.valid = false
     self.data = {}
     self.events = {}
+end
+
+
+-- Функция просчета цвета
+Element.sysColors = function( self )
+    -- Тут ничего не будет 🍷🗿
 end
 
 
@@ -218,6 +221,15 @@ end
 
 -- Функции связанные с управление родительскими элементами
 -- Установка родительского элемента
+local function buildTree( self, tree )
+    if self.data.parent then
+        table.insert( tree, self.data.parent )
+        buildTree( self.data.parent, tree )
+    end
+
+    return tree
+end
+
 Element.setParent = function( self, parent )
     self:sysValidate()
     local _, parentType = checkType( parent, { "wgui", "nil" } )
@@ -268,6 +280,9 @@ Element.setParent = function( self, parent )
     self.data.renderSpace = parent.data.renderSpace
     self.data.parent = parent
     table.insert( parent.data.children, self )
+
+    self.data.parentsTree = buildTree( self, { self.data.renderSpace } )
+
     self:sysRecalculate()
 end
 
@@ -497,7 +512,13 @@ Element.render = function( self )
     
     if self.data.noDraw then return end
 
+    local oldtransition = self.data.transition
     self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
+
+    if self.data.transition ~= oldtransition then
+        self:sysColors()
+    end
+
     self.data.hoverTime = timer.curtime()
 
     if self.data.shouldDraw then

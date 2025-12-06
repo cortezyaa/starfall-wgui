@@ -7,18 +7,90 @@ if player() ~= owner() then return end
 
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
 enableHud( player(), true )
-
 wgui.debug = false
+
 wgui.renderSpace.hud:setCursorEnabled( true )
 
 
 
-local size = 800
-local count = 10
+-- что то типо карточек стим 
+
+local base = wgui.create( "panel", wgui.renderSpace.hud )
+base:setPos( 400, 400 )
+base:setSize( 400, 400 )
+
+
+local card = wgui.create( "panel", base )
+card:setPos( 75, 75 )
+card:setSize( 250, 250 )
+
+card.matrix = Matrix()
+
+local mat = render.createMaterial( 
+    "https://dl.dropbox.com/scl/fi/nshqjt2kq8f24y58vyb06/a-37.jpg?rlkey=fo28otawvmrfqgybd0qkx8rdx&st=e6i2g6vo", 
+    function( _, _, _, _, layout ) if layout then layout( 0, 0, 1024, 1024 ) end end
+)
+
+card.paint = function( self )
+    render.setRGBA( 255, 255, 255, 255 )
+    render.setMaterial(mat)
+    render.drawTexturedRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+end
+
+card.newpaint = function( self )
+    local crs = self.data.renderSpace.cursor.position
+    local angx = ( crs.x - ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) ) / ( self.data.sizeGlobal.w / 2 )
+    local angy = ( crs.y - ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) ) / ( self.data.sizeGlobal.h / 2 )
+    
+    render.pushViewMatrix( {
+        type="3D",
+        x = self.data.positionGlobal.x - 0,
+        y = self.data.positionGlobal.y - 0,
+        w = self.data.sizeGlobal.w + 0,
+        h = self.data.sizeGlobal.h + 0,
+        origin = Vector( -79, 0, 0 ),
+        angles = Angle( 0, 0, 90 ),
+        aspect = 1
+    } )
+        
+        self.matrix:setAngles( Angle( 90 + -angx * 7.5, -angy * 7.5, 0 ) )
+        
+        render.pushMatrix( self.matrix, false )
+            render.setRGBA( 255, 255, 255, 255 )
+            render.setMaterial(mat)
+            render.drawTexturedRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+            
+            render.setRGBA( 255, 255, 255, 10 - angy * 10 )
+            render.drawRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+        render.popMatrix()
+    
+    render.popViewMatrix()
+end
+
+card:addEvent( "hoveron", function( self )
+    self.oldpaint = self.paint
+    self.paint = self.newpaint
+end )
+
+card:addEvent( "hoveroff", function( self )
+    self.paint = self.oldpaint
+end )
+
+
+
+
+--[[
+
+
+-- OPTIMIZATION TEST!
+local size = 500
+local count = 5
 
 local base = wgui.create( "panel", RENDERSPACE.HUD )
 base:setPos( 200, 200 )
 base:setSize( size, size )
+
+local a = {}
 
 for x = 1, count do
     local line = wgui.create( "panel", base )
@@ -29,8 +101,23 @@ for x = 1, count do
         local btn = wgui.create( "buttonSelected", line )
         btn:setSize( size / count, size / count )
         btn:dock( DOCK.LEFT )
+        
+        table.insert( a, btn )
     end
 end
+
+hook.add( "drawhud","rwa", function()
+    base:setPos( 200 + math.sin( timer.curtime() * 10 ) * 40, 200 )
+    
+    for _, e in pairs( a ) do
+        e:setSize( size / count, size / count )
+    end
+end )
+
+]]
+
+
+
 
 --[[
 local base = wgui.create( "panel", RENDERSPACE.HUD )
@@ -49,6 +136,7 @@ btn2:setSize( 100, 100 )
 local btn3 = wgui.create( "buttonCircle", btn2 )
 btn3:setPos( -100, -160 )
 btn3:setSize( 100, 100 )
+]]
 
 
 --[[
@@ -111,4 +199,3 @@ hook.add( "drawhud", "zzzzzalupaaa", function()
     e2:setSize( 100 + math.abs( math.sin( timer.curtime() * 2 ) * 50 ), 100 )
 end )
 ]]--
-
