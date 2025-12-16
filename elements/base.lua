@@ -58,10 +58,7 @@ Element.initialize = function( self, elementName )
     self.data.transitionTime = 0.25
 
     self.data.palette = table.copy( wgui.palette )
-    self.data.colors = {}
-    self.data.colors.main = { r = 255, g = 255, b = 255, a = 255 }
-
-    self:sysColors()
+    self.data.colors = { main = { r = 255, g = 255, b = 255, a = 255 } }
 
     -- Ивенты
     self.events = { system = {} }
@@ -189,6 +186,8 @@ Element.sysRemove = function( self )
         child:sysRemove()
     end
 
+    self:callEvent( "removed" )
+
     self.valid = false
     self.data = {}
     self.events = {}
@@ -248,7 +247,7 @@ Element.setParent = function( self, parent )
     end
 
     -- renderSpace
-    if parent.data.rs then
+    if parent.isRenderSpace then
         if self.data.renderSpace == parent then return end
 
         local oldparent = self.data.parent or self.data.renderSpace
@@ -422,6 +421,7 @@ Element.setValue = function( self, value )
     local oldvalue = self.data.value
     self.data.value = value
 
+    self:sysColors()
     self:callEvent( "valuechanged", value, oldvalue )
 end
 

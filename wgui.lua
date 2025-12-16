@@ -13,6 +13,7 @@ requiredir( "./utils/" )
 wgui = {}
 wgui.registred = {}
 wgui.renderSpace = {}
+wgui.links = {}
 
 -- debug
 wgui.debug = true
@@ -43,6 +44,7 @@ wgui.create = function( elementName, parent )
     end
 
     local element = wgui.registred[ elementName ]:new()
+    element:sysColors()
 
     if parentType == "number" then
         checkEnum( parent, "RENDERSPACE" )
@@ -180,6 +182,11 @@ end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()
     wgui.renderSpace.hud:process()
+end )
+
+-- Подчищаю мусор?
+hook.add( "Removed", "wgui:hook:Removed", function()
+    -- удаление рендертаргетов
 end )
 
 

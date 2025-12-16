@@ -37,6 +37,7 @@ WGUIEVENTS = {
     -- cursor events [ renderspace only ]
     CURSORMOVED = "cursormoved",
 
-    -- value events
-    VALUECHANGED = "valuechanged"
+    -- element events
+    VALUECHANGED = "valuechanged",
+    REMOVED = "removed",
 }

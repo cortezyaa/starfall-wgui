@@ -10,6 +10,17 @@ Element.static.elementName = "renderSpaceScreen"
 -- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
+
+    self.isRenderSpace = true
+    self.data.type = RENDERSPACE.SCREEN
+
+    self.data.renderTarget = "wgui:" .. self.uid
+    
+    if render.renderTargetExists( self.data.renderTarget ) then
+        render.destroyRenderTarget( self.data.renderTarget )
+    end
+
+    render.createRenderTarget( self.data.renderTarget )
 end
 
 

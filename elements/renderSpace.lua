@@ -11,7 +11,8 @@ Element.static.elementName = "renderSpace"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.data.rs = true
+    self.isRenderSpace = true
+    
     self.data.type = RENDERSPACE.HUD -- По стандарту созданный рендер спейс на худ ( пока что )
 
     self.data.hoverElement = nil

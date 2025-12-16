@@ -10,6 +10,9 @@ Element.static.elementName = "renderSpaceHUD"
 -- Инитиализация
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
+
+    self.isRenderSpace = true
+    self.data.type = RENDERSPACE.HUD
 end
 
 

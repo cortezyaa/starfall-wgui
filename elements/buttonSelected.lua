@@ -13,7 +13,6 @@ Element.initialize = function( self )
 
     self.events.system.click = function( self )
         self:setValue( not self.data.value )
-        self:sysColors()
     end
 end
 
