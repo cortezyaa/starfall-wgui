@@ -12,7 +12,7 @@ requiredir( "./utils/" )
 -- Создание таблиц библиотеки
 wgui = {}
 wgui.registred = {}
-wgui.renderSpace = {}
+wgui.renderSpaces = { HUD = {}, SCREEN = {}, WORLD = {} }
 wgui.links = {}
 
 -- debug
@@ -37,25 +37,44 @@ wgui.palette = {
 -- Функция создания элемента
 wgui.create = function( elementName, parent )
     checkType( elementName, "string" )
-    local _, parentType = checkType( parent, { "wgui", "number" } )
+    checkType( parent, "wgui" )
 
-    if not wgui.isRegister( elementName ) then
+    if not wgui.isRegistred( elementName ) then
         throw( "Specified element is not registred" )
     end
 
     local element = wgui.registred[ elementName ]:new()
-    element:sysColors()
+    element:sysRecalculateColors()
 
-    if parentType == "number" then
-        checkEnum( parent, "RENDERSPACE" )
+    element:setParent( parent )
 
-        if parent == RENDERSPACE.HUD then
-            element:setParent( wgui.renderSpace.hud )
-        elseif parent == RENDERSPACE.SCREEN then
-            element:setParent( wgui.renderSpace.screen )
-        end
-    else
-        element:setParent( parent )
+    return element
+end
+
+
+-- Функция создания renderSpace элемента
+wgui.createRenderSpace = function( renderSpaceType )
+    checkType( renderSpaceType, "number" )
+    checkEnum( renderSpaceType, "RENDERSPACE" )
+
+    if not wgui.isRegistred( RENDERSPACENAME[ renderSpaceType ] ) then
+        throw( "Specified element is not registred" )
+    end
+
+    local element = wgui.registred[ RENDERSPACENAME[ renderSpaceType ] ]:new()
+
+    if renderSpaceType == RENDERSPACE.HUD then
+        element.data.sizeLocal.w, element.data.sizeLocal.h = render.getGameResolution()
+        element:sysRecalculate()
+
+        table.insert( wgui.renderSpaces.HUD, element )
+    elseif renderSpaceType == RENDERSPACE.SCREEN then
+        element.data.sizeLocal.w, element.data.sizeLocal.h = 1024, 1024 -- Стандартное разрешение renderTarget'а
+        element:sysRecalculate()
+
+        table.insert( wgui.renderSpaces.SCREEN, element )
+    elseif renderSpaceType == RENDERSPACE.WORLD then
+        table.insert( wgui.renderSpaces.WORLD, element )
     end
 
     return element
@@ -63,7 +82,7 @@ end
 
 
 -- Функция проверки зарегестрирован элемент или нет
-wgui.isRegister = function( elementName )
+wgui.isRegistred = function( elementName )
     checkType( elementName, "string" )
     return not not wgui.registred[ elementName ]
 end
@@ -82,22 +101,6 @@ end
 local function registerIncludedElements()
     local custom = {
         [ "base" ] = function() end,
-        [ "renderSpace" ] = function( elementClass )
-            local scrw, scrh = render.getGameResolution()
-
-            -- hud
-            wgui.renderSpace.hud = elementClass:new()
-            wgui.renderSpace.hud.data.hud = true
-            wgui.renderSpace.hud.data.sizeLocal = { w = scrw, h = scrh }
-            wgui.renderSpace.hud.data.type = RENDERSPACE.HUD
-            wgui.renderSpace.hud:sysRecalculate()
-
-            -- screen
-            wgui.renderSpace.screen = elementClass:new()
-            wgui.renderSpace.screen.data.sizeLocal = { w = 1024, h = 1024 }
-            wgui.renderSpace.screen.data.type = RENDERSPACE.SCREEN
-            wgui.renderSpace.screen:sysRecalculate()
-        end
     }
 
     for _, elementClass in pairs( requiredir( "./elements/" ) ) do
@@ -117,76 +120,97 @@ registerIncludedElements()
 
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-    for _, rs in pairs( wgui.renderSpace ) do
-        if not rs.cursor.enabled then continue end -- Проверка активен ли курсор renderSpace
-        -- if not rs.data.hoverElement then continue end
+    -- for _, rs in pairs( wgui.renderSpace ) do
+    --     if not rs.cursor.enabled then continue end -- Проверка активен ли курсор renderSpace
+    --     -- if not rs.data.hoverElement then continue end
 
-        local hover = rs.data.hoverElement
+    --     local hover = rs.data.hoverElement
 
-        if key == 107 then
-            if hover then
-                if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
-                    hover:callEvent( "doubleclick" )
-                    rs.cursor.dblclickTime = 0
-                    rs.cursor.dblclickElement = nil
-                else
-                    hover:callEvent( "click" )
-                    rs.cursor.dblclickTime = timer.curtime()
-                    rs.cursor.dblclickElement = hover
-                end
-            end
+    --     if key == 107 then
+    --         if hover then
+    --             if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
+    --                 hover:callEvent( "doubleclick" )
+    --                 rs.cursor.dblclickTime = 0
+    --                 rs.cursor.dblclickElement = nil
+    --             else
+    --                 hover:callEvent( "click" )
+    --                 rs.cursor.dblclickTime = timer.curtime()
+    --                 rs.cursor.dblclickElement = hover
+    --             end
+    --         end
 
-            rs.cursor.keyLeft = true
-            rs.cursor.clickTime = timer.curtime()
-            rs.cursor.clickElement = hover
-        elseif key == 108 then
-            if hover then
-                hover:callEvent( "rightclick" )
-            end
+    --         rs.cursor.keyLeft = true
+    --         rs.cursor.clickTime = timer.curtime()
+    --         rs.cursor.clickElement = hover
+    --     elseif key == 108 then
+    --         if hover then
+    --             hover:callEvent( "rightclick" )
+    --         end
 
-            rs.cursor.keyRight = true
-        end
-    end
+    --         rs.cursor.keyRight = true
+    --     end
+    -- end
 end )
 
 hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
-    for _, rs in pairs( wgui.renderSpace ) do
-        if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
+    -- for _, rs in pairs( wgui.renderSpace ) do
+    --     if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
-        if key == 107 then
-            rs.cursor.keyLeft = false
-            rs.cursor.clickElement = nil
-        elseif key == 108 then
-            rs.cursor.keyRight = false
-        end
-    end
+    --     if key == 107 then
+    --         rs.cursor.keyLeft = false
+    --         rs.cursor.clickElement = nil
+    --     elseif key == 108 then
+    --         rs.cursor.keyRight = false
+    --     end
+    -- end
 end )
 
 hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
-    wgui.renderSpace.hud.data.sizeLocal = { w = w, h = h }
-    wgui.renderSpace.hud:sysRecalculate()
-end )
-
-hook.add( "RenderOffscreen", "wgui:hook:RenderOffscreen", function()
-    -- screen render
-    -- тута будет рендер рендерспейсав на рендертаргетах
-    -- у каждава рендерспейса СВОй рендертаргет
-    -- чооооо
-end )
-
-hook.add( "render", "wgui:hook:render", function()
-    -- screen render
-    -- а тут будит проста рендер рендертаргетов л о л
-    -- типа renderSpace:process() л о л
+    for _, rs in pairs( wgui.renderSpaces.HUD ) do
+        rs.data.sizeLocal.w, rs.data.sizeLocal.h = w, h
+        rs:sysRecalculate()
+    end
 end )
 
 hook.add( "drawhud", "wgui:hook:drawhud", function()
-    wgui.renderSpace.hud:process()
+    for _, rs in pairs( wgui.renderSpaces.HUD ) do
+        rs:process()
+    end
+end )
+
+hook.add( "RenderOffscreen", "wgui:hook:RenderOffscreen", function()
+    for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
+        rs:process()
+    end
+end )
+
+hook.add( "render", "wgui:hook:render", function()
+    local screen = render.getScreenEntity()
+
+    for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
+        if rs.data.screen ~= screen then continue end
+
+        local w, h = render.getResolution()
+        local x, y = render.cursorPos()
+        rs.cursor.enabled = not not x
+
+        if rs.cursor.enabled and ( x ~= rs.cursor.position.x or y ~= rs.cursor.position.y ) then
+            rs.cursor.position.x, rs.cursor.position.y = math.round( x / w * rs.data.sizeGlobal.w ), math.round( y / h * rs.data.sizeGlobal.h )
+            rs:callEvent( "cursormoved", rs.cursor.position.x, rs.cursor.position.y )
+        end
+
+        render.setFilterMag( TEXFILTER.POINT )
+        render.setFilterMin( TEXFILTER.POINT )
+        render.setRenderTargetTexture( rs.data.renderTarget )
+        render.drawTexturedRect( 0, 0, w, h )
+    end
 end )
 
 -- Подчищаю мусор?
 hook.add( "Removed", "wgui:hook:Removed", function()
-    -- удаление рендертаргетов
+    for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
+        rs:callEvent( "removed" )
+    end
 end )
 
 

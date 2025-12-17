@@ -195,7 +195,7 @@ end
 
 
 -- Функция просчета цвета
-Element.sysColors = function( self )
+Element.sysRecalculateColors = function( self )
     -- Тут ничего не будет 🍷🗿
 end
 
@@ -421,7 +421,7 @@ Element.setValue = function( self, value )
     local oldvalue = self.data.value
     self.data.value = value
 
-    self:sysColors()
+    self:sysRecalculateColors()
     self:callEvent( "valuechanged", value, oldvalue )
 end
 
@@ -516,7 +516,7 @@ Element.render = function( self )
     self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
-        self:sysColors()
+        self:sysRecalculateColors()
     end
 
     self.data.hoverTime = timer.curtime()
@@ -565,13 +565,27 @@ Element.debugrender = function( self )
         child:debugrender()
     end
 
-    -- debug
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y, "element : " .. tostring( self.data.elementName ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 12, "uid : " .. self.uid )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 24, "transition : " .. tostring( self.data.transition ) )
-    render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y + 36, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
+
+    local L = -1
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "element : " .. tostring( self.data.elementName ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "uid : " .. self.uid )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "transition : " .. tostring( self.data.transition ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
+
+    -- renderSpace
+    if self.isRenderSpace then
+        L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "enabled : " .. tostring( self.cursor.enabled ) )
+
+        local TAL, TAC = TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER
+        
+        render.setRGBA( 255, 255, 255, 255 )
+        render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 24, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
+    end
 
     render.setRGBA( 255, 0, 0, 255 )
     render.drawRectOutline( 

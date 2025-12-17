@@ -20,6 +20,7 @@ Element.initialize = function( self )
 
     self.data.linkuid = ""
 
+    -- Ивенты
     self.events.system.click = function( self )
         self:setValue( true )
 
@@ -62,7 +63,7 @@ end
 
 
 -- Функция просчета цвета
-Element.sysColors = function( self )
+Element.sysRecalculateColors = function( self )
     if self.data.value then
         self.data.colors.check.r = math.lerp( self.data.transition, self.data.palette.button_selected.r, self.data.palette.button_selected_hover.r )
         self.data.colors.check.g = math.lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )

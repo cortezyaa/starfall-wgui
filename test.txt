@@ -3,55 +3,26 @@
 
 if SERVER then return end
 
-if player() ~= owner() then return end
+-- if player() ~= owner() then return end
 
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
+wgui.debug = true
 enableHud( player(), true )
-wgui.debug = false
 
-wgui.renderSpace.hud:setCursorEnabled( true )
-
-
-
-local radioid = uidlib.generate()
-
-local rdds = {}
-
-for x = 1, 9 do
-    local radio = wgui.create( "radio", wgui.renderSpace.hud )
-    radio:setPos( 100, 300 + 40 * x )
-    radio:setSize( 30, 30 )
-    radio:link( radioid )
-    
-    table.insert( rdds, radio )
-end
-
-
-timer.simple( 3, function()
-    for x = 1, 3 do
-        rdds[x]:link( "" )
-    end
-    
-    for x = 4, 6 do
-        rdds[x]:link( "12" )
-    end
-    
-    rdds[9]:remove()
-end )
-
---]]
-
---[[
 -- что то типо карточек стим 
 
-local base = wgui.create( "panel", wgui.renderSpace.hud )
-base:setPos( 400, 400 )
-base:setSize( 400, 400 )
+local rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
+rs:setScreen( chip():getLinkedComponents()[ 1 ] )
+
+local base = wgui.create( "panel", rs )
+base:setPos( 256, 256 )
+base:setSize( 512, 512 )
+base:setOverflow( OVERFLOW.HIDDEN )
 
 
 local card = wgui.create( "panel", base )
-card:setPos( 75, 75 )
-card:setSize( 250, 250 )
+card:setPos( 64, 64 )
+card:setSize( 512 - 128, 512 - 128 )
 
 card.matrix = Matrix()
 
@@ -77,7 +48,8 @@ card.newpaint = function( self )
         y = self.data.positionGlobal.y - 0,
         w = self.data.sizeGlobal.w + 0,
         h = self.data.sizeGlobal.h + 0,
-        origin = Vector( -100, 0, 0 ), -- -79
+        fov = 100,
+        origin = Vector( -200, 0, 0 ), -- -79
         angles = Angle( 0, 0, 90 ),
         aspect = 1
     } )

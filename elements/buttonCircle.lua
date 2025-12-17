@@ -24,7 +24,7 @@ end
 
 
 -- Функция просчета цвета
-Element.sysColors = function( self )
+Element.sysRecalculateColors = function( self )
     self.data.colors.main.r = math.lerp( self.data.transition, self.data.palette.button.r, self.data.palette.button_hover.r )
     self.data.colors.main.g = math.lerp( self.data.transition, self.data.palette.button.g, self.data.palette.button_hover.g )
     self.data.colors.main.b = math.lerp( self.data.transition, self.data.palette.button.b, self.data.palette.button_hover.b )
