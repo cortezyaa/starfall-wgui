@@ -10,73 +10,78 @@ wgui.debug = true
 enableHud( player(), true )
 
 -- что то типо карточек стим 
-
-local rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
-rs:setScreen( chip():getLinkedComponents()[ 1 ] )
-
-local base = wgui.create( "panel", rs )
-base:setPos( 256, 256 )
-base:setSize( 512, 512 )
-base:setOverflow( OVERFLOW.HIDDEN )
+local rss = {}
+rss[ 1 ] = wgui.createRenderSpace( RENDERSPACE.HUD )
+rss[ 1 ]:setCursorEnabled( true )
+rss[ 2 ] = wgui.createRenderSpace( RENDERSPACE.SCREEN )
+rss[ 2 ]:setScreen( chip():getLinkedComponents()[ 1 ] )
 
 
-local card = wgui.create( "panel", base )
-card:setPos( 64, 64 )
-card:setSize( 512 - 128, 512 - 128 )
-
-card.matrix = Matrix()
-
-local mat = render.createMaterial( 
-    "https://dl.dropbox.com/scl/fi/nshqjt2kq8f24y58vyb06/a-37.jpg?rlkey=fo28otawvmrfqgybd0qkx8rdx&st=e6i2g6vo", 
-    function( _, _, _, _, layout ) if layout then layout( 0, 0, 1024, 1024 ) end end
-)
-
-card.paint = function( self )
-    render.setRGBA( 255, 255, 255, 255 )
-    render.setMaterial(mat)
-    render.drawTexturedRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
-end
-
-card.newpaint = function( self )
-    local crs = self.data.renderSpace.cursor.position
-    local angx = ( crs.x - ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) ) / ( self.data.sizeGlobal.w / 2 )
-    local angy = ( crs.y - ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) ) / ( self.data.sizeGlobal.h / 2 )
+for _, rs in pairs( rss ) do
+    local base = wgui.create( "panel", rs )
+    base:setPos( 256, 256 )
+    base:setSize( 512, 512 )
+    base:setOverflow( OVERFLOW.HIDDEN )
     
-    render.pushViewMatrix( {
-        type="3D",
-        x = self.data.positionGlobal.x - 0,
-        y = self.data.positionGlobal.y - 0,
-        w = self.data.sizeGlobal.w + 0,
-        h = self.data.sizeGlobal.h + 0,
-        fov = 100,
-        origin = Vector( -200, 0, 0 ), -- -79
-        angles = Angle( 0, 0, 90 ),
-        aspect = 1
-    } )
+    
+    local card = wgui.create( "panel", base )
+    card:setPos( 64, 64 )
+    card:setSize( 512 - 128, 512 - 128 )
+    
+    card.matrix = Matrix()
+    
+    local mat = render.createMaterial( 
+        "https://dl.dropbox.com/scl/fi/nshqjt2kq8f24y58vyb06/a-37.jpg?rlkey=fo28otawvmrfqgybd0qkx8rdx&st=e6i2g6vo", 
+        function( _, _, _, _, layout ) if layout then layout( 0, 0, 1024, 1024 ) end end
+    )
+    
+    card.paint = function( self )
+        render.setRGBA( 255, 255, 255, 255 )
+        render.setMaterial(mat)
+        render.drawTexturedRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    end
+    
+    card.newpaint = function( self )
+        local crs = self.data.renderSpace.cursor.position
+        local angx = ( crs.x - ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) ) / ( self.data.sizeGlobal.w / 2 )
+        local angy = ( crs.y - ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) ) / ( self.data.sizeGlobal.h / 2 )
         
-        self.matrix:setAngles( Angle( 90 + -angx * 7.5, -angy * 7.5, 0 ) )
-        
-        render.pushMatrix( self.matrix, false )
-            render.setRGBA( 255, 255, 255, 255 )
-            render.setMaterial(mat)
-            render.drawTexturedRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+        render.pushViewMatrix( {
+            type="3D",
+            x = self.data.positionGlobal.x - 0,
+            y = self.data.positionGlobal.y - 0,
+            w = self.data.sizeGlobal.w + 0,
+            h = self.data.sizeGlobal.h + 0,
+            fov = 100,
+            origin = Vector( -200, 0, 0 ), -- -79
+            angles = Angle( 0, 0, 90 ),
+            aspect = 1
+        } )
             
-            local fade = angy < 0 and 255 or 0
-            render.setRGBA( fade, fade, fade, 100 * math.abs( angy ) )
-            render.drawRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
-        render.popMatrix()
+            self.matrix:setAngles( Angle( 90 + -angx * 7.5, -angy * 7.5, 0 ) )
+            
+            render.pushMatrix( self.matrix, false )
+                render.setRGBA( 255, 255, 255, 255 )
+                render.setMaterial(mat)
+                render.drawTexturedRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+                
+                local fade = angy < 0 and 255 or 0
+                render.setRGBA( fade, fade, fade, 100 * math.abs( angy ) )
+                render.drawRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+            render.popMatrix()
+        
+        render.popViewMatrix()
+    end
     
-    render.popViewMatrix()
+    card:addEvent( "hoveron", function( self )
+        self.oldpaint = self.paint
+        self.paint = self.newpaint
+    end )
+    
+    card:addEvent( "hoveroff", function( self )
+        self.paint = self.oldpaint
+    end )
 end
-
-card:addEvent( "hoveron", function( self )
-    self.oldpaint = self.paint
-    self.paint = self.newpaint
-end )
-
-card:addEvent( "hoveroff", function( self )
-    self.paint = self.oldpaint
-end )
 
 
 

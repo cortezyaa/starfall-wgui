@@ -16,7 +16,7 @@ Element.initialize = function( self )
 end
 
 
--- Кастомная хитскан функция
+-- Хитскан функция
 Element.hitscan = function( self, x, y )
     if not ( x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom ) then return false end
     return ( self.data.sizeGlobal.w / 2 ) > math.sqrt( math.pow( ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) - x, 2 ) + math.pow( ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) - y, 2 ) )

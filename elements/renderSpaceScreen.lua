@@ -119,11 +119,7 @@ local function cursorProcess( rs, self, x, y )
     if cursorProcessDone then return end
     if self.data.hitIgnore then return end
 
-    if self.hitscan then
-        cursorProcessDone = self:hitscan( x, y )
-    else
-        cursorProcessDone = ( x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom )
-    end
+    cursorProcessDone = self:hitscan( x, y )
 
     if cursorProcessDone then
         if rs.data.hoverElement ~= self then

@@ -298,6 +298,12 @@ Element.getChildren = function( self )
 end
 
 
+-- Хитскан функция
+Element.hitscan = function( self, x, y )
+    return ( x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom )
+end
+
+
 -- Функции связанные с позиционированием элемента
 -- Установка позиции
 Element.setPos = function( self, x, y )

@@ -120,49 +120,52 @@ registerIncludedElements()
 
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-    -- for _, rs in pairs( wgui.renderSpace ) do
-    --     if not rs.cursor.enabled then continue end -- Проверка активен ли курсор renderSpace
-    --     -- if not rs.data.hoverElement then continue end
+    for _, category in pairs( wgui.renderSpaces ) do
+        for _, rs in pairs( category ) do
+            if not rs.cursor.enabled then continue end -- Проверка активен ли курсор
 
-    --     local hover = rs.data.hoverElement
+            local hover = rs.data.hoverElement
 
-    --     if key == 107 then
-    --         if hover then
-    --             if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
-    --                 hover:callEvent( "doubleclick" )
-    --                 rs.cursor.dblclickTime = 0
-    --                 rs.cursor.dblclickElement = nil
-    --             else
-    --                 hover:callEvent( "click" )
-    --                 rs.cursor.dblclickTime = timer.curtime()
-    --                 rs.cursor.dblclickElement = hover
-    --             end
-    --         end
+            if key == 107 then
+                if hover then
+                    if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
+                        hover:callEvent( "doubleclick" )
+                        rs.cursor.dblclickTime = 0
+                        rs.cursor.dblclickElement = nil
+                    else
+                        hover:callEvent( "click" )
+                        rs.cursor.dblclickTime = timer.curtime()
+                        rs.cursor.dblclickElement = hover
+                    end
+                end
 
-    --         rs.cursor.keyLeft = true
-    --         rs.cursor.clickTime = timer.curtime()
-    --         rs.cursor.clickElement = hover
-    --     elseif key == 108 then
-    --         if hover then
-    --             hover:callEvent( "rightclick" )
-    --         end
+                rs.cursor.keyLeft = true
+                rs.cursor.clickTime = timer.curtime()
+                rs.cursor.clickElement = hover
+            elseif key == 108 then
+                if hover then
+                    hover:callEvent( "rightclick" )
+                end
 
-    --         rs.cursor.keyRight = true
-    --     end
-    -- end
+                rs.cursor.keyRight = true
+            end
+        end
+    end
 end )
 
 hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
-    -- for _, rs in pairs( wgui.renderSpace ) do
-    --     if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
+    for _, category in pairs( wgui.renderSpaces ) do
+        for _, rs in pairs( category ) do
+            if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
-    --     if key == 107 then
-    --         rs.cursor.keyLeft = false
-    --         rs.cursor.clickElement = nil
-    --     elseif key == 108 then
-    --         rs.cursor.keyRight = false
-    --     end
-    -- end
+            if key == 107 then
+                rs.cursor.keyLeft = false
+                rs.cursor.clickElement = nil
+            elseif key == 108 then
+                rs.cursor.keyRight = false
+            end
+        end
+    end
 end )
 
 hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h )
@@ -172,7 +175,7 @@ hook.add( "onScreenSizeChanged", "wgui:hook:onScreenSizeChanged", function( w, h
     end
 end )
 
-hook.add( "drawhud", "wgui:hook:drawhud", function()
+hook.add( "DrawHUD", "wgui:hook:DrawHUD", function()
     for _, rs in pairs( wgui.renderSpaces.HUD ) do
         rs:process()
     end
