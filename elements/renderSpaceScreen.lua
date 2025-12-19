@@ -78,7 +78,6 @@ end
 -- Функция получения позиции курсора
 Element.getCursorPos = function( self )
     self:sysValidate()
-    
     return self.cursor.position.x, self.cursor.position.y
 end
 
@@ -106,7 +105,7 @@ Element.pushRecalculation = function( self, recalc )
 end
 
 
--- process
+-- Процесс
 local cursorProcessDone = false
 local function cursorProcess( rs, self, x, y )
     if self.data.noDraw then return end
@@ -161,6 +160,9 @@ Element.process = function( self )
         el:sysRecalculation()
     end
     self.data.recalculation = {}
+
+    render.setFilterMag( TEXFILTER.POINT )
+    render.setFilterMin( TEXFILTER.POINT )
 
     render.selectRenderTarget( self.data.renderTarget )
     render.clear()

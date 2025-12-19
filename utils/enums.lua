@@ -28,21 +28,21 @@ OVERFLOW = {
 }
 
 WGUIEVENTS = {
-    -- click events
+    -- click
     CLICK = "click",
     RIGHTCLICK = "rightclick",
     DOUBLECLICK = "doubleclick",
     HOVERCLICK = "hoverclick",
 
-    -- hover events
+    -- hover
     HOVER = "hover",
     HOVERON = "hoveron",
     HOVEROFF = "hoveroff",
 
-    -- cursor events [ renderspace only ]
+    -- cursor [ renderspace only ]
     CURSORMOVED = "cursormoved",
 
-    -- element events
+    -- element
     VALUECHANGED = "valuechanged",
     REMOVED = "removed",
 }

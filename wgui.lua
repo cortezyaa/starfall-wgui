@@ -74,6 +74,9 @@ wgui.createRenderSpace = function( renderSpaceType )
 
         table.insert( wgui.renderSpaces.SCREEN, element )
     elseif renderSpaceType == RENDERSPACE.WORLD then
+        element.data.sizeLocal.w, element.data.sizeLocal.h = 1024, 1024
+        element:sysRecalculate()
+        
         table.insert( wgui.renderSpaces.WORLD, element )
     end
 
@@ -202,10 +205,14 @@ hook.add( "render", "wgui:hook:render", function()
             rs:callEvent( "cursormoved", rs.cursor.position.x, rs.cursor.position.y )
         end
 
-        render.setFilterMag( TEXFILTER.POINT )
-        render.setFilterMin( TEXFILTER.POINT )
         render.setRenderTargetTexture( rs.data.renderTarget )
         render.drawTexturedRect( 0, 0, w, h )
+    end
+end )
+
+hook.add( "PostDrawOpaqueRenderables", "wgui:hook:PostDrawOpaqueRenderables", function()
+    for _, rs in pairs( wgui.renderSpaces.WORLD ) do
+        rs:process()
     end
 end )
 

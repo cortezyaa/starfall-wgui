@@ -6,20 +6,70 @@ if SERVER then return end
 -- if player() ~= owner() then return end
 
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
-wgui.debug = true
+wgui.debug = false
 enableHud( player(), true )
 
+--[[
+local size = 500
+local count = 5
+
+rs = wgui.createRenderSpace( RENDERSPACE.WORLD )
+rs:setWPos( chip():getPos() + Vector( 0, 0, 100 ) )
+rs:setWAng( Angle( 0, 0, -90 ) )
+rs:setScale( 0.1 )
+
+local base = wgui.create( "panel", rs )
+base:setPos( 200, 200 )
+base:setSize( size, size )
+
+local a = {}
+
+for x = 1, count do
+    local line = wgui.create( "panel", base )
+    line:setSize( size / count, size / count )
+    line:dock( DOCK.TOP )
+    
+    for y = 1, count do
+        local btn = wgui.create( "radio", line )
+        btn:setSize( size / count, size / count )
+        btn:dock( DOCK.LEFT )
+        btn:link( "link!" )
+        
+        table.insert( a, btn )
+    end
+end
+
+hook.add( "drawhud","rwa", function()
+    base:setPos( 
+        256 + math.sin( timer.curtime() * 0.5 ) * 64, 
+        256 + math.cos( timer.curtime() * 0.5 ) * 64
+    )
+    
+    for _, e in pairs( a ) do
+        e:setSize( size / count, size / count )
+    end
+end )
+--]]
+
+--
 -- что то типо карточек стим 
 local rss = {}
+
 rss[ 1 ] = wgui.createRenderSpace( RENDERSPACE.HUD )
-rss[ 1 ]:setCursorEnabled( true )
+-- rss[ 1 ]:setCursorEnabled( true )
+
 rss[ 2 ] = wgui.createRenderSpace( RENDERSPACE.SCREEN )
 rss[ 2 ]:setScreen( chip():getLinkedComponents()[ 1 ] )
+
+rss[ 3 ] = wgui.createRenderSpace( RENDERSPACE.WORLD )
+rss[ 3 ]:setWPos( chip():getPos() + Vector( 0, 0, 100 ) )
+rss[ 3 ]:setWAng( Angle( 0, 0, -90 ) )
+rss[ 3 ]:setScale( 0.1 )
 
 
 for _, rs in pairs( rss ) do
     local base = wgui.create( "panel", rs )
-    base:setPos( 256, 256 )
+    base:setPos( 0, 0 )
     base:setSize( 512, 512 )
     base:setOverflow( OVERFLOW.HIDDEN )
     

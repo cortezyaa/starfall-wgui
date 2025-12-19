@@ -233,7 +233,7 @@ Element.setParent = function( self, parent )
     self:sysValidate()
     local _, parentType = checkType( parent, { "wgui", "nil" } )
 
-    -- unparent
+    -- Снятие парента
     if parentType == "nil" then
         if self.data.parent then
             table.removeByValue( self.data.parent.data.children, self )
@@ -246,7 +246,7 @@ Element.setParent = function( self, parent )
         return
     end
 
-    -- renderSpace
+    -- К renderSpace'у
     if parent.isRenderSpace then
         if self.data.renderSpace == parent then return end
 
@@ -265,7 +265,7 @@ Element.setParent = function( self, parent )
         return
     end
 
-    -- element
+    -- К элементу
     if self.data.parent == parent then return end
 
     local oldparent = self.data.parent or self.data.renderSpace
@@ -305,7 +305,7 @@ end
 
 
 -- Функции связанные с позиционированием элемента
--- Установка позиции
+-- Установка локальной позиции
 Element.setPos = function( self, x, y )
     self:sysValidate()
     checkType( x, "number" )
@@ -489,7 +489,7 @@ Element.getHitIgnore = function( self )
 end
 
 
--- events
+-- Ивенты
 Element.addEvent = function( self, event, callback )
     self:sysValidate()
     checkType( event, "string" )
