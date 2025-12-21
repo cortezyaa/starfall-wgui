@@ -58,7 +58,7 @@ Element.initialize = function( self, elementName )
     self.data.transitionTime = 0.25
 
     self.data.palette = table.copy( wgui.palette )
-    self.data.colors = { main = { r = 255, g = 255, b = 255, a = 255 } }
+    self.data.colors = {}
 
     -- Ивенты
     self.events = { system = {} }
@@ -297,6 +297,12 @@ Element.getChildren = function( self )
     return self.data.children
 end
 
+-- Получение renderSpace'а элемента
+Element.getRenderSpace = function( self )
+    self:sysValidate()
+    return self.data.renderSpace
+end
+
 
 -- Хитскан функция
 Element.hitscan = function( self, x, y )
@@ -424,11 +430,11 @@ end
 Element.setValue = function( self, value )
     self:sysValidate()
 
-    local oldvalue = self.data.value
+    local valueOld = self.data.value
     self.data.value = value
 
     self:sysRecalculateColors()
-    self:callEvent( "valuechanged", value, oldvalue )
+    self:callEvent( "valuechanged", value, valueOld )
 end
 
 -- Получение значением

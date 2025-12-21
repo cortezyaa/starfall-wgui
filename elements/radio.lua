@@ -11,12 +11,8 @@ Element.static.elementName = "radio"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.data.colors.main.r = self.data.palette.button.r
-    self.data.colors.main.g = self.data.palette.button.g
-    self.data.colors.main.b = self.data.palette.button.b
-    self.data.colors.main.a = self.data.palette.button.a
-
-    self.data.colors.check = { r = 255, g = 255, b = 255, a = 255 }
+    self.data.colors.fill = table.rgba( self.data.palette.button.r, self.data.palette.button.g, self.data.palette.button.b, self.data.palette.button.a )
+    self.data.colors.check = table.rgba()
 
     self.data.linkuid = ""
 
@@ -80,11 +76,11 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.main.r, self.data.colors.main.g, self.data.colors.main.b, self.data.colors.main.a )
-    render.drawRect( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
     render.setRGBA( self.data.colors.check.r, self.data.colors.check.g, self.data.colors.check.b, self.data.colors.check.a )
-    render.drawRect( self.data.positionGlobal.x + self.data.sizeGlobal.w / 4, self.data.positionGlobal.y + self.data.sizeGlobal.h / 4, self.data.sizeGlobal.w / 2, self.data.sizeGlobal.h / 2 )
+    render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 4, self.data.positionGlobal.y + self.data.sizeGlobal.h / 4, self.data.sizeGlobal.w / 2, self.data.sizeGlobal.h / 2 )
 end
 
 

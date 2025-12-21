@@ -33,13 +33,14 @@ WGUIEVENTS = {
     RIGHTCLICK = "rightclick",
     DOUBLECLICK = "doubleclick",
     HOVERCLICK = "hoverclick",
+    HOVERCLICKDELAYED = "hoverclickdelayed",
 
     -- hover
     HOVER = "hover",
     HOVERON = "hoveron",
     HOVEROFF = "hoveroff",
 
-    -- cursor [ renderspace only ]
+    -- cursor ( renderspace only )
     CURSORMOVED = "cursormoved",
 
     -- element

@@ -30,6 +30,7 @@ Element.initialize = function( self )
 
     self.cursor.clickTime = 0
     self.cursor.clickElement = nil
+    self.cursor.clickPosition = { x = 0, y = 0 }
 
     self.cursor.dblclickTime = 0
     self.cursor.dblclickElement = nil
@@ -197,8 +198,12 @@ Element.process = function( self )
 
         local click = self.cursor.clickElement
 
-        if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) and self.cursor.keyLeft and click then
-            click:callEvent( "clickhover" )
+        if self.cursor.keyLeft and click then
+            click:callEvent( "hoverclick" )
+
+            if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) then
+                click:callEvent( "hoverclickdelayed" )
+            end
         end
     end
 

@@ -91,6 +91,29 @@ function checkEnum( object, enum, shouldError )
 end
 
 
+-- Создает таблицу rgba
+table.rgba = function( r, g, b, a )
+    checkType( r, { "nil", "number" } )
+    checkType( g, { "nil", "number" } )
+    checkType( b, { "nil", "number" } )
+    checkType( a, { "nil", "number" } )
+
+    return { r = r or 0, g = g or 0, b = b or 0, a = a or 0 }
+end
+
+
+-- Улучшенный мульти-принт
+function printm( ... )
+    local res = ""
+
+    for _, tx in pairs( { ... } ) do
+        res = res .. tx .. " ; "
+    end
+
+    print( res )
+end
+
+
 -- Функция возвращает 'true', если данный ввод является wgui
 function iswgui( object )
     return type( object ) == "wgui"

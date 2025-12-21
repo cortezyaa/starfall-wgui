@@ -145,6 +145,7 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
                 rs.cursor.keyLeft = true
                 rs.cursor.clickTime = timer.curtime()
                 rs.cursor.clickElement = hover
+                rs.cursor.clickPosition.x, rs.cursor.clickPosition.y = rs.cursor.position.x, rs.cursor.position.y
             elseif key == 108 then
                 if hover then
                     hover:callEvent( "rightclick" )

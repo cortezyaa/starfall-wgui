@@ -9,6 +9,20 @@ local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
 wgui.debug = false
 enableHud( player(), true )
 
+local rs = wgui.createRenderSpace( RENDERSPACE.HUD )
+rs:setCursorEnabled( true )
+
+local scroll = wgui.create( "slider", rs )
+scroll.data.horizontal = true
+scroll:setSize( 200, 10 )
+scroll:setPos( 320, 280 )
+
+local scroll = wgui.create( "slider", rs )
+scroll:setSize( 10, 200 )
+scroll:setPos( 300, 300 )
+
+
+
 --[[
 local size = 500
 local count = 5
@@ -51,7 +65,7 @@ hook.add( "drawhud","rwa", function()
 end )
 --]]
 
---
+--[[
 -- что то типо карточек стим 
 local rss = {}
 
@@ -117,7 +131,7 @@ for _, rs in pairs( rss ) do
                 
                 local fade = angy < 0 and 255 or 0
                 render.setRGBA( fade, fade, fade, 100 * math.abs( angy ) )
-                render.drawRect( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+                render.drawRectFast( -self.data.sizeGlobal.w / 2, -self.data.sizeGlobal.h / 2, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
             render.popMatrix()
         
         render.popViewMatrix()
