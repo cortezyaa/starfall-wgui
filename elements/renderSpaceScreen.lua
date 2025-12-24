@@ -70,7 +70,7 @@ end
 -- Выбор экрана для рендера
 Element.setScreen = function( self, screen )
     self:sysValidate()
-    checkType( screen, "Entity" )
+    checkType( screen, { "Entity", "nil" } )
 
     self.data.screen = screen
 end
@@ -165,9 +165,6 @@ Element.process = function( self )
         el:sysRecalculation()
     end
     self.data.recalculation = {}
-
-    render.setFilterMag( TEXFILTER.POINT )
-    render.setFilterMin( TEXFILTER.POINT )
 
     render.selectRenderTarget( self.data.renderTarget )
     render.clear()

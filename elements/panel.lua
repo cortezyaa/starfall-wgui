@@ -11,7 +11,7 @@ Element.static.elementName = "panel"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
     
-    self.data.colors.fill = table.rgba( self.data.palette.fill.r, self.data.palette.fill.g, self.data.palette.fill.b, self.data.palette.fill.a )
+    self.data.colors.fill = table.rgba( self.data.palette.fill )
 end
 
 

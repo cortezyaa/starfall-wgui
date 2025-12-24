@@ -93,10 +93,14 @@ end
 
 -- Создает таблицу rgba
 table.rgba = function( r, g, b, a )
-    checkType( r, { "nil", "number" } )
+    local _, rtype = checkType( r, { "nil", "number", "table", "Color" } )
     checkType( g, { "nil", "number" } )
     checkType( b, { "nil", "number" } )
     checkType( a, { "nil", "number" } )
+
+    if rtype == "table" or rtype == "Color" then
+        return { r = r.r, g = r.g, b = r.b, a = r.a }
+    end
 
     return { r = r or 0, g = g or 0, b = b or 0, a = a or 0 }
 end

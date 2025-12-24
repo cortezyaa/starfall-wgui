@@ -46,4 +46,6 @@ WGUIEVENTS = {
     -- element
     VALUECHANGED = "valuechanged",
     REMOVED = "removed",
+    CHILDRENADDED = "childrenadded",
+    CHILDRENREMOVED = "childrenremoved",
 }

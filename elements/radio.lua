@@ -11,7 +11,7 @@ Element.static.elementName = "radio"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.data.colors.fill = table.rgba( self.data.palette.button.r, self.data.palette.button.g, self.data.palette.button.b, self.data.palette.button.a )
+    self.data.colors.fill = table.rgba( self.data.palette.button )
     self.data.colors.check = table.rgba()
 
     self.data.linkuid = ""

@@ -159,9 +159,6 @@ Element.process = function( self )
     end
     self.data.recalculation = {}
 
-    render.setFilterMag( TEXFILTER.POINT )
-    render.setFilterMin( TEXFILTER.POINT )
-
     self:render()
 
     if wgui.debug then self:debugrender() end

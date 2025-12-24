@@ -17,12 +17,13 @@ Element.initialize = function( self )
     self.data.valueOld = 0
     self.data.valueSnap = 0
 
-    self.data.thumbSize = 25
+    self.data.thumbLength = 25
     self.data.thumbOffset = 0
 
-    self.data.colors.fill = table.rgba( self.data.palette.button.r, self.data.palette.button.g, self.data.palette.button.b, self.data.palette.button.a )
+    self.data.colors.fill = table.rgba( self.data.palette.button )
     self.data.colors.thumb = table.rgba()
 
+    -- Ивенты
     self.events.system.click = function( self )
         self.data.valueOld = self.data.value
     end
@@ -31,7 +32,7 @@ Element.initialize = function( self )
         self.data.transition = 1
 
         local delta = self.data.renderSpace.cursor.position[ self.data.horizontal and "x" or "y" ] - self.data.renderSpace.cursor.clickPosition[ self.data.horizontal and "x" or "y" ]
-        local track = self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] - self.data.thumbSize
+        local track = self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] - self.data.thumbLength
         local value = math.clamp( ( ( track * self.data.valueOld ) + delta ) / track, 0, 1 )
 
         if self.data.valueSnap and self.data.valueSnap ~= 0 then
@@ -44,7 +45,7 @@ Element.initialize = function( self )
     end
 
     self.events.system.valuechanged = function( self, value, valueOld )
-        self.data.thumbOffset = ( self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] - self.data.thumbSize ) * self.data.value
+        self.data.thumbOffset = ( self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] - self.data.thumbLength ) * self.data.value
     end
     self.events.system.valuechanged( self, self.data.value, self.data.value )
 end
@@ -65,6 +66,7 @@ Element.setHorizontal = function( self, horizontal )
     checkType( horizontal, "boolean" )
 
     self.data.horizontal = horizontal
+    self.events.system.valuechanged( self, self.data.value, self.data.value )
 end
 
 Element.getHorizontal = function( self )
@@ -95,9 +97,9 @@ Element.paint = function( self )
     render.setRGBA( self.data.colors.thumb.r, self.data.colors.thumb.g, self.data.colors.thumb.b, self.data.colors.thumb.a )
 
     if self.data.horizontal then
-        render.drawRectFast( self.data.positionGlobal.x + self.data.thumbOffset, self.data.positionGlobal.y, self.data.thumbSize, self.data.sizeGlobal.h )
+        render.drawRectFast( self.data.positionGlobal.x + self.data.thumbOffset, self.data.positionGlobal.y, self.data.thumbLength, self.data.sizeGlobal.h )
     else
-        render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y + self.data.thumbOffset, self.data.sizeGlobal.w, self.data.thumbSize )
+        render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y + self.data.thumbOffset, self.data.sizeGlobal.w, self.data.thumbLength )
     end
 end
 

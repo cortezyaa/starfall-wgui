@@ -16,9 +16,10 @@ Element.initialize = function( self )
     self.data.value = 0
     self.data.valueSnap = 0
 
-    self.data.colors.fill = table.rgba( self.data.palette.button.r, self.data.palette.button.g, self.data.palette.button.b, self.data.palette.button.a )
+    self.data.colors.fill = table.rgba( self.data.palette.button )
     self.data.colors.thumb = table.rgba()
 
+    -- Ивенты
     self.events.system.hoverclick = function( self )
         self.data.transition = 1
 

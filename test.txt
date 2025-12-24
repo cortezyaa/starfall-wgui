@@ -6,22 +6,20 @@ if SERVER then return end
 -- if player() ~= owner() then return end
 
 local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
-wgui.debug = false
-enableHud( player(), true )
+wgui.debug = true
+-- enableHud( player(), true )
 
-local rs = wgui.createRenderSpace( RENDERSPACE.HUD )
-rs:setCursorEnabled( true )
+local rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
+rs:setScreen( chip():getLinkedComponents()[ 1 ] )
 
-local scroll = wgui.create( "slider", rs )
-scroll.data.horizontal = true
-scroll:setSize( 200, 10 )
-scroll:setPos( 320, 280 )
-
-local scroll = wgui.create( "slider", rs )
-scroll:setSize( 10, 200 )
-scroll:setPos( 300, 300 )
+local space = wgui.create( "space", rs )
+space:setPos( 100, 100 )
+space:setSize( 1024 - 256, 1024 - 256 )
 
 
+local panel = wgui.create( "panel", space )
+panel:setPos( 0, 0 )
+panel:setSize( 64, 64 )
 
 --[[
 local size = 500

@@ -238,9 +238,12 @@ Element.setParent = function( self, parent )
         if self.data.parent then
             table.removeByValue( self.data.parent.data.children, self )
             self.data.parent:sysRecalculate()
+            self.data.parent:callEvent( "childrenremoved", self )
             self.data.parent = nil
+
             table.insert( self.data.renderSpace.data.children, self )
             self:sysRecalculate()
+            self.data.renderSpace:callEvent( "childrenadded", self )
         end
 
         return
@@ -255,12 +258,14 @@ Element.setParent = function( self, parent )
         if oldparent then
             table.removeByValue( oldparent.data.children, self )
             oldparent:sysRecalculate()
+            oldparent:callEvent( "childrenremoved", self )
             self.data.parent = nil
         end
 
         self.data.renderSpace = parent
         table.insert( parent.data.children, self )
         self:sysRecalculate()
+        parent:callEvent( "childrenadded", self )
 
         return
     end
@@ -273,6 +278,7 @@ Element.setParent = function( self, parent )
     if oldparent then
         table.removeByValue( oldparent.data.children, self )
         oldparent:sysRecalculate()
+        oldparent:callEvent( "childrenremoved", self )
         self.data.parent = nil
     end
     
@@ -283,6 +289,7 @@ Element.setParent = function( self, parent )
     self.data.parentsTree = buildTree( self, { self.data.renderSpace } )
 
     self:sysRecalculate()
+    parent:callEvent( "childrenadded", self )
 end
 
 -- Получение родительского элемента
@@ -306,7 +313,10 @@ end
 
 -- Хитскан функция
 Element.hitscan = function( self, x, y )
-    return ( x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom )
+    if self.data.hitbox.left >= self.data.hitbox.right or self.data.hitbox.top >= self.data.hitbox.bottom then return false end
+    return x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom
+    -- Круглый хитскан
+    -- return ( self.data.sizeGlobal.w / 2 ) > math.sqrt( math.pow( ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) - x, 2 ) + math.pow( ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) - y, 2 ) )
 end
 
 
@@ -505,7 +515,7 @@ Element.addEvent = function( self, event, callback )
 end
 
 Element.callEvent = function( self, event, ... )
-    self:sysValidate()
+    if not isValid( self ) then return end
     checkType( event, "string" )
 
     if self.events.system[ event ] then
