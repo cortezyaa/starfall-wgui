@@ -52,7 +52,9 @@ Element.initialize = function( self, elementName )
     self.data.value = false
 
     self.data.hover = false
-    self.data.hoverTime = timer.curtime()
+    self.data.focus = false
+
+    self.data.curtime = timer.curtime()
 
     self.data.transition = 0
     self.data.transitionTime = 0.25
@@ -535,13 +537,13 @@ Element.render = function( self )
     if self.data.noDraw then return end
 
     local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.hoverTime ) / self.data.transitionTime ), 0, 1 )
+    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.curtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
     end
 
-    self.data.hoverTime = timer.curtime()
+    self.data.curtime = timer.curtime()
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
@@ -587,6 +589,7 @@ Element.debugrender = function( self )
         child:debugrender()
     end
 
+    render.setFont( "DebugFixed" )
     render.setRGBA( 255, 255, 255, 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
@@ -594,6 +597,7 @@ Element.debugrender = function( self )
     L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "element : " .. tostring( self.data.elementName ) )
     L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "uid : " .. self.uid )
     L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "transition : " .. tostring( self.data.transition ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "hover : " .. tostring( self.data.hover ) .. " / focus : " .. tostring( self.data.focus ) )
     L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
 
     -- renderSpace

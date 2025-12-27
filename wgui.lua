@@ -123,13 +123,13 @@ registerIncludedElements()
 
 -- hooks
 hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
-    for _, category in pairs( wgui.renderSpaces ) do
+    for rst, category in pairs( wgui.renderSpaces ) do
         for _, rs in pairs( category ) do
             if not rs.cursor.enabled then continue end -- Проверка активен ли курсор
 
             local hover = rs.data.hoverElement
 
-            if key == 107 then
+            if key == 107 or ( key == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
                 if hover then
                     if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
                         hover:callEvent( "doubleclick" )
@@ -146,6 +146,23 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
                 rs.cursor.clickTime = timer.curtime()
                 rs.cursor.clickElement = hover
                 rs.cursor.clickPosition.x, rs.cursor.clickPosition.y = rs.cursor.position.x, rs.cursor.position.y
+
+                if rs.data.focusElement ~= hover then
+                    local oldfocus = rs.data.focusElement
+
+                    if rs.data.focusElement then
+                        rs.data.focusElement.data.focus = false
+                        rs.data.focusElement:callEvent( "focusoff" )
+                    end
+
+                    rs.data.focusElement = hover
+                    rs:callEvent( "focuschanged", hover, oldfocus )
+
+                    if rs.data.focusElement then
+                        rs.data.focusElement.data.focus = true
+                        rs.data.focusElement:callEvent( "focuson" )
+                    end
+                end
             elseif key == 108 then
                 if hover then
                     hover:callEvent( "rightclick" )
@@ -158,11 +175,11 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
 end )
 
 hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
-    for _, category in pairs( wgui.renderSpaces ) do
+    for rst, category in pairs( wgui.renderSpaces ) do
         for _, rs in pairs( category ) do
             if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
-            if key == 107 then
+            if key == 107 or ( key == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
                 rs.cursor.keyLeft = false
                 rs.cursor.clickElement = nil
             elseif key == 108 then

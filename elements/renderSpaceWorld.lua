@@ -19,8 +19,10 @@ Element.initialize = function( self )
     self.data.scale = 1
 
     self.data.matrix = Matrix()
-    
+
     self.data.hoverElement = nil
+    self.data.focusElement = nil
+
     self.data.recalculation = {}
 
     -- Курсор
@@ -155,21 +157,22 @@ local function cursorProcess( rs, self, x, y )
 
     cursorProcessDone = self:hitscan( x, y )
 
-    if cursorProcessDone then
-        if rs.data.hoverElement ~= self then
-            if rs.data.hoverElement ~= nil then
-                local oldhover = rs.data.hoverElement
-                rs.data.hoverElement.data.hover = false
-                rs.data.hoverElement = nil
-                oldhover:callEvent( "hoveroff" )
-            end
+    if not cursorProcessDone then return end
+    if rs.data.hoverElement == self then return end
 
-            if self ~= rs then
-                rs.data.hoverElement = self
-                rs.data.hoverElement.data.hover = true
-                rs.data.hoverElement:callEvent( "hoveron" )
-            end
-        end
+    local oldhover = rs.data.hoverElement
+
+    if rs.data.hoverElement then
+        rs.data.hoverElement.data.hover = false
+        rs.data.hoverElement:callEvent( "hoveroff" )
+    end
+
+    rs.data.hoverElement = self == rs and nil or self
+    rs:callEvent( "hoverchanged", rs.data.hoverElement, oldhover )
+
+    if rs.data.hoverElement then
+        rs.data.hoverElement.data.hover = true
+        rs.data.hoverElement:callEvent( "hoveron" )
     end
 end
 

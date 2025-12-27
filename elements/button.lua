@@ -12,6 +12,14 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.data.colors.fill = table.rgba()
+
+    -- Ивенты
+    self.events.system.click = function( self )
+        self:setValue( true )
+
+        timer.remove( self.uid )
+        timer.сreate( self.uid, 0.1, 1, function() self:setValue( false ) end )
+    end
 end
 
 

@@ -40,12 +40,18 @@ WGUIEVENTS = {
     HOVERON = "hoveron",
     HOVEROFF = "hoveroff",
 
-    -- cursor ( renderspace only )
-    CURSORMOVED = "cursormoved",
+    -- focus
+    FOCUSON = "focuson",
+    FOCUSOFF = "focusoff",
 
     -- element
     VALUECHANGED = "valuechanged",
     REMOVED = "removed",
     CHILDRENADDED = "childrenadded",
     CHILDRENREMOVED = "childrenremoved",
+    
+    -- renderSpace
+    CURSORMOVED = "cursormoved",
+    HOVERCHANGED = "hoverchanged",
+    FOCUSCHANGED = "focuschanged",
 }
