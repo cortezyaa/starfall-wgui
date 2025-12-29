@@ -26,11 +26,11 @@ wgui.palette = {
     button = Color( 40, 40, 40, 255 ),
     button_hover = Color( 80, 80, 80, 255 ),
 
-    button_text = Color( 180, 180, 180, 255 ),
-    button_text_hover = Color( 255, 255, 255, 255 ),
-
     button_selected = Color( 130, 50, 255, 255 ),
     button_selected_hover = Color( 190, 110, 255, 255 ),
+    
+    text = Color( 180, 180, 180, 255 ),
+    text_hover = Color( 255, 255, 255, 255 ),
 }
 
 
@@ -122,21 +122,42 @@ registerIncludedElements()
 
 
 -- hooks
-hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
+hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
     for rst, category in pairs( wgui.renderSpaces ) do
         for _, rs in pairs( category ) do
             if not rs.cursor.enabled then continue end -- Проверка активен ли курсор
 
+            local focus = rs.data.focusElement
+
+            if focus and focus.data.keyboardInput == true then
+                local key = KEYBOARD[ ( input.isShiftDown() and "u" or "" ) .. tostring( button ) ]
+
+                if key then
+                    if key == "ENTER" then
+                        focus.data.focus = false
+                        focus:callEvent( WGUIEVENTS.FOCUSOFF )
+                        rs.data.focusElement = nil
+                        focus:setValue( focus.data.value )
+                    elseif key == "BACKSPACE" then
+                        focus.data.value = string.sub( focus.data.value, 1, #focus.data.value - 1 )
+                    else
+                        focus.data.value = focus.data.value .. key
+                    end
+                end
+
+                continue
+            end
+
             local hover = rs.data.hoverElement
 
-            if key == 107 or ( key == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
+            if button == 107 or ( button == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
                 if hover then
                     if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
-                        hover:callEvent( "doubleclick" )
+                        hover:callEvent( WGUIEVENTS.DOUBLECLICK )
                         rs.cursor.dblclickTime = 0
                         rs.cursor.dblclickElement = nil
                     else
-                        hover:callEvent( "click" )
+                        hover:callEvent( WGUIEVENTS.CLICK )
                         rs.cursor.dblclickTime = timer.curtime()
                         rs.cursor.dblclickElement = hover
                     end
@@ -152,20 +173,20 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
 
                     if rs.data.focusElement then
                         rs.data.focusElement.data.focus = false
-                        rs.data.focusElement:callEvent( "focusoff" )
+                        rs.data.focusElement:callEvent( WGUIEVENTS.FOCUSOFF )
                     end
 
-                    rs.data.focusElement = hover
-                    rs:callEvent( "focuschanged", hover, oldfocus )
+                    rs.data.focusElement = hover.isRenderSpace == true and nil or hover
+                    rs:callEvent( WGUIEVENTS.FOCUSCHANGED, rs.data.focusElement, oldfocus )
 
                     if rs.data.focusElement then
                         rs.data.focusElement.data.focus = true
-                        rs.data.focusElement:callEvent( "focuson" )
+                        rs.data.focusElement:callEvent( WGUIEVENTS.FOCUSON )
                     end
                 end
-            elseif key == 108 then
+            elseif button == 108 then
                 if hover then
-                    hover:callEvent( "rightclick" )
+                    hover:callEvent( WGUIEVENTS.RIGHTCLICK )
                 end
 
                 rs.cursor.keyRight = true
@@ -174,15 +195,16 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( key )
     end
 end )
 
-hook.add( "InputReleased", "wgui:hook:InputReleased", function( key )
+hook.add( "InputReleased", "wgui:hook:InputReleased", function( button )
     for rst, category in pairs( wgui.renderSpaces ) do
         for _, rs in pairs( category ) do
             if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
-            if key == 107 or ( key == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
+            if button == 107 or ( button == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
+                rs.cursor.clickElement:callEvent( WGUIEVENTS.CLICKRELEASE )
                 rs.cursor.keyLeft = false
                 rs.cursor.clickElement = nil
-            elseif key == 108 then
+            elseif button == 108 then
                 rs.cursor.keyRight = false
             end
         end
@@ -220,7 +242,7 @@ hook.add( "render", "wgui:hook:render", function()
 
         if rs.cursor.enabled and ( x ~= rs.cursor.position.x or y ~= rs.cursor.position.y ) then
             rs.cursor.position.x, rs.cursor.position.y = math.round( x / w * rs.data.sizeGlobal.w ), math.round( y / h * rs.data.sizeGlobal.h )
-            rs:callEvent( "cursormoved", rs.cursor.position.x, rs.cursor.position.y )
+            rs:callEvent( WGUIEVENTS.CURSORMOVED, rs.cursor.position.x, rs.cursor.position.y )
         end
 
         render.setRenderTargetTexture( rs.data.renderTarget )
@@ -237,7 +259,7 @@ end )
 -- Подчищаю мусор?
 hook.add( "Removed", "wgui:hook:Removed", function()
     for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
-        rs:callEvent( "removed" )
+        rs:callEvent( WGUIEVENTS.REMOVED ) 
     end
 end )
 

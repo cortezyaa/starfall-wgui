@@ -188,7 +188,7 @@ Element.sysRemove = function( self )
         child:sysRemove()
     end
 
-    self:callEvent( "removed" )
+    self:callEvent( WGUIEVENTS.REMOVED ) 
 
     self.valid = false
     self.data = {}
@@ -240,12 +240,12 @@ Element.setParent = function( self, parent )
         if self.data.parent then
             table.removeByValue( self.data.parent.data.children, self )
             self.data.parent:sysRecalculate()
-            self.data.parent:callEvent( "childrenremoved", self )
+            self.data.parent:callEvent( WGUIEVENTS.CHILDRENREMOVED, self )
             self.data.parent = nil
 
             table.insert( self.data.renderSpace.data.children, self )
             self:sysRecalculate()
-            self.data.renderSpace:callEvent( "childrenadded", self )
+            self.data.renderSpace:callEvent( WGUIEVENTS.CHILDRENADDED, self )
         end
 
         return
@@ -260,14 +260,14 @@ Element.setParent = function( self, parent )
         if oldparent then
             table.removeByValue( oldparent.data.children, self )
             oldparent:sysRecalculate()
-            oldparent:callEvent( "childrenremoved", self )
+            oldparent:callEvent( WGUIEVENTS.CHILDRENREMOVED, self )
             self.data.parent = nil
         end
 
         self.data.renderSpace = parent
         table.insert( parent.data.children, self )
         self:sysRecalculate()
-        parent:callEvent( "childrenadded", self )
+        parent:callEvent( WGUIEVENTS.CHILDRENADDED, self )
 
         return
     end
@@ -280,7 +280,7 @@ Element.setParent = function( self, parent )
     if oldparent then
         table.removeByValue( oldparent.data.children, self )
         oldparent:sysRecalculate()
-        oldparent:callEvent( "childrenremoved", self )
+        oldparent:callEvent( WGUIEVENTS.CHILDRENREMOVED, self )
         self.data.parent = nil
     end
     
@@ -291,7 +291,7 @@ Element.setParent = function( self, parent )
     self.data.parentsTree = buildTree( self, { self.data.renderSpace } )
 
     self:sysRecalculate()
-    parent:callEvent( "childrenadded", self )
+    parent:callEvent( WGUIEVENTS.CHILDRENADDED, self )
 end
 
 -- Получение родительского элемента
@@ -446,7 +446,7 @@ Element.setValue = function( self, value )
     self.data.value = value
 
     self:sysRecalculateColors()
-    self:callEvent( "valuechanged", value, valueOld )
+    self:callEvent( WGUIEVENTS.VALUECHANGED, value, valueOld )
 end
 
 -- Получение значением
@@ -511,6 +511,7 @@ end
 Element.addEvent = function( self, event, callback )
     self:sysValidate()
     checkType( event, "string" )
+    checkEnum( event, "WGUIEVENTS" )
     checkType( callback, "function" )
 
     self.events[ event ] = callback
@@ -589,28 +590,32 @@ Element.debugrender = function( self )
         child:debugrender()
     end
 
+    render.setRGBA( self.data.focus and 0 or 255, 255, 255, self.data.focus and math.abs( math.sin( timer.curtime() * 5 ) * 255 ) or 255 )
+    render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    
     render.setFont( "DebugFixed" )
     render.setRGBA( 255, 255, 255, 255 )
-    render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
+    local O = 10
     local L = -1
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "element : " .. tostring( self.data.elementName ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "uid : " .. self.uid )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "transition : " .. tostring( self.data.transition ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "hover : " .. tostring( self.data.hover ) .. " / focus : " .. tostring( self.data.focus ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "element : " .. tostring( self.data.elementName ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "uid : " .. self.uid )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "value : " .. tostring( self.data.value ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "transition : " .. tostring( self.data.transition ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "hover : " .. tostring( self.data.hover ) .. " / focus : " .. tostring( self.data.focus ) )
+    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
 
     -- renderSpace
     if self.isRenderSpace then
-        L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +12*L, "enabled : " .. tostring( self.cursor.enabled ) )
+        L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "enabled : " .. tostring( self.cursor.enabled ) )
 
         local TAL, TAC = TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER
         
         render.setRGBA( 255, 255, 255, 255 )
         render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
-        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 12, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
-        render.drawSimpleText( self.cursor.position.x + 12, self.cursor.position.y + 24, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
+        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O*2, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
     end
 
     render.setRGBA( 255, 0, 0, 255 )

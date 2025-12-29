@@ -1,25 +1,126 @@
 --@name test
 --@author cortez
 
-if SERVER then return end
+--@name test[wgui]
+--@author cortez
 
--- if player() ~= owner() then return end
+if SERVER then
+    -- connect screen to chip
+    if chip():isWeldedTo() and chip():isWeldedTo():getClass() == "starfall_screen" then
+        chip():isWeldedTo():linkComponent( chip() )
+        chip():setColor( Color( 255, 255, 255, 255 ) )
+        
+        hook.add( "ClientInitialized", "setup", function( ply )
+            net.start( "setup" )
+            net.send( ply )
+        end )
+    else
+        print( "Place the chip on the starfall screen" )
+        chip():remove()
+    end
+    
+    return
+end
 
-local wgui = require( "./wgui.lua" ) --@include ./wgui.lua
-wgui.debug = true
--- enableHud( player(), true )
-
-local rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
-rs:setScreen( chip():getLinkedComponents()[ 1 ] )
-
-local space = wgui.create( "space", rs )
-space:setPos( 100, 100 )
-space:setSize( 1024 - 256, 1024 - 256 )
+--@include ./wgui.lua
 
 
-local panel = wgui.create( "panel", space )
-panel:setPos( 0, 0 )
-panel:setSize( 64, 64 )
+local function setup()
+    enableHud( player(), true )
+    require( "./wgui.lua" )
+    wgui.debug = false
+    
+    local e = {}
+    
+    e.rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
+    e.rs:setScreen( chip():getLinkedComponents()[ 1 ] )
+    
+    e.space = wgui.create( "space", e.rs )
+    e.space:setPos( 64, 64 )
+    e.space:setSize( 1024 - 128, 1024 - 128 )
+    
+    local btn1 = wgui.create( "button", e.space )
+    btn1:setPos( 32, 32 )
+    btn1:setSize( 32, 32 )
+    
+    local btn2
+    
+    for xx = 1, 10 do
+        btn2 = wgui.create( "button", e.space )
+        btn2:setPos( 256, 64 + xx * 48 )
+        btn2:setSize( 32, 32 )
+        btn2.linkable = true
+    end
+    
+    -- bezier shit
+    btn1.prevpaint = btn1.paint
+    
+    btn1.paint = function( self )
+        if btn1.bzra or btn1.link then
+            btn1.bzr.v1 = Vector( btn1.data.positionGlobal.x + btn1.data.sizeGlobal.w / 2, btn1.data.positionGlobal.y + btn1.data.sizeGlobal.h / 2 )
+            
+            if btn1.bzra then
+                btn1.bzr.v4 = Vector( btn1.data.renderSpace.cursor.position.x, btn1.data.renderSpace.cursor.position.y )
+            else
+                btn1.bzr.v4 = Vector( btn1.link.data.positionGlobal.x + btn1.link.data.sizeGlobal.w / 2, btn1.link.data.positionGlobal.y + btn1.link.data.sizeGlobal.h / 2 )
+            end
+            
+            local dist = ( btn1.bzr.v4.x - ( btn1.data.positionGlobal.x + btn1.data.sizeGlobal.w / 2 ) ) * 0.66
+            
+            btn1.bzr.v2 = btn1.bzr.v1 + Vector( dist, 0 )
+            btn1.bzr.v3 = btn1.bzr.v4 + Vector( -dist, 0 )
+            
+            local step = 10
+            
+            for iter = 0, 100, step do
+                if iter == 0 then continue end
+                
+                local ppp = math.bezierVectorCubic( 0.01 * ( iter - step ), btn1.bzr.v1, btn1.bzr.v2, btn1.bzr.v3, btn1.bzr.v4 )
+                local nnn = math.bezierVectorCubic( 0.01 * iter, btn1.bzr.v1, btn1.bzr.v2, btn1.bzr.v3, btn1.bzr.v4 )
+                
+                render.setRGBA( 255, 0, 0, 255 )
+                render.drawLine( ppp.x, ppp.y, nnn.x, nnn.y )
+            end
+        end
+        
+        self:prevpaint()
+    end
+    
+    btn1.bzr = { v1 = Vector(), v2 = Vector(), v3 = Vector(), v4 = Vector() }
+    btn1.bzra = false
+    btn1.link = btn2
+    
+    btn1:addEvent( "click", function( self )
+        self.bzra = true
+    end )
+    
+    btn1:addEvent( "clickrelease", function( self )
+        self.bzra = false
+        local hover = self.data.renderSpace.data.hoverElement
+        self.link = hover.linkable == true and hover or nil
+    end )
+    
+    
+    
+    local textbox = wgui.create( "textbox", e.space )
+    textbox:setPos( 512, 64 )
+    textbox:setSize( 256, 64 )
+    
+    textbox:addEvent( "valuechanged", function( self, val, oval )
+        print( val )
+    end )
+end
+
+
+hook.add( "PermissionRequest", "PermissionRequest11", function()
+    if permissionRequestSatisfied() then setup() end
+end )
+
+
+-- nets
+net.receive( "setup", function()
+    setupPermissionRequest( { "enablehud" }, "", true )
+end )
 
 --[[
 local size = 500
@@ -236,13 +337,13 @@ d.data.hitIgnore = true
 wgui.renderSpace.hud:setCursorEnabled( true )
 
 
--- e2.events.hover = function( self ) print( "hover" ) end
-e2.events.hoveron = function( self ) print( "hoveron" ) end
-e2.events.hoveroff = function( self ) print( "hoveroff" ) end
+-- e2.events.hover = function( self ) print( WGUIEVENTS.HOVER ) end
+e2.events.hoveron = function( self ) print( WGUIEVENTS.HOVERON ) end
+e2.events.hoveroff = function( self ) print( WGUIEVENTS.HOVEROFF ) end
 
-e2.events.click = function( self ) print( "click" ) end
+e2.events.click = function( self ) print( WGUIEVENTS.CLICK ) end
 e2.events.dblclick = function( self ) print( "dblclick" ) end
-e2.events.rightclick = function( self ) print( "rightclick" ) end
+e2.events.rightclick = function( self ) print( WGUIEVENTS.RIGHTCLICK ) end
 e2.events.clickhover = function( self ) print( "clickhover" ) end
 
 

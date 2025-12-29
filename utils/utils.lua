@@ -61,7 +61,6 @@ end
 
 -- Функция проверяет существует ли данное значение в указанной enumeration таблице
 function checkEnum( object, enum, shouldError )
-    checkType( object, "number" )
     checkType( enum, "string" )
     checkType( shouldError, { "boolean", "nil" } )
 
@@ -111,7 +110,7 @@ function printm( ... )
     local res = ""
 
     for _, tx in pairs( { ... } ) do
-        res = res .. tx .. " ; "
+        res = res .. tostring( tx ) .. " ; "
     end
 
     print( res )

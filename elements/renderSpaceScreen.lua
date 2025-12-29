@@ -130,15 +130,15 @@ local function cursorProcess( rs, self, x, y )
 
     if rs.data.hoverElement then
         rs.data.hoverElement.data.hover = false
-        rs.data.hoverElement:callEvent( "hoveroff" )
+        rs.data.hoverElement:callEvent( WGUIEVENTS.HOVEROFF )
     end
 
     rs.data.hoverElement = self == rs and nil or self
-    rs:callEvent( "hoverchanged", rs.data.hoverElement, oldhover )
+    rs:callEvent( WGUIEVENTS.HOVERCHANGED, rs.data.hoverElement, oldhover )
 
     if rs.data.hoverElement then
         rs.data.hoverElement.data.hover = true
-        rs.data.hoverElement:callEvent( "hoveron" )
+        rs.data.hoverElement:callEvent( WGUIEVENTS.HOVERON )
     end
 end
 
@@ -150,16 +150,16 @@ Element.process = function( self )
         local hover = self.data.hoverElement
 
         if hover then
-            hover:callEvent( "hover" )
+            hover:callEvent( WGUIEVENTS.HOVER )
         end
 
         local click = self.cursor.clickElement
 
         if self.cursor.keyLeft and click then
-            click:callEvent( "hoverclick" )
+            click:callEvent( WGUIEVENTS.HOVERCLICK )
 
             if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) then
-                click:callEvent( "hoverclickdelayed" )
+                click:callEvent( WGUIEVENTS.HOVERCLICKDELAYED )
             end
         end
     end
