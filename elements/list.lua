@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/list", BaseElement )
+local Element = class( "wgui/list", BaseElement )
 Element.static.elementName = "list"
 
 
@@ -27,7 +27,7 @@ Element.initialize = function( self )
 
     self.data.colors.fill = table.rgba( self.data.palette.fill )
     self.data.colors.back = table.rgba( self.data.palette.button )
-    self.data.colors.thumb = table.rgba()
+    self.data.colors.thumb = table.rgba( self.data.palette.button_selected )
 
     -- Ивенты
     self.events.system.click = function( self )

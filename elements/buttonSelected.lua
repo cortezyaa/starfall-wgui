@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/buttonSelected", BaseElement )
+local Element = class( "wgui/buttonSelected", BaseElement )
 Element.static.elementName = "buttonSelected"
 
 
@@ -11,7 +11,7 @@ Element.static.elementName = "buttonSelected"
 Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
-    self.data.colors.fill = table.rgba()
+    self.data.colors.fill = table.rgba( self.data.palette.button )
 
     -- Ивенты
     self.events.system.click = function( self )

@@ -103,7 +103,7 @@ end
 -- Регистрация элементов
 local function registerIncludedElements()
     local custom = {
-        [ "base" ] = function() end,
+        -- [ "base" ] = function() end,
     }
 
     for _, elementClass in pairs( requiredir( "./elements/" ) ) do
@@ -240,9 +240,13 @@ hook.add( "render", "wgui:hook:render", function()
         local x, y = render.cursorPos()
         rs.cursor.enabled = not not x
 
-        if rs.cursor.enabled and ( x ~= rs.cursor.position.x or y ~= rs.cursor.position.y ) then
-            rs.cursor.position.x, rs.cursor.position.y = math.round( x / w * rs.data.sizeGlobal.w ), math.round( y / h * rs.data.sizeGlobal.h )
-            rs:callEvent( WGUIEVENTS.CURSORMOVED, rs.cursor.position.x, rs.cursor.position.y )
+        if rs.cursor.enabled then
+            x, y = math.round( x / w * rs.data.sizeGlobal.w ), math.round( y / h * rs.data.sizeGlobal.h )
+
+            if x ~= rs.cursor.position.x or y ~= rs.cursor.position.y then
+                rs.cursor.position.x, rs.cursor.position.y = x, y
+                rs:callEvent( WGUIEVENTS.CURSORMOVED, rs.cursor.position.x, rs.cursor.position.y )
+            end
         end
 
         render.setRenderTargetTexture( rs.data.renderTarget )

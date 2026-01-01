@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/slider", BaseElement )
+local Element = class( "wgui/slider", BaseElement )
 Element.static.elementName = "slider"
 
 
@@ -17,7 +17,7 @@ Element.initialize = function( self )
     self.data.valueSnap = 0
 
     self.data.colors.fill = table.rgba( self.data.palette.button )
-    self.data.colors.thumb = table.rgba()
+    self.data.colors.thumb = table.rgba( self.data.palette.button_selected )
 
     -- Ивенты
     self.events.system.hoverclick = function( self )

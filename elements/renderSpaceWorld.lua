@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/renderSpaceWorld", BaseElement )
+local Element = class( "wgui/renderSpaceWorld", BaseElement )
 Element.static.elementName = "renderSpaceWorld"
 
 

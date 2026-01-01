@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/scroll", BaseElement )
+local Element = class( "wgui/scroll", BaseElement )
 Element.static.elementName = "scroll"
 
 
@@ -21,7 +21,7 @@ Element.initialize = function( self )
     self.data.thumbOffset = 0
 
     self.data.colors.fill = table.rgba( self.data.palette.button )
-    self.data.colors.thumb = table.rgba()
+    self.data.colors.thumb = table.rgba( self.data.palette.button_selected )
 
     -- Ивенты
     self.events.system.click = function( self )

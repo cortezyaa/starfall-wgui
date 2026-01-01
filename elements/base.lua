@@ -5,7 +5,7 @@ requiredir( "../utils/" ) --@includedir ../utils/
 
 
 -- Создание класса
-local Element = class( "wgui/e/base" )
+local Element = class( "wgui/base" )
 Element.static.elementName = "base"
 
 

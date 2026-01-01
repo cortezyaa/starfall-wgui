@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/radio", BaseElement )
+local Element = class( "wgui/radio", BaseElement )
 Element.static.elementName = "radio"
 
 
@@ -12,7 +12,7 @@ Element.initialize = function( self )
     BaseElement.initialize( self, Element.static.elementName )
 
     self.data.colors.fill = table.rgba( self.data.palette.button )
-    self.data.colors.check = table.rgba()
+    self.data.colors.check = table.rgba( self.data.palette.fill )
 
     self.data.linkuid = ""
 

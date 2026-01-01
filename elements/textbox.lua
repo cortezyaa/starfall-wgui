@@ -3,7 +3,7 @@
 
 -- Создание класса элемента
 local BaseElement = require( "./base.lua" ) --@include ./base.lua
-local Element = class( "wgui/e/textbox", BaseElement )
+local Element = class( "wgui/textbox", BaseElement )
 Element.static.elementName = "textbox"
 
 
