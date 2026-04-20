@@ -166,3 +166,23 @@ uidlib.variants = function( length )
 
     return ( #uidlib.chars ) ^ length
 end
+
+
+-- Небольшое расширение input библиотеки
+-- Которое должно быть по дефолту btw
+input.lockCooldown = convar.getFloat( "sf_input_lock_cooldown" )
+input.lockedControlCooldown = 0
+
+input.old_lockControls = input.lockControls
+input.lockControls = function( enable )
+    if not enable then
+        input.old_lockControls( false )
+        return
+    end
+
+    if not input.canLockControls() then return end
+    input.old_lockControls( true )
+
+    if not input.isControlLocked() then return end
+    input.lockedControlCooldown = timer.curtime()
+end

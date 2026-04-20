@@ -65,9 +65,7 @@ ondrop	event occurs when an element or text selection is being dropped on a vali
 
 todo
 
-функция регистрации колбэков (ивентов)
-
-
+там вроде надо DOCK править, но я не уверен!
 
 сигма музыка
 

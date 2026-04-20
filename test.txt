@@ -1,8 +1,6 @@
 --@name test
 --@author cortez
 
---@name test[wgui]
---@author cortez
 
 if SERVER then
     -- connect screen to chip
@@ -103,8 +101,24 @@ local function setup()
     
     
     local textbox = wgui.create( "textbox", e.space )
-    textbox:setPos( 512, 64 )
-    textbox:setSize( 256, 64 )
+    textbox:setPos( 512, 60 )
+    textbox:setSize( 256, 58 )
+    
+    textbox:addEvent( "valuechanged", function( self, val, oval )
+        print( val )
+    end )
+    
+    local textbox = wgui.create( "textbox", e.space )
+    textbox:setPos( 512, 120 )
+    textbox:setSize( 256, 58 )
+    
+    textbox:addEvent( "valuechanged", function( self, val, oval )
+        print( val )
+    end )
+    
+    local textbox = wgui.create( "textbox", e.space )
+    textbox:setPos( 512, 180 )
+    textbox:setSize( 256, 58 )
     
     textbox:addEvent( "valuechanged", function( self, val, oval )
         print( val )

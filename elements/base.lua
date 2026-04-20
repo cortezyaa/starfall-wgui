@@ -202,6 +202,12 @@ Element.sysRecalculateColors = function( self )
 end
 
 
+-- Функция проверки возможностьи фокуса на элементе
+Element.sysFocus = function( self )
+    return true
+end
+
+
 -- Функция проверки действительности элемента
 Element.isValid = function( self )
     return self.valid

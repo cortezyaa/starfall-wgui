@@ -133,7 +133,7 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
                 local key = KEYBOARD[ ( input.isShiftDown() and "u" or "" ) .. tostring( button ) ]
 
                 if key then
-                    if key == "ENTER" then
+                    if key == "ENTER" or not input.isControlLocked() then
                         focus.data.focus = false
                         focus:callEvent( WGUIEVENTS.FOCUSOFF )
                         rs.data.focusElement = nil
@@ -176,7 +176,7 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
                         rs.data.focusElement:callEvent( WGUIEVENTS.FOCUSOFF )
                     end
 
-                    rs.data.focusElement = hover.isRenderSpace == true and nil or hover
+                    rs.data.focusElement = hover.isRenderSpace == true and nil or ( hover:sysFocus() and hover or nil )
                     rs:callEvent( WGUIEVENTS.FOCUSCHANGED, rs.data.focusElement, oldfocus )
 
                     if rs.data.focusElement then
@@ -200,7 +200,7 @@ hook.add( "InputReleased", "wgui:hook:InputReleased", function( button )
         for _, rs in pairs( category ) do
             if not ( rs.cursor.keyLeft or rs.cursor.keyRight ) then continue end
 
-            if button == 107 or ( button == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
+            if rs.cursor.clickElement and ( button == 107 or ( button == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) ) then
                 rs.cursor.clickElement:callEvent( WGUIEVENTS.CLICKRELEASE )
                 rs.cursor.keyLeft = false
                 rs.cursor.clickElement = nil
