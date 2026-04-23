@@ -103,26 +103,31 @@ local function setup()
     local textbox = wgui.create( "textbox", e.space )
     textbox:setPos( 512, 60 )
     textbox:setSize( 256, 58 )
+    textbox:setAlign( TEXT_ALIGN.LEFT )
     
     textbox:addEvent( "valuechanged", function( self, val, oval )
         print( val )
     end )
     
     local textbox = wgui.create( "textbox", e.space )
-    textbox:setPos( 512, 120 )
+    textbox:setPos( 512, 130 )
     textbox:setSize( 256, 58 )
+    textbox:setAlign( TEXT_ALIGN.CENTER )
     
     textbox:addEvent( "valuechanged", function( self, val, oval )
         print( val )
     end )
     
     local textbox = wgui.create( "textbox", e.space )
-    textbox:setPos( 512, 180 )
+    textbox:setPos( 512, 200 )
     textbox:setSize( 256, 58 )
+    textbox:setAlign( TEXT_ALIGN.RIGHT )
     
     textbox:addEvent( "valuechanged", function( self, val, oval )
         print( val )
     end )
+    
+    timer.simple( 5, function() textbox:remove() end )
 end
 
 
@@ -179,7 +184,7 @@ end )
 --]]
 
 --[[
--- что то типо карточек стим 
+--      
 local rss = {}
 
 rss[ 1 ] = wgui.createRenderSpace( RENDERSPACE.HUD )

@@ -125,8 +125,7 @@ end
 
 -- onScreenSizeChanged hook ( https://wiki.facepunch.com/gmod/GM:OnScreenSizeChanged )
 local hookscrw, hookscrh = render.getGameResolution()
-
-local z = timer.create( "hook:onScreenSizeChanged", 10, 0, function()
+timer.create( "hook:onScreenSizeChanged", 10, 0, function()
     local w, h = render.getGameResolution()
 
     if hookscrw ~= w or hookscrh ~= h then
@@ -186,3 +185,10 @@ input.lockControls = function( enable )
     if not input.isControlLocked() then return end
     input.lockedControlCooldown = timer.curtime()
 end
+
+local inputControlLocked = input.isControlLocked() -- ❤ это просто что-то
+timer.create( "hook:onControlLockedChanged", 0.1, 0, function()
+    if inputControlLocked == input.isControlLocked() then return end
+    inputControlLocked = input.isControlLocked()
+    hook.run( "onControlLockedChanged", inputControlLocked )
+end )

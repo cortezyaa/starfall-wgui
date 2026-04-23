@@ -18,7 +18,8 @@ Element.initialize = function( self )
     self.data.keyboardInput = true
 
     self.data.value = "string"
-    self.data.font = "ChatFont"
+    self.data.textFont = "ChatFont"
+    self.data.textAlign = TEXT_ALIGN.CENTER
 
     -- Ивенты
     self.events.system.focuson = function( self )
@@ -33,6 +34,12 @@ Element.initialize = function( self )
         self:sysRecalculateColors()
 
         if input.isControlLocked() then
+            input.lockControls( false )
+        end
+    end
+
+    self.events.system.removed = function( self )
+        if self.data.focus and input.isControlLocked() then
             input.lockControls( false )
         end
     end
@@ -66,13 +73,28 @@ Element.setFont = function( self, font )
     self:sysValidate()
     checkType( font, "string" )
 
-    self.data.font = font
+    self.data.textFont = font
 end
 
 -- Функция получения шрифта
 Element.getFont = function( self )
     self:sysValidate()
-    return self.data.font
+    return self.data.textFont
+end
+
+
+-- Функция установки выравнивания
+Element.setAlign = function( self, align )
+    self:sysValidate()
+    checkType( align, "number" )
+
+    self.data.textAlign = align
+end
+
+-- Функция получения выравнивания
+Element.getAlign = function( self )
+    self:sysValidate()
+    return self.data.textAlign
 end
 
 
@@ -83,16 +105,6 @@ Element.paint = function( self )
 
     render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
     render.drawRectFast( self.data.positionGlobal.x + 1, self.data.positionGlobal.y + 1, self.data.sizeGlobal.w - 2, self.data.sizeGlobal.h - 2 )
-    
-    render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
-    render.setFont( self.data.font )
-    render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.CENTER, TEXT_ALIGN.CENTER )
-
-    if self.data.focus then -- ну блять эта косочка
-        local w, h = render.getTextSize( self.data.value )
-        render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a - math.abs( math.tan( timer.curtime() * 2 ) ) * 155 )
-        render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + w / 2 + 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
-    end
 
     if input.lockedControlCooldown + input.lockCooldown >= timer.curtime() then
         render.setRGBA( self.data.colors.border.r, self.data.colors.border.g, self.data.colors.border.b, self.data.colors.border.a )
@@ -102,6 +114,110 @@ Element.paint = function( self )
             self.data.sizeGlobal.w * ( ( timer.curtime() - input.lockedControlCooldown ) / input.lockCooldown ), 
             2
         )
+    end
+end
+
+
+-- Функция отрисовки текста
+Element.paintText = function( self )
+    render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
+    render.setFont( self.data.textFont )
+
+    local w, h = render.getTextSize( self.data.value )
+
+    if self.data.textAlign == TEXT_ALIGN.LEFT then
+        render.drawSimpleText( self.data.positionGlobal.x + 7, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+    elseif self.data.textAlign == TEXT_ALIGN.RIGHT then
+        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w - 10, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.RIGHT, TEXT_ALIGN.CENTER )
+    elseif self.data.textAlign == TEXT_ALIGN.CENTER then
+        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.CENTER, TEXT_ALIGN.CENTER )
+    end
+
+    if self.data.focus then
+        render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a - math.abs( math.tan( timer.curtime() * 3 ) ) * 155 )
+
+        if self.data.textAlign == TEXT_ALIGN.LEFT then
+            render.drawRectFast( self.data.positionGlobal.x + w + 10, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+        elseif self.data.textAlign == TEXT_ALIGN.RIGHT then
+            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - 7, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+        elseif self.data.textAlign == TEXT_ALIGN.CENTER then
+            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + w / 2 + 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+        end
+    end
+end
+
+
+-- Функции рендера элемента
+Element.render = function( self )
+    if not self.valid then return end
+    
+    if self.data.noDraw then return end
+
+    local oldtransition = self.data.transition
+    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.curtime ) / self.data.transitionTime ), 0, 1 )
+
+    if self.data.transition ~= oldtransition then
+        self:sysRecalculateColors()
+    end
+
+    self.data.curtime = timer.curtime()
+
+    if self.data.shouldDraw then
+        if self.data.shouldUseStencil then
+            render.setStencilEnable( true )
+            render.clearStencil()
+            render.setStencilTestMask( 255 )
+            render.setStencilWriteMask( 255 )
+            render.setStencilPassOperation( STENCIL.KEEP )
+            render.setStencilZFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.NEVER )
+            render.setStencilReferenceValue( 1 )
+            render.setStencilFailOperation( STENCIL.REPLACE )
+
+            render.drawRectFast( 
+                self.data.overflowBox.left, 
+                self.data.overflowBox.top, 
+                self.data.overflowBox.right - self.data.overflowBox.left,
+                self.data.overflowBox.bottom - self.data.overflowBox.top
+            )
+
+            render.setStencilFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.EQUAL )
+
+            self:paint()
+
+            render.setStencilEnable( false )
+        else
+            self:paint()
+        end
+
+        render.setStencilEnable( true )
+        render.clearStencil()
+        render.setStencilTestMask( 255 )
+        render.setStencilWriteMask( 255 )
+        render.setStencilPassOperation( STENCIL.KEEP )
+        render.setStencilZFailOperation( STENCIL.KEEP )
+        render.setStencilCompareFunction( STENCIL.NEVER )
+        render.setStencilReferenceValue( 1 )
+        render.setStencilFailOperation( STENCIL.REPLACE )
+
+        render.drawRectFast( 
+            math.max( self.data.overflowBox.left, self.data.positionGlobal.x + 7 ), 
+            math.max( self.data.overflowBox.top, self.data.positionGlobal.y ), 
+            math.min( self.data.overflowBox.right - self.data.overflowBox.left, self.data.sizeGlobal.w - 14 ),
+            math.min( self.data.overflowBox.bottom - self.data.overflowBox.top, self.data.sizeGlobal.h )
+        )
+
+        render.setStencilFailOperation( STENCIL.KEEP )
+        render.setStencilCompareFunction( STENCIL.EQUAL )
+
+        self:paintText()
+
+        render.setStencilEnable( false )
+    end
+
+    for _, child in pairs( self.data.children ) do
+        child:render()
     end
 end
 

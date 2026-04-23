@@ -133,13 +133,22 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
                 local key = KEYBOARD[ ( input.isShiftDown() and "u" or "" ) .. tostring( button ) ]
 
                 if key then
-                    if key == "ENTER" or not input.isControlLocked() then
+                    if key == "ENTER" then
                         focus.data.focus = false
                         focus:callEvent( WGUIEVENTS.FOCUSOFF )
                         rs.data.focusElement = nil
                         focus:setValue( focus.data.value )
                     elseif key == "BACKSPACE" then
                         focus.data.value = string.sub( focus.data.value, 1, #focus.data.value - 1 )
+
+                        timer.create( "TEXTBOX_BACKSPACE", 0.1, 0, function()
+                            if not focus or not focus.data.focus or not input.isKeyDown( 66 ) then
+                                timer.remove( "TEXTBOX_BACKSPACE" )
+                                return
+                            end
+
+                            focus.data.value = string.sub( focus.data.value, 1, #focus.data.value - 1 )
+                        end )
                     else
                         focus.data.value = focus.data.value .. key
                     end
@@ -176,7 +185,8 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
                         rs.data.focusElement:callEvent( WGUIEVENTS.FOCUSOFF )
                     end
 
-                    rs.data.focusElement = hover.isRenderSpace == true and nil or ( hover:sysFocus() and hover or nil )
+                    rs.data.focusElement = hover.isRenderSpace ~= true and ( hover:sysFocus() and hover or nil ) or nil
+
                     rs:callEvent( WGUIEVENTS.FOCUSCHANGED, rs.data.focusElement, oldfocus )
 
                     if rs.data.focusElement then
@@ -207,6 +217,26 @@ hook.add( "InputReleased", "wgui:hook:InputReleased", function( button )
             elseif button == 108 then
                 rs.cursor.keyRight = false
             end
+        end
+    end
+end )
+
+hook.add( "onControlLockedChanged", "wgui:hook:onControlLockedChanged", function( locked )
+    if locked then return end
+
+    for rst, category in pairs( wgui.renderSpaces ) do
+        for _, rs in pairs( category ) do
+            if not rs.cursor.enabled then continue end
+            
+            local focus = rs.data.focusElement
+            
+            if not focus then continue end
+            if focus.data.keyboardInput ~= true then continue end
+
+            focus.data.focus = false
+            focus:callEvent( WGUIEVENTS.FOCUSOFF )
+            rs.data.focusElement = nil
+            focus:setValue( focus.data.value )
         end
     end
 end )
