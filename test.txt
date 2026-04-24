@@ -20,8 +20,54 @@ if SERVER then
     return
 end
 
---@include ./wgui.lua
+if player() ~= owner() then return end
 
+--@include ./wgui.lua
+require( "./wgui.lua" )
+wgui.debug = true
+
+enableHud( player(), true )
+
+local e = {}
+
+
+e.rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
+e.rs:setScreen( chip():getLinkedComponents()[ 1 ] )
+
+
+e.panel = wgui.create( "panel", e.rs )
+e.panel:setPos( 64, 64 )
+e.panel:setSize( 870, 800 )
+e.panel:dockPadding( 20, 20, 20, 20 )
+
+local d = DOCK.TOP
+
+
+e.b1 = wgui.create( "buttonSelected", e.panel )
+e.b1:dock( d )
+e.b1:setSize( 220, 220 )
+
+e.b2 = wgui.create( "buttonSelected", e.panel )
+e.b2:dock( d )
+e.b2:setSize( 220, 220 )
+
+e.b3 = wgui.create( "buttonSelected", e.panel )
+e.b3:dock( d )
+e.b3:setSize( 220, 220 )
+
+e.b4 = wgui.create( "buttonSelected", e.panel )
+e.b4:dock( d )
+e.b4:setSize( 220, 220 )
+
+
+e.b5 = wgui.create( "buttonSelected", e.panel )
+e.b5:dock( d )
+e.b5:setSize( 220, 220 )
+
+
+
+
+--[[
 
 local function setup()
     enableHud( player(), true )

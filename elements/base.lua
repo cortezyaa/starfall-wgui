@@ -101,36 +101,36 @@ Element.sysRecalculation = function( self )
         elseif child.data.dock == DOCK.FILL then
             table.insert( fill, child )
         elseif child.data.dock == DOCK.LEFT then
+            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
+            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
+
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
-
-            child.data.sizeGlobal.w = child.data.sizeLocal.w
-            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
             space.left = space.left + child.data.sizeGlobal.w + child.data.dockMargin.left + child.data.dockMargin.right
         elseif child.data.dock == DOCK.TOP then
+            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
+            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
-
-            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = child.data.sizeLocal.h
 
             space.top = space.top + child.data.sizeGlobal.h + child.data.dockMargin.top + child.data.dockMargin.bottom
         elseif child.data.dock == DOCK.RIGHT then
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeLocal.w - child.data.dockMargin.right
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
-                
-            child.data.sizeGlobal.w = child.data.sizeLocal.w
+            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
             child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
-                
+
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeGlobal.w - child.data.dockMargin.right
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
+
             space.right = space.right - child.data.sizeGlobal.w - child.data.dockMargin.left - child.data.dockMargin.right
         elseif child.data.dock == DOCK.BOTTOM then
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeLocal.h - child.data.dockMargin.bottom
-                
             child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = child.data.sizeLocal.h
-                
+            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+
+            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
+            child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.bottom
+
             space.bottom = space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.top - child.data.dockMargin.bottom
         end
     end
@@ -168,6 +168,7 @@ Element.sysRecalculation = function( self )
 
         child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
         child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
+        child.data.shouldDraw =  not ( child.data.sizeGlobal.w <= 0 or child.data.sizeGlobal.h <= 0 ) and child.data.shouldDraw or false
 
         child:sysRecalculation()
     end

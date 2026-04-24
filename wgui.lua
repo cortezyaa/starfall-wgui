@@ -16,7 +16,7 @@ wgui.renderSpaces = { HUD = {}, SCREEN = {}, WORLD = {} }
 wgui.links = {}
 
 -- debug
-wgui.debug = true
+wgui.debug = false
 
 -- Cтандартная таблица цветов
 wgui.palette = {

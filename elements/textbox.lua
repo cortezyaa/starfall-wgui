@@ -20,6 +20,7 @@ Element.initialize = function( self )
     self.data.value = "string"
     self.data.textFont = "ChatFont"
     self.data.textAlign = TEXT_ALIGN.CENTER
+    self.data.textStencil = false
 
     -- Ивенты
     self.events.system.focuson = function( self )
@@ -124,6 +125,7 @@ Element.paintText = function( self )
     render.setFont( self.data.textFont )
 
     local w, h = render.getTextSize( self.data.value )
+    self.data.textStencil = w > ( self.data.sizeGlobal.w - 14 )
 
     if self.data.textAlign == TEXT_ALIGN.LEFT then
         render.drawSimpleText( self.data.positionGlobal.x + 7, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
@@ -191,29 +193,39 @@ Element.render = function( self )
             self:paint()
         end
 
-        render.setStencilEnable( true )
-        render.clearStencil()
-        render.setStencilTestMask( 255 )
-        render.setStencilWriteMask( 255 )
-        render.setStencilPassOperation( STENCIL.KEEP )
-        render.setStencilZFailOperation( STENCIL.KEEP )
-        render.setStencilCompareFunction( STENCIL.NEVER )
-        render.setStencilReferenceValue( 1 )
-        render.setStencilFailOperation( STENCIL.REPLACE )
+        if self.data.shouldUseStencil or self.data.textStencil then
+            render.setStencilEnable( true )
+            render.clearStencil()
+            render.setStencilTestMask( 255 )
+            render.setStencilWriteMask( 255 )
+            render.setStencilPassOperation( STENCIL.KEEP )
+            render.setStencilZFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.NEVER )
+            render.setStencilReferenceValue( 1 )
+            render.setStencilFailOperation( STENCIL.REPLACE )
 
-        render.drawRectFast( 
-            math.max( self.data.overflowBox.left, self.data.positionGlobal.x + 7 ), 
-            math.max( self.data.overflowBox.top, self.data.positionGlobal.y ), 
-            math.min( self.data.overflowBox.right - self.data.overflowBox.left, self.data.sizeGlobal.w - 14 ),
-            math.min( self.data.overflowBox.bottom - self.data.overflowBox.top, self.data.sizeGlobal.h )
-        )
+            render.drawRectFast( 
+                math.max( self.data.overflowBox.left, self.data.positionGlobal.x + 7 ), 
+                math.max( self.data.overflowBox.top, self.data.positionGlobal.y ), 
+                
+                ( ( self.data.positionGlobal.x + self.data.sizeGlobal.w - 7 ) <= self.data.overflowBox.right ) 
+                    and ( self.data.sizeGlobal.w - 14 ) 
+                    or ( self.data.overflowBox.right - self.data.positionGlobal.x - 7 ),
 
-        render.setStencilFailOperation( STENCIL.KEEP )
-        render.setStencilCompareFunction( STENCIL.EQUAL )
+                ( ( self.data.positionGlobal.y + self.data.sizeGlobal.h ) <= self.data.overflowBox.bottom ) 
+                    and ( self.data.sizeGlobal.h ) 
+                    or ( self.data.overflowBox.right - self.data.positionGlobal.y )
+            )
 
-        self:paintText()
+            render.setStencilFailOperation( STENCIL.KEEP )
+            render.setStencilCompareFunction( STENCIL.EQUAL )
 
-        render.setStencilEnable( false )
+            self:paintText()
+
+            render.setStencilEnable( false )
+        else
+            self:paintText()
+        end
     end
 
     for _, child in pairs( self.data.children ) do
