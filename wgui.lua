@@ -161,19 +161,19 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
 
             if button == 107 or ( button == 15 and rst ~= RENDERSPACENAME[ RENDERSPACE.HUD ] ) then
                 if hover then
-                    if ( rs.cursor.dblclickElement == hover ) and ( ( timer.curtime() - rs.cursor.dblclickTime ) < 0.2 ) then
+                    if ( rs.cursor.dblclickElement == hover ) and ( ( timer.realtime() - rs.cursor.dblclickTime ) < 0.2 ) then
                         hover:callEvent( WGUIEVENTS.DOUBLECLICK )
                         rs.cursor.dblclickTime = 0
                         rs.cursor.dblclickElement = nil
                     else
                         hover:callEvent( WGUIEVENTS.CLICK )
-                        rs.cursor.dblclickTime = timer.curtime()
+                        rs.cursor.dblclickTime = timer.realtime()
                         rs.cursor.dblclickElement = hover
                     end
                 end
 
                 rs.cursor.keyLeft = true
-                rs.cursor.clickTime = timer.curtime()
+                rs.cursor.clickTime = timer.realtime()
                 rs.cursor.clickElement = hover
                 rs.cursor.clickPosition.x, rs.cursor.clickPosition.y = rs.cursor.position.x, rs.cursor.position.y
 

@@ -101,7 +101,7 @@ table.rgba = function( r, g, b, a )
         return { r = r.r, g = r.g, b = r.b, a = r.a }
     end
 
-    return { r = r or 0, g = g or 0, b = b or 0, a = a or 0 }
+    return { r = r or 255, g = g or 255, b = b or 255, a = a or 255 }
 end
 
 
@@ -134,61 +134,4 @@ timer.create( "hook:onScreenSizeChanged", 10, 0, function()
 
         hook.run( "onScreenSizeChanged", w, h )
     end
-end )
-
-
--- Мини-библиотека генерирующая uid'шники
-uidlib = { list = {}, chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" }
-
-uidlib.generate = function( length )
-    checkType( length, { "nil", "number" } )
-    length = length or 8
-
-    local uid = ""
-
-    for char = 1, length do
-        uid = uid .. uidlib.chars[ math.random( 1, #uidlib.chars ) ]
-    end
-
-    if uidlib.list[ uid ] then
-        uid = uidlib.generate( length )
-    end
-
-    uidlib.list[ uid ] = true
-
-    return uid
-end
-
-uidlib.variants = function( length )
-    checkType( length, { "nil", "number" } )
-    length = length or 8
-
-    return ( #uidlib.chars ) ^ length
-end
-
-
--- Небольшое расширение input библиотеки
--- Которое должно быть по дефолту btw
-input.lockCooldown = convar.getFloat( "sf_input_lock_cooldown" )
-input.lockedControlCooldown = 0
-
-input.old_lockControls = input.lockControls
-input.lockControls = function( enable )
-    if not enable then
-        input.old_lockControls( false )
-        return
-    end
-
-    if not input.canLockControls() then return end
-    input.old_lockControls( true )
-
-    if not input.isControlLocked() then return end
-    input.lockedControlCooldown = timer.curtime()
-end
-
-local inputControlLocked = input.isControlLocked() -- ❤ это просто что-то
-timer.create( "hook:onControlLockedChanged", 0.1, 0, function()
-    if inputControlLocked == input.isControlLocked() then return end
-    inputControlLocked = input.isControlLocked()
-    hook.run( "onControlLockedChanged", inputControlLocked )
 end )

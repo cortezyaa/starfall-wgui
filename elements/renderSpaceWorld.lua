@@ -204,7 +204,7 @@ Element.process = function( self )
         if self.cursor.keyLeft and click then
             click:callEvent( WGUIEVENTS.HOVERCLICK )
 
-            if ( timer.curtime() - self.cursor.clickTime >= 0.25 ) then
+            if ( timer.realtime() - self.cursor.clickTime >= 0.25 ) then
                 click:callEvent( WGUIEVENTS.HOVERCLICKDELAYED )
             end
         end

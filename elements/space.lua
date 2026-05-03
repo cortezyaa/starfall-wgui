@@ -74,6 +74,7 @@ Element.sysRecalculation = function( self )
 
         child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
         child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
+        child.data.shouldDraw =  not ( child.data.sizeGlobal.w <= 0 or child.data.sizeGlobal.h <= 0 ) and child.data.shouldDraw or false
 
         child:sysRecalculation()
     end

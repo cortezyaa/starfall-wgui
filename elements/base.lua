@@ -54,7 +54,7 @@ Element.initialize = function( self, elementName )
     self.data.hover = false
     self.data.focus = false
 
-    self.data.curtime = timer.curtime()
+    self.data.realtime = timer.realtime()
 
     self.data.transition = 0
     self.data.transitionTime = 0.25
@@ -545,13 +545,13 @@ Element.render = function( self )
     if self.data.noDraw then return end
 
     local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.curtime ) / self.data.transitionTime ), 0, 1 )
+    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
     end
 
-    self.data.curtime = timer.curtime()
+    self.data.realtime = timer.realtime()
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
@@ -597,7 +597,7 @@ Element.debugrender = function( self )
         child:debugrender()
     end
 
-    render.setRGBA( self.data.focus and 0 or 255, 255, 255, self.data.focus and math.abs( math.sin( timer.curtime() * 5 ) * 255 ) or 255 )
+    render.setRGBA( self.data.focus and 0 or 255, 255, 255, self.data.focus and math.abs( math.sin( timer.realtime() * 5 ) * 255 ) or 255 )
     render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
     
     render.setFont( "DebugFixed" )

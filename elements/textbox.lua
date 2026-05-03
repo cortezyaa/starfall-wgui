@@ -107,12 +107,12 @@ Element.paint = function( self )
     render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
     render.drawRectFast( self.data.positionGlobal.x + 1, self.data.positionGlobal.y + 1, self.data.sizeGlobal.w - 2, self.data.sizeGlobal.h - 2 )
 
-    if input.lockedControlCooldown + input.lockCooldown >= timer.curtime() then
+    if input.lockedControlCooldown + input.lockCooldown >= timer.realtime() then
         render.setRGBA( self.data.colors.border.r, self.data.colors.border.g, self.data.colors.border.b, self.data.colors.border.a )
         render.drawRectFast( 
             self.data.positionGlobal.x, 
             self.data.positionGlobal.y - 2 + self.data.sizeGlobal.h, 
-            self.data.sizeGlobal.w * ( ( timer.curtime() - input.lockedControlCooldown ) / input.lockCooldown ), 
+            self.data.sizeGlobal.w * ( ( timer.realtime() - input.lockedControlCooldown ) / input.lockCooldown ), 
             2
         )
     end
@@ -136,7 +136,7 @@ Element.paintText = function( self )
     end
 
     if self.data.focus then
-        render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a - math.abs( math.tan( timer.curtime() * 3 ) ) * 155 )
+        render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a - math.abs( math.tan( timer.realtime() * 3 ) ) * 155 )
 
         if self.data.textAlign == TEXT_ALIGN.LEFT then
             render.drawRectFast( self.data.positionGlobal.x + w + 10, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
@@ -156,13 +156,13 @@ Element.render = function( self )
     if self.data.noDraw then return end
 
     local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.curtime() - self.data.curtime ) / self.data.transitionTime ), 0, 1 )
+    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
     end
 
-    self.data.curtime = timer.curtime()
+    self.data.realtime = timer.realtime()
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
