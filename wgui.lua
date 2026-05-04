@@ -137,7 +137,12 @@ hook.add( "InputPressed", "wgui:hook:InputPressed", function( button )
                         focus.data.focus = false
                         focus:callEvent( WGUIEVENTS.FOCUSOFF )
                         rs.data.focusElement = nil
-                        focus:setValue( focus.data.value )
+
+                        -- ну да костыль и чо
+                        local stored = focus.data.value
+                        focus.data.value = focus.data.oldvalue
+
+                        focus:setValue( stored )
                     elseif key == "BACKSPACE" then
                         focus.data.value = string.sub( focus.data.value, 1, #focus.data.value - 1 )
 

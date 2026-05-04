@@ -15,7 +15,6 @@ Element.initialize = function( self )
     self.data.colors.wait = table.rgba( self.data.palette.button_selected )
     self.data.colors.image = table.rgba()
 
-    self.data.value = nil
     self.data.loaded = false
     self.data.material = material.create( "UnlitGeneric", true )
 
@@ -25,22 +24,26 @@ Element.initialize = function( self )
 end
 
 
--- Функции управления значением (текстурой) элемента
--- Установка значением
-Element.setValue = function( self, value )
+-- Функции управления текстурой элемента
+-- Установка текстуры
+Element.setTexture = function( self, texture )
     self:sysValidate()
-    checkType( value, { "nil", "string" } )
+    checkType( texture, { "nil", "string" } )
 
-    if value == self.data.value then return end
+    local oldTexture = self.data.material:getTexture( "$basetexture" )
 
-    local valueOld = self.data.value
-    self.data.value = value
+    if oldTexture == texture then return end
 
     self.data.loaded = false
 
-    local prefix = string.match( value, "^(%w-):" )
+    if texture == nil or texture == "" then
+        self.data.material:setTexture( "$basetexture", "" )
+        return
+    end
+
+    local prefix = string.match( texture, "^(%w-):" )
 	if prefix == "http" or prefix == "https" or prefix == "data" then
-        self.data.material:setTextureURL( "$basetexture", value, 
+        self.data.material:setTextureURL( "$basetexture", texture, 
             function( material, url, width, height, layout )
                 if not layout then return end
                 layout( 0, 0, 1024, 1024 )
@@ -50,17 +53,15 @@ Element.setValue = function( self, value )
             end
         )
     else
-        self.data.material:setTexture( "$basetexture", value )
+        self.data.material:setTexture( "$basetexture", texture )
         self.data.loaded = true
     end
-
-    self:callEvent( WGUIEVENTS.VALUECHANGED, value, valueOld )
 end
 
--- Получение значением
-Element.getValue = function( self )
+-- Получение текстуры
+Element.getTexture = function( self )
     self:sysValidate()
-    return self.data.value
+    return self.data.material:getTexture( "$basetexture" )
 end
 
 

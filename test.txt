@@ -45,17 +45,28 @@ e.image = wgui.create( "image", e.base )
 e.image:setPos( 64, 64 )
 e.image:setSize( 256, 256 )
 
-
-local mat = material.create( "UnlitGeneric" )
-
--- mat:setTexture( "$basetexture", "" )
-print( "mat:\"", mat:getTexture( "$basetexture" ), "\"" )
-
--- error nil
+-- e.image:setTexture( "https://dl.dropbox.com/scl/fi/neq4ychmaxh12hl6s6n4t/full-cut.jpeg?rlkey=kdbg466lsiel8xc9jsw8pj2yk" )
+-- timer.simple( 5, function() e.image:setTexture( nil ) end )
 
 
-e.image:setMaterial( mat )
 
+e.textbox = wgui.create( "textbox", e.base )
+e.textbox:setPos( 64, 350 )
+e.textbox:setSize( 256, 32 )
+
+
+e.button = wgui.create( "button", e.base )
+e.button:setPos( 64, 350 + 42 )
+e.button:setSize( 256, 32 )
+
+e.buttons = wgui.create( "buttonSelected", e.base )
+e.buttons:setPos( 64, 350 + 42 + 42 )
+e.buttons:setSize( 256, 32 )
+
+e.textbox:addEvent( WGUIEVENTS.VALUECHANGED, function( self, new, old )
+    e.button:setText( new )
+    e.buttons:setText( new )
+end )
 
 --[[
 
@@ -209,8 +220,8 @@ end
 
 hook.add( "drawhud","rwa", function()
     base:setPos( 
-        256 + math.sin( timer.realtime() * 0.5 ) * 64, 
-        256 + math.cos( timer.realtime() * 0.5 ) * 64
+        256 + math.sin( timer.curtime() * 0.5 ) * 64, 
+        256 + math.cos( timer.curtime() * 0.5 ) * 64
     )
     
     for _, e in pairs( a ) do
@@ -332,7 +343,7 @@ for x = 1, count do
 end
 
 hook.add( "drawhud","rwa", function()
-    base:setPos( 200 + math.sin( timer.realtime() * 10 ) * 40, 200 )
+    base:setPos( 200 + math.sin( timer.curtime() * 10 ) * 40, 200 )
     
     for _, e in pairs( a ) do
         e:setSize( size / count, size / count )
@@ -421,6 +432,6 @@ timer.simple( 2, function()
 end )
 
 hook.add( "drawhud", "zzzzzalupaaa", function()
-    e2:setSize( 100 + math.abs( math.sin( timer.realtime() * 2 ) * 50 ), 100 )
+    e2:setSize( 100 + math.abs( math.sin( timer.curtime() * 2 ) * 50 ), 100 )
 end )
 ]]--

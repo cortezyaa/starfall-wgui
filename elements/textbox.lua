@@ -17,7 +17,9 @@ Element.initialize = function( self )
 
     self.data.keyboardInput = true
 
-    self.data.value = "string"
+    self.data.value = ""
+    self.data.oldvalue = self.data.value
+
     self.data.textFont = "ChatFont"
     self.data.textAlign = TEXT_ALIGN.CENTER
     self.data.textStencil = false
@@ -26,9 +28,11 @@ Element.initialize = function( self )
     self.events.system.focuson = function( self )
         self:sysRecalculateColors()
 
-        if not input.isControlLocked() and input.canLockControls() then
+        if not input.isControlLocked() then
             input.lockControls( true )
         end
+
+        self.data.oldvalue = self.data.value
     end
 
     self.events.system.focusoff = function( self )
@@ -54,11 +58,21 @@ Element.sysRecalculateColors = function( self )
         self.data.colors.border.g = math.lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )
         self.data.colors.border.b = math.lerp( self.data.transition, self.data.palette.button_selected.b, self.data.palette.button_selected_hover.b )
         self.data.colors.border.a = math.lerp( self.data.transition, self.data.palette.button_selected.a, self.data.palette.button_selected_hover.a )
+
+        self.data.colors.text.r = self.data.palette.text_hover.r
+        self.data.colors.text.g = self.data.palette.text_hover.g
+        self.data.colors.text.b = self.data.palette.text_hover.b
+        self.data.colors.text.a = self.data.palette.text_hover.a
     else
         self.data.colors.border.r = math.lerp( self.data.transition, self.data.palette.button.r, self.data.palette.button_hover.r )
         self.data.colors.border.g = math.lerp( self.data.transition, self.data.palette.button.g, self.data.palette.button_hover.g )
         self.data.colors.border.b = math.lerp( self.data.transition, self.data.palette.button.b, self.data.palette.button_hover.b )
         self.data.colors.border.a = math.lerp( self.data.transition, self.data.palette.button.a, self.data.palette.button_hover.a )
+
+        self.data.colors.text.r = self.data.palette.text.r
+        self.data.colors.text.g = self.data.palette.text.g
+        self.data.colors.text.b = self.data.palette.text.b
+        self.data.colors.text.a = self.data.palette.text.a
     end
 end
 
@@ -88,6 +102,7 @@ end
 Element.setAlign = function( self, align )
     self:sysValidate()
     checkType( align, "number" )
+    checkEnum( align, "TEXT_ALIGN" )
 
     self.data.textAlign = align
 end
@@ -120,17 +135,18 @@ end
 
 
 -- Функция отрисовки текста
+local tw, th = 0, 0
 Element.paintText = function( self )
     render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
     render.setFont( self.data.textFont )
 
-    local w, h = render.getTextSize( self.data.value )
-    self.data.textStencil = w > ( self.data.sizeGlobal.w - 14 )
+    tw, th = render.getTextSize( self.data.value )
+    self.data.textStencil = tw > ( self.data.sizeGlobal.w - th )
 
     if self.data.textAlign == TEXT_ALIGN.LEFT then
-        render.drawSimpleText( self.data.positionGlobal.x + 7, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
+        render.drawSimpleText( self.data.positionGlobal.x + ( th / 2 ), self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
     elseif self.data.textAlign == TEXT_ALIGN.RIGHT then
-        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w - 10, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.RIGHT, TEXT_ALIGN.CENTER )
+        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w - ( th / 2 ) - 3, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.RIGHT, TEXT_ALIGN.CENTER )
     elseif self.data.textAlign == TEXT_ALIGN.CENTER then
         render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.value, TEXT_ALIGN.CENTER, TEXT_ALIGN.CENTER )
     end
@@ -139,11 +155,11 @@ Element.paintText = function( self )
         render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a - math.abs( math.tan( timer.realtime() * 3 ) ) * 155 )
 
         if self.data.textAlign == TEXT_ALIGN.LEFT then
-            render.drawRectFast( self.data.positionGlobal.x + w + 10, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+            render.drawRectFast( self.data.positionGlobal.x + w + ( th / 2 ) + 3, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - th / 2, 1, th )
         elseif self.data.textAlign == TEXT_ALIGN.RIGHT then
-            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - 7, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - ( th / 2 ), self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - th / 2, 1, th )
         elseif self.data.textAlign == TEXT_ALIGN.CENTER then
-            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + w / 2 + 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - h / 2, 1, h )
+            render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + tw / 2 + 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 - th / 2, 1, th )
         end
     end
 end
@@ -205,12 +221,12 @@ Element.render = function( self )
             render.setStencilFailOperation( STENCIL.REPLACE )
 
             render.drawRectFast( 
-                math.max( self.data.overflowBox.left, self.data.positionGlobal.x + 7 ), 
+                math.max( self.data.overflowBox.left, self.data.positionGlobal.x + ( th / 2 ) ), 
                 math.max( self.data.overflowBox.top, self.data.positionGlobal.y ), 
                 
-                ( ( self.data.positionGlobal.x + self.data.sizeGlobal.w - 7 ) <= self.data.overflowBox.right ) 
-                    and ( self.data.sizeGlobal.w - 14 ) 
-                    or ( self.data.overflowBox.right - self.data.positionGlobal.x - 7 ),
+                ( ( self.data.positionGlobal.x + self.data.sizeGlobal.w - ( th / 2 ) ) <= self.data.overflowBox.right ) 
+                    and ( self.data.sizeGlobal.w - th ) 
+                    or ( self.data.overflowBox.right - self.data.positionGlobal.x - ( th / 2 ) ),
 
                 ( ( self.data.positionGlobal.y + self.data.sizeGlobal.h ) <= self.data.overflowBox.bottom ) 
                     and ( self.data.sizeGlobal.h ) 
