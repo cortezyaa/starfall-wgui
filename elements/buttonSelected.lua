@@ -16,7 +16,9 @@ Element.initialize = function( self )
 
     self.data.text = nil
     self.data.textFont = "ChatFont"
-    self.data.textAlign = TEXT_ALIGN.CENTER
+
+    self.data.textAlignX = TEXT_ALIGN.CENTER
+
     self.data.textStencil = false
 
     -- Ивенты
@@ -82,19 +84,19 @@ Element.getFont = function( self )
 end
 
 
--- Функция установки выравнивания
-Element.setAlign = function( self, align )
+-- Функции установки выравнивания
+Element.setAlignX = function( self, align )
     self:sysValidate()
     checkType( align, "number" )
     checkEnum( align, "TEXT_ALIGN" )
 
-    self.data.textAlign = align
+    self.data.textAlignX = align
 end
 
 -- Функция получения выравнивания
-Element.getAlign = function( self )
+Element.getAlignX = function( self )
     self:sysValidate()
-    return self.data.textAlign
+    return self.data.textAlignX
 end
 
 
@@ -106,25 +108,25 @@ end
 
 
 -- Функция отрисовки текста
-local tw, th = 0, 0
+local tx, tw, th, ts = 0, 0, 0, 4
 Element.paintText = function( self )
     render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
     render.setFont( self.data.textFont )
 
     tw, th = render.getTextSize( self.data.text )
-    self.data.textStencil = tw > ( self.data.sizeGlobal.w - th )
+    self.data.textStencil = ( tw > ( self.data.sizeGlobal.w - ts ) ) or ( th > ( self.data.sizeGlobal.h - ts ) )
 
-    if self.data.textAlign == TEXT_ALIGN.LEFT then
-        render.drawSimpleText( self.data.positionGlobal.x + ( th / 2 ), self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER )
-    elseif self.data.textAlign == TEXT_ALIGN.RIGHT then
-        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w - ( th / 2 ), self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, TEXT_ALIGN.RIGHT, TEXT_ALIGN.CENTER )
-    elseif self.data.textAlign == TEXT_ALIGN.CENTER then
-        render.drawSimpleText( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, TEXT_ALIGN.CENTER, TEXT_ALIGN.CENTER )
+    if      self.data.textAlignX == TEXT_ALIGN.LEFT     then tx = self.data.positionGlobal.x + ts
+    elseif  self.data.textAlignX == TEXT_ALIGN.CENTER   then tx = self.data.positionGlobal.x + self.data.sizeGlobal.w / 2
+    elseif  self.data.textAlignX == TEXT_ALIGN.RIGHT    then tx = self.data.positionGlobal.x + self.data.sizeGlobal.w - ts
     end
+
+    render.drawSimpleText( tx, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, self.data.textAlignX, TEXT_ALIGN.CENTER )
 end
 
 
 -- Функции рендера элемента
+local sx, sy, sw, sh = 0, 0, 0, 0
 Element.render = function( self )
     if not self.valid then return end
     
@@ -180,18 +182,12 @@ Element.render = function( self )
                 render.setStencilReferenceValue( 1 )
                 render.setStencilFailOperation( STENCIL.REPLACE )
 
-                render.drawRectFast( 
-                    math.max( self.data.overflowBox.left, self.data.positionGlobal.x + ( th / 2 ) ), 
-                    math.max( self.data.overflowBox.top, self.data.positionGlobal.y ), 
-                    
-                    ( ( self.data.positionGlobal.x + self.data.sizeGlobal.w - ( th / 2 ) ) <= self.data.overflowBox.right ) 
-                        and ( self.data.sizeGlobal.w - th )
-                        or ( self.data.overflowBox.right - self.data.positionGlobal.x - ( th / 2 ) ),
+                sx = math.max( self.data.overflowBox.left, self.data.positionGlobal.x + ts )
+                sy = math.max( self.data.overflowBox.top, self.data.positionGlobal.y + ts )
+                sw = math.min( self.data.overflowBox.right, self.data.positionGlobal.x + self.data.sizeGlobal.w - ts ) - sx
+                sh = math.min( self.data.overflowBox.bottom, self.data.positionGlobal.y + self.data.sizeGlobal.h - ts ) - sy
 
-                    ( ( self.data.positionGlobal.y + self.data.sizeGlobal.h ) <= self.data.overflowBox.bottom ) 
-                        and ( self.data.sizeGlobal.h ) 
-                        or ( self.data.overflowBox.right - self.data.positionGlobal.y )
-                )
+                render.drawRectFast( sx, sy, sw, sh )
 
                 render.setStencilFailOperation( STENCIL.KEEP )
                 render.setStencilCompareFunction( STENCIL.EQUAL )

@@ -16,15 +16,45 @@ Element.initialize = function( self )
     self.data.colors.image = table.rgba()
 
     self.data.loaded = false
+    self.data.materialKeep = false
     self.data.material = material.create( "UnlitGeneric", true )
 
     self.events.system.removed = function( self )
+        if self.data.materialKeep then return end
         self.data.material:destroy()
     end
 end
 
 
--- Функции управления текстурой элемента
+-- Установка материала
+Element.setMaterial = function( self, mat )
+    self:sysValidate()
+    checkType( mat, { "material" } )
+
+    -- but why?
+    if mat == self.data.material then return end
+
+    if not self.data.materialKeep then
+        self.data.material:destroy()
+    end
+
+    self.data.materialKeep = true
+    self.data.material = self.data.material
+
+    local texture = self.data.material:getTexture( "$basetexture" )
+
+    if texture == nil or texture == "" then
+        self.data.loaded = false
+    end
+end
+
+-- Получение материала
+Element.getMaterial = function( self )
+    self:sysValidate()
+    return self.data.material
+end
+
+
 -- Установка текстуры
 Element.setTexture = function( self, texture )
     self:sysValidate()
@@ -62,6 +92,12 @@ end
 Element.getTexture = function( self )
     self:sysValidate()
     return self.data.material:getTexture( "$basetexture" )
+end
+
+-- Загружена текстура или нет
+Element.isTextureLoaded = function( self )
+    self:sysValidate()
+    return self.data.loaded
 end
 
 

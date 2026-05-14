@@ -40,28 +40,39 @@ e.base:setPos( 64, 64 )
 e.base:setSize( 1024 - 128, 1024 - 128 )
 
 
+e.list = wgui.create( "list", e.base )
+e.list:setPos( 366, 64 )
+e.list:setSize( 512, 128 )
+
+e.label = wgui.create( "label", e.list )
+e.label:setSize( 512, 256 )
+e.label:setText( "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas laoreet, nulla non vestibulum efficitur, sapien urna pulvinar ipsum, dapibus aliquam felis dolor vitae nisi. Ut et magna ultricies, tincidunt enim non, dignissim arcu. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Duis turpis ligula, hendrerit et volutpat quis, egestas a est. In et finibus orci. Nulla quis porta erat. Aliquam ut scelerisque quam, ac euismod metus. Aliquam eget diam semper, lobortis eros in, egestas mauris. Mauris a aliquam arcu. Duis eget est luctus, fringilla lacus ac, efficitur diam. Praesent magna purus, ullamcorper nec orci quis, aliquet euismod velit. Etiam vitae nisl in risus luctus scelerisque." )
+e.label:setAlignX( TEXT_ALIGN.RIGHT )
+e.label:setAlignY( TEXT_ALIGN.TOP )
+e.label:setWrap( true )
+
 
 e.image = wgui.create( "image", e.base )
 e.image:setPos( 64, 64 )
 e.image:setSize( 256, 256 )
-
 -- e.image:setTexture( "https://dl.dropbox.com/scl/fi/neq4ychmaxh12hl6s6n4t/full-cut.jpeg?rlkey=kdbg466lsiel8xc9jsw8pj2yk" )
--- timer.simple( 5, function() e.image:setTexture( nil ) end )
-
 
 
 e.textbox = wgui.create( "textbox", e.base )
 e.textbox:setPos( 64, 350 )
 e.textbox:setSize( 256, 32 )
+e.textbox:setAlignX( TEXT_ALIGN.CENTER )
 
 
 e.button = wgui.create( "button", e.base )
 e.button:setPos( 64, 350 + 42 )
 e.button:setSize( 256, 32 )
+e.button:setAlignX( TEXT_ALIGN.LEFT )
 
 e.buttons = wgui.create( "buttonSelected", e.base )
 e.buttons:setPos( 64, 350 + 42 + 42 )
 e.buttons:setSize( 256, 32 )
+e.buttons:setAlignX( TEXT_ALIGN.RIGHT )
 
 e.textbox:addEvent( WGUIEVENTS.VALUECHANGED, function( self, new, old )
     e.button:setText( new )

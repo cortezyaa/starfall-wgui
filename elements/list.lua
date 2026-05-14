@@ -80,7 +80,7 @@ Element.sysRecalculation = function( self )
         elseif child.data.dock == DOCK.FILL then
             table.insert( fill, child )
         elseif child.data.dock == DOCK.LEFT then
-            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
+            child.data.sizeGlobal.w = child.data.sizeLocal.w
             child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
@@ -89,14 +89,14 @@ Element.sysRecalculation = function( self )
             space.left = space.left + child.data.sizeGlobal.w + child.data.dockMargin.left + child.data.dockMargin.right
         elseif child.data.dock == DOCK.TOP then
             child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+            child.data.sizeGlobal.h = child.data.sizeLocal.h
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
 
             space.top = space.top + child.data.sizeGlobal.h + child.data.dockMargin.top + child.data.dockMargin.bottom
         elseif child.data.dock == DOCK.RIGHT then
-            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
+            child.data.sizeGlobal.w = child.data.sizeLocal.w
             child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeGlobal.w - child.data.dockMargin.right
@@ -105,7 +105,7 @@ Element.sysRecalculation = function( self )
             space.right = space.right - child.data.sizeGlobal.w - child.data.dockMargin.left - child.data.dockMargin.right
         elseif child.data.dock == DOCK.BOTTOM then
             child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+            child.data.sizeGlobal.h = child.data.sizeLocal.h
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.bottom
