@@ -263,7 +263,6 @@ end )
 hook.add( "RenderOffscreen", "wgui:hook:RenderOffscreen", function()
     for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
         rs:process()
-        if rs.postdraw then rs.postdraw() end
     end
 end )
 
@@ -296,6 +295,7 @@ end )
 hook.add( "PostDrawOpaqueRenderables", "wgui:hook:PostDrawOpaqueRenderables", function()
     for _, rs in pairs( wgui.renderSpaces.WORLD ) do
         rs:process()
+        if rs.postdraw then rs.postdraw() end
     end
 end )
 
