@@ -256,12 +256,14 @@ end )
 hook.add( "DrawHUD", "wgui:hook:DrawHUD", function()
     for _, rs in pairs( wgui.renderSpaces.HUD ) do
         rs:process()
+        if rs.postdraw then rs.postdraw() end
     end
 end )
 
 hook.add( "RenderOffscreen", "wgui:hook:RenderOffscreen", function()
     for _, rs in pairs( wgui.renderSpaces.SCREEN ) do
         rs:process()
+        if rs.postdraw then rs.postdraw() end
     end
 end )
 
@@ -286,6 +288,8 @@ hook.add( "render", "wgui:hook:render", function()
 
         render.setRenderTargetTexture( rs.data.renderTarget )
         render.drawTexturedRect( 0, 0, w, h )
+
+        if rs.postdraw then rs.postdraw() end
     end
 end )
 

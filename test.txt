@@ -24,7 +24,7 @@ if player() ~= owner() then return end
 
 --@include ./wgui.lua
 require( "./wgui.lua" )
-wgui.debug = false
+wgui.debug = true
 
 enableHud( player(), true )
 
@@ -78,6 +78,7 @@ e.textbox:addEvent( WGUIEVENTS.VALUECHANGED, function( self, new, old )
     e.button:setText( new )
     e.buttons:setText( new )
 end )
+
 
 --[[
 
