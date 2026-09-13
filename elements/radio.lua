@@ -35,6 +35,14 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+
+
 -- Объединение элементов в одну группу
 Element.link = function( self, uid )
     self:sysValidate()
@@ -61,26 +69,26 @@ end
 -- Функция просчета цвета
 Element.sysRecalculateColors = function( self )
     if self.data.value then
-        self.data.colors.check.r = math.lerp( self.data.transition, self.data.palette.button_selected.r, self.data.palette.button_selected_hover.r )
-        self.data.colors.check.g = math.lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )
-        self.data.colors.check.b = math.lerp( self.data.transition, self.data.palette.button_selected.b, self.data.palette.button_selected_hover.b )
-        self.data.colors.check.a = math.lerp( self.data.transition, self.data.palette.button_selected.a, self.data.palette.button_selected_hover.a )
+        self.data.colors.check.r = math_lerp( self.data.transition, self.data.palette.button_selected.r, self.data.palette.button_selected_hover.r )
+        self.data.colors.check.g = math_lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )
+        self.data.colors.check.b = math_lerp( self.data.transition, self.data.palette.button_selected.b, self.data.palette.button_selected_hover.b )
+        self.data.colors.check.a = math_lerp( self.data.transition, self.data.palette.button_selected.a, self.data.palette.button_selected_hover.a )
     else
-        self.data.colors.check.r = math.lerp( self.data.transition, self.data.palette.fill.r, self.data.palette.button_hover.r )
-        self.data.colors.check.g = math.lerp( self.data.transition, self.data.palette.fill.g, self.data.palette.button_hover.g )
-        self.data.colors.check.b = math.lerp( self.data.transition, self.data.palette.fill.b, self.data.palette.button_hover.b )
-        self.data.colors.check.a = math.lerp( self.data.transition, self.data.palette.fill.a, self.data.palette.button_hover.a )
+        self.data.colors.check.r = math_lerp( self.data.transition, self.data.palette.fill.r, self.data.palette.button_hover.r )
+        self.data.colors.check.g = math_lerp( self.data.transition, self.data.palette.fill.g, self.data.palette.button_hover.g )
+        self.data.colors.check.b = math_lerp( self.data.transition, self.data.palette.fill.b, self.data.palette.button_hover.b )
+        self.data.colors.check.a = math_lerp( self.data.transition, self.data.palette.fill.a, self.data.palette.button_hover.a )
     end
 end
 
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
-    render.setRGBA( self.data.colors.check.r, self.data.colors.check.g, self.data.colors.check.b, self.data.colors.check.a )
-    render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 4, self.data.positionGlobal.y + self.data.sizeGlobal.h / 4, self.data.sizeGlobal.w / 2, self.data.sizeGlobal.h / 2 )
+    render_setRGBA( self.data.colors.check.r, self.data.colors.check.g, self.data.colors.check.b, self.data.colors.check.a )
+    render_drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w / 4, self.data.positionGlobal.y + self.data.sizeGlobal.h / 4, self.data.sizeGlobal.w / 2, self.data.sizeGlobal.h / 2 )
 end
 
 

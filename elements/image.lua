@@ -26,6 +26,19 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_sin = math.sin
+local math_cos = math.cos
+local math_rad = math.rad
+local render = render
+local render_setRGBA = render.setRGBA
+local render_setMaterial = render.setMaterial
+local render_drawRectFast = render.drawRectFast
+local render_drawRectRotated = render.drawRectRotated
+local render_drawTexturedRectFast = render.drawTexturedRectFast
+
+
 -- Установка материала
 Element.setMaterial = function( self, mat )
     self:sysValidate()
@@ -105,17 +118,17 @@ end
 local duration, count, size, radius = 4, 6, 8, 28
 Element.paint = function( self )
     if not self.data.loaded then
-        render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-        render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+        render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+        render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
         for sq = 1, count do
             local progress = ( ( duration / count * sq ) + timer.realtime() ) % duration / duration
-            local rotsq = math.sin( math.rad( progress * 360 + timer.realtime() * 16 ) )
+            local rotsq = math_sin( math_rad( progress * 360 + timer.realtime() * 16 ) )
 
-            render.setRGBA( self.data.colors.wait.r, self.data.colors.wait.g, self.data.colors.wait.b, 255 + ( rotsq - 1 ) * 120 )
-            render.drawRectRotated( 
-                self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + math.sin( math.rad( progress * 360 ) ) * radius, 
-                self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 + math.cos( math.rad( progress * 360 ) ) * radius, 
+            render_setRGBA( self.data.colors.wait.r, self.data.colors.wait.g, self.data.colors.wait.b, 255 + ( rotsq - 1 ) * 120 )
+            render_drawRectRotated( 
+                self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 + math_sin( math_rad( progress * 360 ) ) * radius, 
+                self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 + math_cos( math_rad( progress * 360 ) ) * radius, 
                 size + rotsq * 3, 
                 size + rotsq * 3,
                 progress * 360
@@ -125,9 +138,9 @@ Element.paint = function( self )
         return
     end
 
-    render.setRGBA( self.data.colors.image.r, self.data.colors.image.g, self.data.colors.image.b, self.data.colors.image.a )
-    render.setMaterial( self.data.material )
-    render.drawTexturedRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.image.r, self.data.colors.image.g, self.data.colors.image.b, self.data.colors.image.a )
+    render_setMaterial( self.data.material )
+    render_drawTexturedRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 

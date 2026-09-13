@@ -54,8 +54,22 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local math_max = math.max
+local math_min = math.min
+local math_clamp = math.clamp
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+
+
 -- Системная функция перерасчета элемента
 Element.sysRecalculation = function( self )
+
+
+    -- ВСЁ ПЕРЕПИСАТЬ!
     local fill = {}
     local space = {
         left = self.data.dockPadding.left,
@@ -128,7 +142,7 @@ Element.sysRecalculation = function( self )
         self.data.spaceSize = self.data.spaceSize + child.data.sizeGlobal[ self.data.horizontal and "w" or "h" ]
     end
     
-    self.data.thumbLength = self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] * math.min( 1, self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] / self.data.spaceSize )
+    self.data.thumbLength = self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] * math_min( 1, self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] / self.data.spaceSize )
     self.data.thumbOffset = self.data.value * ( self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] - self.data.thumbLength )
     local track = ( self.data.spaceSize - self.data.sizeGlobal[ self.data.horizontal and "w" or "h" ] )
     self.data.spaceOffset = track <= 0 and 0 or track * self.data.value
@@ -147,20 +161,20 @@ Element.sysRecalculation = function( self )
             child.data.overflowBox.right = self.data.overflowBox.right
             child.data.overflowBox.bottom = self.data.overflowBox.bottom
         else
-            child.data.overflowBox.left = math.max( x, self.data.overflowBox.left )
-            child.data.overflowBox.top = math.max( y, self.data.overflowBox.top )
-            child.data.overflowBox.right = math.min( x + w, self.data.overflowBox.right )
-            child.data.overflowBox.bottom = math.min( y + h, self.data.overflowBox.bottom )
+            child.data.overflowBox.left = math_max( x, self.data.overflowBox.left )
+            child.data.overflowBox.top = math_max( y, self.data.overflowBox.top )
+            child.data.overflowBox.right = math_min( x + w, self.data.overflowBox.right )
+            child.data.overflowBox.bottom = math_min( y + h, self.data.overflowBox.bottom )
         end
 
-        child.data.hitbox.left = math.clamp( math.max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.top = math.clamp( math.max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
-        child.data.hitbox.right = math.clamp( math.min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.bottom = math.clamp( math.min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.left = math_clamp( math_max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.top = math_clamp( math_max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.right = math_clamp( math_min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.bottom = math_clamp( math_min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
 
         child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
         child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
-        child.data.shouldDraw =  not ( child.data.sizeGlobal.w <= 0 or child.data.sizeGlobal.h <= 0 ) and child.data.shouldDraw or false
+        child.data.shouldDraw = not ( child.data.sizeGlobal.w <= 0 or child.data.sizeGlobal.h <= 0 ) and child.data.shouldDraw or false
 
         child:sysRecalculation()
     end
@@ -169,10 +183,10 @@ end
 
 -- Функция просчета цвета
 Element.sysRecalculateColors = function( self )
-    self.data.colors.thumb.r = math.lerp( self.data.transition, self.data.palette.button_selected.r, self.data.palette.button_selected_hover.r )
-    self.data.colors.thumb.g = math.lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )
-    self.data.colors.thumb.b = math.lerp( self.data.transition, self.data.palette.button_selected.b, self.data.palette.button_selected_hover.b )
-    self.data.colors.thumb.a = math.lerp( self.data.transition, self.data.palette.button_selected.a, self.data.palette.button_selected_hover.a )
+    self.data.colors.thumb.r = math_lerp( self.data.transition, self.data.palette.button_selected.r, self.data.palette.button_selected_hover.r )
+    self.data.colors.thumb.g = math_lerp( self.data.transition, self.data.palette.button_selected.g, self.data.palette.button_selected_hover.g )
+    self.data.colors.thumb.b = math_lerp( self.data.transition, self.data.palette.button_selected.b, self.data.palette.button_selected_hover.b )
+    self.data.colors.thumb.a = math_lerp( self.data.transition, self.data.palette.button_selected.a, self.data.palette.button_selected_hover.a )
 end
 
 
@@ -198,21 +212,21 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
     if self.data.horizontal then
-        render.setRGBA( self.data.colors.back.r, self.data.colors.back.g, self.data.colors.back.b, self.data.colors.back.a )
-        render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y + self.data.sizeGlobal.h - self.data.thumbWidth, self.data.sizeGlobal.w, self.data.thumbWidth )
+        render_setRGBA( self.data.colors.back.r, self.data.colors.back.g, self.data.colors.back.b, self.data.colors.back.a )
+        render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y + self.data.sizeGlobal.h - self.data.thumbWidth, self.data.sizeGlobal.w, self.data.thumbWidth )
 
-        render.setRGBA( self.data.colors.thumb.r, self.data.colors.thumb.g, self.data.colors.thumb.b, self.data.colors.thumb.a )
-        render.drawRectFast( self.data.positionGlobal.x + self.data.thumbOffset, self.data.positionGlobal.y + self.data.sizeGlobal.h - self.data.thumbWidth, self.data.thumbLength, self.data.thumbWidth )
+        render_setRGBA( self.data.colors.thumb.r, self.data.colors.thumb.g, self.data.colors.thumb.b, self.data.colors.thumb.a )
+        render_drawRectFast( self.data.positionGlobal.x + self.data.thumbOffset, self.data.positionGlobal.y + self.data.sizeGlobal.h - self.data.thumbWidth, self.data.thumbLength, self.data.thumbWidth )
     else
-        render.setRGBA( self.data.colors.back.r, self.data.colors.back.g, self.data.colors.back.b, self.data.colors.back.a )
-        render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - self.data.thumbWidth, self.data.positionGlobal.y, self.data.thumbWidth, self.data.sizeGlobal.h )
+        render_setRGBA( self.data.colors.back.r, self.data.colors.back.g, self.data.colors.back.b, self.data.colors.back.a )
+        render_drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - self.data.thumbWidth, self.data.positionGlobal.y, self.data.thumbWidth, self.data.sizeGlobal.h )
 
-        render.setRGBA( self.data.colors.thumb.r, self.data.colors.thumb.g, self.data.colors.thumb.b, self.data.colors.thumb.a )
-        render.drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - self.data.thumbWidth, self.data.positionGlobal.y + self.data.thumbOffset, self.data.thumbWidth, self.data.thumbLength )
+        render_setRGBA( self.data.colors.thumb.r, self.data.colors.thumb.g, self.data.colors.thumb.b, self.data.colors.thumb.a )
+        render_drawRectFast( self.data.positionGlobal.x + self.data.sizeGlobal.w - self.data.thumbWidth, self.data.positionGlobal.y + self.data.thumbOffset, self.data.thumbWidth, self.data.thumbLength )
     end
 end
 

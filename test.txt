@@ -36,12 +36,13 @@ e.rs:setScreen( chip():getLinkedComponents()[ 1 ] )
 
 
 e.base = wgui.create( "panel", e.rs )
-e.base:setPos( 64, 64 )
-e.base:setSize( 1024 - 128, 1024 - 128 )
+e.base:setPos( 128, 128 )
+e.base:setSize( 1024 - 256, 1024 - 256 )
+e.base:setOverflow( OVERFLOW.HIDDEN )
 
 
 e.list = wgui.create( "list", e.base )
-e.list:setPos( 366, 64 )
+e.list:setPos( 366, 128 )
 e.list:setSize( 512, 128 )
 
 e.label = wgui.create( "label", e.list )
@@ -78,6 +79,19 @@ e.textbox:addEvent( WGUIEVENTS.VALUECHANGED, function( self, new, old )
     e.button:setText( new )
     e.buttons:setText( new )
 end )
+
+--[[
+local p = e.base
+
+for I = 1, 16 do 
+    local r = wgui.create( "buttonSelected", p )
+    r:setPos( 24, 24 )
+    r:setSize( 256, 256 )
+    r:setOverflow( OVERFLOW.HIDDEN )
+    
+    p = r
+end
+
 
 
 --[[

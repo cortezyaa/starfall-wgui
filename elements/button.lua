@@ -23,17 +23,39 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local math_max = math.max
+local math_min = math.min
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+local render_setFont = render.setFont
+local render_getTextSize = render.getTextSize
+local render_drawSimpleText = render.drawSimpleText
+local render_setStencilEnable = render.setStencilEnable
+local render_clearStencil = render.clearStencil
+local render_setStencilTestMask = render.setStencilTestMask
+local render_setStencilWriteMask = render.setStencilWriteMask
+local render_setStencilPassOperation = render.setStencilPassOperation
+local render_setStencilZFailOperation = render.setStencilZFailOperation
+local render_setStencilCompareFunction = render.setStencilCompareFunction
+local render_setStencilReferenceValue = render.setStencilReferenceValue
+local render_setStencilFailOperation = render.setStencilFailOperation
+
+
 -- Функция просчета цвета
 Element.sysRecalculateColors = function( self )
-    self.data.colors.fill.r = math.lerp( self.data.transition, self.data.palette.button.r, self.data.palette.button_hover.r )
-    self.data.colors.fill.g = math.lerp( self.data.transition, self.data.palette.button.g, self.data.palette.button_hover.g )
-    self.data.colors.fill.b = math.lerp( self.data.transition, self.data.palette.button.b, self.data.palette.button_hover.b )
-    self.data.colors.fill.a = math.lerp( self.data.transition, self.data.palette.button.a, self.data.palette.button_hover.a )
+    self.data.colors.fill.r = math_lerp( self.data.transition, self.data.palette.button.r, self.data.palette.button_hover.r )
+    self.data.colors.fill.g = math_lerp( self.data.transition, self.data.palette.button.g, self.data.palette.button_hover.g )
+    self.data.colors.fill.b = math_lerp( self.data.transition, self.data.palette.button.b, self.data.palette.button_hover.b )
+    self.data.colors.fill.a = math_lerp( self.data.transition, self.data.palette.button.a, self.data.palette.button_hover.a )
 
-    self.data.colors.text.r = math.lerp( self.data.transition, self.data.palette.text.r, self.data.palette.text_hover.r )
-    self.data.colors.text.g = math.lerp( self.data.transition, self.data.palette.text.g, self.data.palette.text_hover.g )
-    self.data.colors.text.b = math.lerp( self.data.transition, self.data.palette.text.b, self.data.palette.text_hover.b )
-    self.data.colors.text.a = math.lerp( self.data.transition, self.data.palette.text.a, self.data.palette.text_hover.a )
+    self.data.colors.text.r = math_lerp( self.data.transition, self.data.palette.text.r, self.data.palette.text_hover.r )
+    self.data.colors.text.g = math_lerp( self.data.transition, self.data.palette.text.g, self.data.palette.text_hover.g )
+    self.data.colors.text.b = math_lerp( self.data.transition, self.data.palette.text.b, self.data.palette.text_hover.b )
+    self.data.colors.text.a = math_lerp( self.data.transition, self.data.palette.text.a, self.data.palette.text_hover.a )
 end
 
 
@@ -90,18 +112,18 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 
 -- Функция отрисовки текста
 local tx, tw, th, ts = 0, 0, 0, 4
 Element.paintText = function( self )
-    render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
-    render.setFont( self.data.textFont )
+    render_setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
+    render_setFont( self.data.textFont )
 
-    tw, th = render.getTextSize( self.data.text )
+    tw, th = render_getTextSize( self.data.text )
     self.data.textStencil = ( tw > ( self.data.sizeGlobal.w - ts ) ) or ( th > ( self.data.sizeGlobal.h - ts ) )
 
     if      self.data.textAlignX == TEXT_ALIGN.LEFT     then tx = self.data.positionGlobal.x + ts
@@ -109,19 +131,23 @@ Element.paintText = function( self )
     elseif  self.data.textAlignX == TEXT_ALIGN.RIGHT    then tx = self.data.positionGlobal.x + self.data.sizeGlobal.w - ts
     end
 
-    render.drawSimpleText( tx, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, self.data.textAlignX, TEXT_ALIGN.CENTER )
+    render_drawSimpleText( tx, self.data.positionGlobal.y + self.data.sizeGlobal.h / 2, self.data.text, self.data.textAlignX, TEXT_ALIGN.CENTER )
 end
 
 
 -- Функции рендера элемента
 local sx, sy, sw, sh = 0, 0, 0, 0
+local oldtransition
+
 Element.render = function( self )
     if not self.valid then return end
     
     if self.data.noDraw then return end
 
-    local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
+    oldtransition = self.data.transition
+    realtime = timer.realtime()
+
+    self.data.transition = math_lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
@@ -131,58 +157,58 @@ Element.render = function( self )
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
-            render.setStencilEnable( true )
-            render.clearStencil()
-            render.setStencilTestMask( 255 )
-            render.setStencilWriteMask( 255 )
-            render.setStencilPassOperation( STENCIL.KEEP )
-            render.setStencilZFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.NEVER )
-            render.setStencilReferenceValue( 1 )
-            render.setStencilFailOperation( STENCIL.REPLACE )
+            render_setStencilEnable( true )
+            render_clearStencil()
+            render_setStencilTestMask( 255 )
+            render_setStencilWriteMask( 255 )
+            render_setStencilPassOperation( STENCIL.KEEP )
+            render_setStencilZFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.NEVER )
+            render_setStencilReferenceValue( 1 )
+            render_setStencilFailOperation( STENCIL.REPLACE )
 
-            render.drawRectFast( 
+            render_drawRectFast( 
                 self.data.overflowBox.left, 
                 self.data.overflowBox.top, 
                 self.data.overflowBox.right - self.data.overflowBox.left,
                 self.data.overflowBox.bottom - self.data.overflowBox.top
             )
 
-            render.setStencilFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.EQUAL )
+            render_setStencilFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.EQUAL )
 
             self:paint()
 
-            render.setStencilEnable( false )
+            render_setStencilEnable( false )
         else
             self:paint()
         end
 
         if self.data.text ~= nil and self.data.text ~= "" then
             if self.data.shouldUseStencil or self.data.textStencil then
-                render.setStencilEnable( true )
-                render.clearStencil()
-                render.setStencilTestMask( 255 )
-                render.setStencilWriteMask( 255 )
-                render.setStencilPassOperation( STENCIL.KEEP )
-                render.setStencilZFailOperation( STENCIL.KEEP )
-                render.setStencilCompareFunction( STENCIL.NEVER )
-                render.setStencilReferenceValue( 1 )
-                render.setStencilFailOperation( STENCIL.REPLACE )
+                render_setStencilEnable( true )
+                render_clearStencil()
+                render_setStencilTestMask( 255 )
+                render_setStencilWriteMask( 255 )
+                render_setStencilPassOperation( STENCIL.KEEP )
+                render_setStencilZFailOperation( STENCIL.KEEP )
+                render_setStencilCompareFunction( STENCIL.NEVER )
+                render_setStencilReferenceValue( 1 )
+                render_setStencilFailOperation( STENCIL.REPLACE )
 
-                sx = math.max( self.data.overflowBox.left, self.data.positionGlobal.x + ts )
-                sy = math.max( self.data.overflowBox.top, self.data.positionGlobal.y + ts )
-                sw = math.min( self.data.overflowBox.right, self.data.positionGlobal.x + self.data.sizeGlobal.w - ts ) - sx
-                sh = math.min( self.data.overflowBox.bottom, self.data.positionGlobal.y + self.data.sizeGlobal.h - ts ) - sy
+                sx = math_max( self.data.overflowBox.left, self.data.positionGlobal.x + ts )
+                sy = math_max( self.data.overflowBox.top, self.data.positionGlobal.y + ts )
+                sw = math_min( self.data.overflowBox.right, self.data.positionGlobal.x + self.data.sizeGlobal.w - ts ) - sx
+                sh = math_min( self.data.overflowBox.bottom, self.data.positionGlobal.y + self.data.sizeGlobal.h - ts ) - sy
 
-                render.drawRectFast( sx, sy, sw, sh )
+                render_drawRectFast( sx, sy, sw, sh )
 
-                render.setStencilFailOperation( STENCIL.KEEP )
-                render.setStencilCompareFunction( STENCIL.EQUAL )
+                render_setStencilFailOperation( STENCIL.KEEP )
+                render_setStencilCompareFunction( STENCIL.EQUAL )
 
                 self:paintText()
 
-                render.setStencilEnable( false )
+                render_setStencilEnable( false )
             else
                 self:paintText()
             end

@@ -15,10 +15,15 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+
+
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 

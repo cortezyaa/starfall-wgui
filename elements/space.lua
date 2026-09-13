@@ -42,8 +42,24 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local math_max = math.max
+local math_min = math.min
+local math_clamp = math.clamp
+local math_ceil = math.ceil
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+local render_drawLine = render.drawLine
+
+
 -- Системная функция перерасчета элемента
 Element.sysRecalculation = function( self )
+
+
+    -- ВСЁ ПЕРЕПИСАТЬ!
     for _, child in pairs( self.data.children ) do
         child.data.positionGlobal.x = self.data.positionGlobal.x + child.data.positionLocal.x + self.data.offsetX
         child.data.positionGlobal.y = self.data.positionGlobal.y + child.data.positionLocal.y + self.data.offsetY
@@ -61,16 +77,16 @@ Element.sysRecalculation = function( self )
             child.data.overflowBox.right = self.data.overflowBox.right
             child.data.overflowBox.bottom = self.data.overflowBox.bottom
         else
-            child.data.overflowBox.left = math.max( x, self.data.overflowBox.left )
-            child.data.overflowBox.top = math.max( y, self.data.overflowBox.top )
-            child.data.overflowBox.right = math.min( x + w, self.data.overflowBox.right )
-            child.data.overflowBox.bottom = math.min( y + h, self.data.overflowBox.bottom )
+            child.data.overflowBox.left = math_max( x, self.data.overflowBox.left )
+            child.data.overflowBox.top = math_max( y, self.data.overflowBox.top )
+            child.data.overflowBox.right = math_min( x + w, self.data.overflowBox.right )
+            child.data.overflowBox.bottom = math_min( y + h, self.data.overflowBox.bottom )
         end
 
-        child.data.hitbox.left = math.clamp( math.max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.top = math.clamp( math.max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
-        child.data.hitbox.right = math.clamp( math.min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.bottom = math.clamp( math.min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.left = math_clamp( math_max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.top = math_clamp( math_max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.right = math_clamp( math_min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.bottom = math_clamp( math_min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
 
         child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
         child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
@@ -83,24 +99,24 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 
     if self.data.lines then
-        render.setRGBA( self.data.colors.lines.r, self.data.colors.lines.g, self.data.colors.lines.b, self.data.colors.lines.a )
+        render_setRGBA( self.data.colors.lines.r, self.data.colors.lines.g, self.data.colors.lines.b, self.data.colors.lines.a )
 
         local pos = 0
 
-        for line = 1, math.ceil( self.data.sizeGlobal.w / self.data.linesDistance ) do
+        for line = 1, math_ceil( self.data.sizeGlobal.w / self.data.linesDistance ) do
             pos = self.data.positionGlobal.x + self.data.linesDistance * line + ( self.data.offsetX % self.data.linesDistance ) - self.data.linesDistance
             if pos >= self.data.positionGlobal.x + self.data.sizeGlobal.w then continue end
-            render.drawLine( pos, self.data.positionGlobal.y, pos, self.data.positionGlobal.y + self.data.sizeGlobal.h )
+            render_drawLine( pos, self.data.positionGlobal.y, pos, self.data.positionGlobal.y + self.data.sizeGlobal.h )
         end
 
-        for line = 1, math.ceil( self.data.sizeGlobal.h / self.data.linesDistance ) do
+        for line = 1, math_ceil( self.data.sizeGlobal.h / self.data.linesDistance ) do
             pos = self.data.positionGlobal.y + self.data.linesDistance * line + ( self.data.offsetY % self.data.linesDistance ) - self.data.linesDistance
             if pos >= self.data.positionGlobal.y + self.data.sizeGlobal.h then continue end
-            render.drawLine( self.data.positionGlobal.x, pos, self.data.positionGlobal.x + self.data.sizeGlobal.w, pos )
+            render_drawLine( self.data.positionGlobal.x, pos, self.data.positionGlobal.x + self.data.sizeGlobal.w, pos )
         end
     end
 end

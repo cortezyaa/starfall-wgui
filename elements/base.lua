@@ -70,6 +70,33 @@ Element.initialize = function( self, elementName )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local math_clamp = math.clamp
+local math_abs = math.abs
+local math_sin = math.sin
+local math_min = math.min
+local math_max = math.max
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+local render_drawRectOutline = render.drawRectOutline
+local render_drawCircle = render.drawCircle
+local render_setFont = render.setFont
+local render_getTextSize = render.getTextSize
+local render_drawSimpleText = render.drawSimpleText
+local render_setStencilEnable = render.setStencilEnable
+local render_clearStencil = render.clearStencil
+local render_setStencilTestMask = render.setStencilTestMask
+local render_setStencilWriteMask = render.setStencilWriteMask
+local render_setStencilPassOperation = render.setStencilPassOperation
+local render_setStencilZFailOperation = render.setStencilZFailOperation
+local render_setStencilCompareFunction = render.setStencilCompareFunction
+local render_setStencilReferenceValue = render.setStencilReferenceValue
+local render_setStencilFailOperation = render.setStencilFailOperation
+
+
 -- Системныя функция проверки действительности элемента
 -- Если элемент не действителен, то вызывается ошибка
 Element.sysValidate = function( self )
@@ -83,6 +110,9 @@ end
 
 -- Системная функция перерасчета элемента
 Element.sysRecalculation = function( self )
+
+
+    -- ВСЁ ПЕРЕПИСАТЬ!
     local fill = {}
     local space = {
         left = self.data.dockPadding.left,
@@ -101,7 +131,7 @@ Element.sysRecalculation = function( self )
         elseif child.data.dock == DOCK.FILL then
             table.insert( fill, child )
         elseif child.data.dock == DOCK.LEFT then
-            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
+            child.data.sizeGlobal.w = math_min( child.data.sizeLocal.w, space.right - space.left )
             child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
@@ -110,14 +140,14 @@ Element.sysRecalculation = function( self )
             space.left = space.left + child.data.sizeGlobal.w + child.data.dockMargin.left + child.data.dockMargin.right
         elseif child.data.dock == DOCK.TOP then
             child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+            child.data.sizeGlobal.h = math_min( child.data.sizeLocal.h, space.bottom - space.top )
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
 
             space.top = space.top + child.data.sizeGlobal.h + child.data.dockMargin.top + child.data.dockMargin.bottom
         elseif child.data.dock == DOCK.RIGHT then
-            child.data.sizeGlobal.w = math.min( child.data.sizeLocal.w, space.right - space.left )
+            child.data.sizeGlobal.w = math_min( child.data.sizeLocal.w, space.right - space.left )
             child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeGlobal.w - child.data.dockMargin.right
@@ -126,7 +156,7 @@ Element.sysRecalculation = function( self )
             space.right = space.right - child.data.sizeGlobal.w - child.data.dockMargin.left - child.data.dockMargin.right
         elseif child.data.dock == DOCK.BOTTOM then
             child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math.min( child.data.sizeLocal.h, space.bottom - space.top )
+            child.data.sizeGlobal.h = math_min( child.data.sizeLocal.h, space.bottom - space.top )
 
             child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
             child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.bottom
@@ -155,16 +185,16 @@ Element.sysRecalculation = function( self )
             child.data.overflowBox.right = self.data.overflowBox.right
             child.data.overflowBox.bottom = self.data.overflowBox.bottom
         else
-            child.data.overflowBox.left = math.max( x, self.data.overflowBox.left )
-            child.data.overflowBox.top = math.max( y, self.data.overflowBox.top )
-            child.data.overflowBox.right = math.min( x + w, self.data.overflowBox.right )
-            child.data.overflowBox.bottom = math.min( y + h, self.data.overflowBox.bottom )
+            child.data.overflowBox.left = math_max( x, self.data.overflowBox.left )
+            child.data.overflowBox.top = math_max( y, self.data.overflowBox.top )
+            child.data.overflowBox.right = math_min( x + w, self.data.overflowBox.right )
+            child.data.overflowBox.bottom = math_min( y + h, self.data.overflowBox.bottom )
         end
 
-        child.data.hitbox.left = math.clamp( math.max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.top = math.clamp( math.max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
-        child.data.hitbox.right = math.clamp( math.min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.bottom = math.clamp( math.min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.left = math_clamp( math_max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.top = math_clamp( math_max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        child.data.hitbox.right = math_clamp( math_min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
+        child.data.hitbox.bottom = math_clamp( math_min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
 
         child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
         child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
@@ -324,8 +354,6 @@ end
 Element.hitscan = function( self, x, y )
     if self.data.hitbox.left >= self.data.hitbox.right or self.data.hitbox.top >= self.data.hitbox.bottom then return false end
     return x >= self.data.hitbox.left and x <= self.data.hitbox.right and y >= self.data.hitbox.top and y <= self.data.hitbox.bottom
-    -- Круглый хитскан
-    -- return ( self.data.sizeGlobal.w / 2 ) > math.sqrt( math.pow( ( self.data.positionGlobal.x + self.data.sizeGlobal.w / 2 ) - x, 2 ) + math.pow( ( self.data.positionGlobal.y + self.data.sizeGlobal.h / 2 ) - y, 2 ) )
 end
 
 
@@ -544,8 +572,8 @@ Element.render = function( self )
     
     if self.data.noDraw then return end
 
-    local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
+    oldtransition = self.data.transition
+    self.data.transition = math_lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
@@ -555,29 +583,29 @@ Element.render = function( self )
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
-            render.setStencilEnable( true )
-            render.clearStencil()
-            render.setStencilTestMask( 255 )
-            render.setStencilWriteMask( 255 )
-            render.setStencilPassOperation( STENCIL.KEEP )
-            render.setStencilZFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.NEVER )
-            render.setStencilReferenceValue( 1 )
-            render.setStencilFailOperation( STENCIL.REPLACE )
+            render_setStencilEnable( true )
+            render_clearStencil()
+            render_setStencilTestMask( 255 )
+            render_setStencilWriteMask( 255 )
+            render_setStencilPassOperation( STENCIL.KEEP )
+            render_setStencilZFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.NEVER )
+            render_setStencilReferenceValue( 1 )
+            render_setStencilFailOperation( STENCIL.REPLACE )
 
-            render.drawRectFast( 
+            render_drawRectFast( 
                 self.data.overflowBox.left, 
                 self.data.overflowBox.top, 
                 self.data.overflowBox.right - self.data.overflowBox.left,
                 self.data.overflowBox.bottom - self.data.overflowBox.top
             )
 
-            render.setStencilFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.EQUAL )
+            render_setStencilFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.EQUAL )
 
             self:paint()
 
-            render.setStencilEnable( false )
+            render_setStencilEnable( false )
         else
             self:paint()
         end
@@ -597,44 +625,44 @@ Element.debugrender = function( self )
         child:debugrender()
     end
 
-    render.setRGBA( self.data.focus and 0 or 255, 255, 255, self.data.focus and math.abs( math.sin( timer.realtime() * 5 ) * 255 ) or 255 )
-    render.drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.focus and 0 or 255, 255, 255, self.data.focus and math_abs( math_sin( timer.realtime() * 5 ) * 255 ) or 255 )
+    render_drawRectOutline( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
     
-    render.setFont( "DebugFixed" )
-    render.setRGBA( 255, 255, 255, 255 )
+    render_setFont( "DebugFixed" )
+    render_setRGBA( 255, 255, 255, 255 )
 
     local O = 10
     local L = -1
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "element : " .. tostring( self.data.elementName ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "uid : " .. self.uid )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "value : " .. tostring( self.data.value ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "transition : " .. tostring( self.data.transition ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "hover : " .. tostring( self.data.hover ) .. " / focus : " .. tostring( self.data.focus ) )
-    L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "element : " .. tostring( self.data.elementName ) )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "uid : " .. self.uid )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "value : " .. tostring( self.data.value ) )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "transition : " .. tostring( self.data.transition ) )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "hover : " .. tostring( self.data.hover ) .. " / focus : " .. tostring( self.data.focus ) )
+    L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "draw : " .. tostring( self.data.shouldDraw ) .. " / stencil : " .. tostring( self.data.shouldUseStencil ) )
 
     -- renderSpace
     if self.isRenderSpace then
-        L=L+1 render.drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "enabled : " .. tostring( self.cursor.enabled ) )
+        L=L+1 render_drawSimpleText( self.data.positionGlobal.x + 4, self.data.positionGlobal.y +O*L, "enabled : " .. tostring( self.cursor.enabled ) )
 
         local TAL, TAC = TEXT_ALIGN.LEFT, TEXT_ALIGN.CENTER
         
-        render.setRGBA( 255, 255, 255, 255 )
-        render.drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
-        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
-        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
-        render.drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O*2, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
+        render_setRGBA( 255, 255, 255, 255 )
+        render_drawCircle( self.cursor.position.x, self.cursor.position.y, 4 )
+        render_drawSimpleText( self.cursor.position.x + O, self.cursor.position.y, "hover: " .. ( self.data.hoverElement and self.data.hoverElement.uid or "" ), TAL, TAC )
+        render_drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O, "click: " .. ( self.cursor.clickElement and self.cursor.clickElement.uid or "" ), TAL, TAC )
+        render_drawSimpleText( self.cursor.position.x + O, self.cursor.position.y + O*2, "L=" .. tostring( self.cursor.keyLeft ) .. " / R=" .. tostring( self.cursor.keyRight ), TAL, TAC )
     end
 
-    render.setRGBA( 255, 0, 0, 255 )
-    render.drawRectOutline( 
+    render_setRGBA( 255, 0, 0, 255 )
+    render_drawRectOutline( 
         self.data.hitbox.left + 1, 
         self.data.hitbox.top + 1, 
         self.data.hitbox.right - self.data.hitbox.left - 2, 
         self.data.hitbox.bottom - self.data.hitbox.top - 2
     )
 
-    render.setRGBA( 0, 0, 255, 255 )
-    render.drawRectOutline( 
+    render_setRGBA( 0, 0, 255, 255 )
+    render_drawRectOutline( 
         self.data.overflowBox.left + 2, 
         self.data.overflowBox.top + 2, 
         self.data.overflowBox.right - self.data.overflowBox.left - 4, 

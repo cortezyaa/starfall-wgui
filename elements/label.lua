@@ -29,6 +29,29 @@ Element.initialize = function( self )
 end
 
 
+-- Оптимизация?
+local math = math
+local math_lerp = math.lerp
+local math_max = math.max
+local math_min = math.min
+local render = render
+local render_setRGBA = render.setRGBA
+local render_drawRectFast = render.drawRectFast
+local render_setFont = render.setFont
+local render_getTextSize = render.getTextSize
+local render_drawText = render.drawText
+local render_drawSimpleText = render.drawSimpleText
+local render_setStencilEnable = render.setStencilEnable
+local render_clearStencil = render.clearStencil
+local render_setStencilTestMask = render.setStencilTestMask
+local render_setStencilWriteMask = render.setStencilWriteMask
+local render_setStencilPassOperation = render.setStencilPassOperation
+local render_setStencilZFailOperation = render.setStencilZFailOperation
+local render_setStencilCompareFunction = render.setStencilCompareFunction
+local render_setStencilReferenceValue = render.setStencilReferenceValue
+local render_setStencilFailOperation = render.setStencilFailOperation
+
+
 -- Функция просчета цвета
 Element.sysRecalculateColors = function( self )
     return
@@ -135,16 +158,16 @@ end
 
 -- Функция отрисовки элемента
 Element.paint = function( self )
-    render.setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
-    render.drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
+    render_setRGBA( self.data.colors.fill.r, self.data.colors.fill.g, self.data.colors.fill.b, self.data.colors.fill.a )
+    render_drawRectFast( self.data.positionGlobal.x, self.data.positionGlobal.y, self.data.sizeGlobal.w, self.data.sizeGlobal.h )
 end
 
 
 -- Функция отрисовки текста
 local text, tw, th, tx, ty, ts = "", 0, 0, 0, 0, 4
 Element.paintText = function( self )
-    render.setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
-    render.setFont( self.data.textFont )
+    render_setRGBA( self.data.colors.text.r, self.data.colors.text.g, self.data.colors.text.b, self.data.colors.text.a )
+    render_setFont( self.data.textFont )
 
     -- расстанровка переносов
     if self.data.textWrap and not self.data.textWraped then
@@ -154,14 +177,14 @@ Element.paintText = function( self )
         for _, word in pairs( string.explode( " ", self.data.text ) ) do
             word = word .. " "
 
-            wx, wy = render.getTextSize( word )
+            wx, wy = render_getTextSize( word )
             if wx > ( self.data.sizeGlobal.w - ts ) then
                 self.data.textWraped = self.data.textWraped .. ( #line == 0 and "" or ( string.trim( line ) .. "\n" ) ) .. string.trim( word ) .. "\n"
                 line = ""
                 continue
             end
 
-            wx, wy = render.getTextSize( line .. word )
+            wx, wy = render_getTextSize( line .. word )
             if wx > ( self.data.sizeGlobal.w - ts ) then
                 self.data.textWraped = self.data.textWraped .. string.trim( line ) .. "\n"
                 line = word
@@ -177,7 +200,7 @@ Element.paintText = function( self )
 
     text = self.data.textWrap and self.data.textWraped or self.data.text
 
-    tw, th = render.getTextSize( text )
+    tw, th = render_getTextSize( text )
     self.data.textStencil = ( tw > ( self.data.sizeGlobal.w - ts ) ) or ( th > ( self.data.sizeGlobal.h - ts ) )
 
     -- yanderedev момент 💀
@@ -191,7 +214,11 @@ Element.paintText = function( self )
     elseif  self.data.textAlignY == TEXT_ALIGN.BOTTOM   then ty = self.data.positionGlobal.y + self.data.sizeGlobal.h - th - ts
     end
 
-    render[ self.data.textMultiline and "drawText" or "drawSimpleText" ]( tx, ty, text, self.data.textAlignX, TEXT_ALIGN.TOP )
+    if self.data.textMultiline then
+        render_drawText( tx, ty, text, self.data.textAlignX )
+    else
+        render_drawSimpleText( tx, ty, text, self.data.textAlignX, TEXT_ALIGN.TOP )
+    end
 end
 
 
@@ -203,7 +230,7 @@ Element.render = function( self )
     if self.data.noDraw then return end
 
     local oldtransition = self.data.transition
-    self.data.transition = math.lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
+    self.data.transition = math_lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then
         self:sysRecalculateColors()
@@ -213,58 +240,58 @@ Element.render = function( self )
 
     if self.data.shouldDraw then
         if self.data.shouldUseStencil then
-            render.setStencilEnable( true )
-            render.clearStencil()
-            render.setStencilTestMask( 255 )
-            render.setStencilWriteMask( 255 )
-            render.setStencilPassOperation( STENCIL.KEEP )
-            render.setStencilZFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.NEVER )
-            render.setStencilReferenceValue( 1 )
-            render.setStencilFailOperation( STENCIL.REPLACE )
+            render_setStencilEnable( true )
+            render_clearStencil()
+            render_setStencilTestMask( 255 )
+            render_setStencilWriteMask( 255 )
+            render_setStencilPassOperation( STENCIL.KEEP )
+            render_setStencilZFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.NEVER )
+            render_setStencilReferenceValue( 1 )
+            render_setStencilFailOperation( STENCIL.REPLACE )
 
-            render.drawRectFast( 
+            render_drawRectFast( 
                 self.data.overflowBox.left, 
                 self.data.overflowBox.top, 
                 self.data.overflowBox.right - self.data.overflowBox.left,
                 self.data.overflowBox.bottom - self.data.overflowBox.top
             )
 
-            render.setStencilFailOperation( STENCIL.KEEP )
-            render.setStencilCompareFunction( STENCIL.EQUAL )
+            render_setStencilFailOperation( STENCIL.KEEP )
+            render_setStencilCompareFunction( STENCIL.EQUAL )
 
             self:paint()
 
-            render.setStencilEnable( false )
+            render_setStencilEnable( false )
         else
             self:paint()
         end
 
         if self.data.text ~= nil and self.data.text ~= "" then
             if self.data.shouldUseStencil or self.data.textStencil then
-                render.setStencilEnable( true )
-                render.clearStencil()
-                render.setStencilTestMask( 255 )
-                render.setStencilWriteMask( 255 )
-                render.setStencilPassOperation( STENCIL.KEEP )
-                render.setStencilZFailOperation( STENCIL.KEEP )
-                render.setStencilCompareFunction( STENCIL.NEVER )
-                render.setStencilReferenceValue( 1 )
-                render.setStencilFailOperation( STENCIL.REPLACE )
+                render_setStencilEnable( true )
+                render_clearStencil()
+                render_setStencilTestMask( 255 )
+                render_setStencilWriteMask( 255 )
+                render_setStencilPassOperation( STENCIL.KEEP )
+                render_setStencilZFailOperation( STENCIL.KEEP )
+                render_setStencilCompareFunction( STENCIL.NEVER )
+                render_setStencilReferenceValue( 1 )
+                render_setStencilFailOperation( STENCIL.REPLACE )
 
-                sx = math.max( self.data.overflowBox.left, self.data.positionGlobal.x + ts )
-                sy = math.max( self.data.overflowBox.top, self.data.positionGlobal.y + ts )
-                sw = math.min( self.data.overflowBox.right, self.data.positionGlobal.x + self.data.sizeGlobal.w - ts ) - sx
-                sh = math.min( self.data.overflowBox.bottom, self.data.positionGlobal.y + self.data.sizeGlobal.h - ts ) - sy
+                sx = math_max( self.data.overflowBox.left, self.data.positionGlobal.x + ts )
+                sy = math_max( self.data.overflowBox.top, self.data.positionGlobal.y + ts )
+                sw = math_min( self.data.overflowBox.right, self.data.positionGlobal.x + self.data.sizeGlobal.w - ts ) - sx
+                sh = math_min( self.data.overflowBox.bottom, self.data.positionGlobal.y + self.data.sizeGlobal.h - ts ) - sy
 
-                render.drawRectFast( sx, sy, sw, sh )
+                render_drawRectFast( sx, sy, sw, sh )
 
-                render.setStencilFailOperation( STENCIL.KEEP )
-                render.setStencilCompareFunction( STENCIL.EQUAL )
+                render_setStencilFailOperation( STENCIL.KEEP )
+                render_setStencilCompareFunction( STENCIL.EQUAL )
 
                 self:paintText()
 
-                render.setStencilEnable( false )
+                render_setStencilEnable( false )
             else
                 self:paintText()
             end
