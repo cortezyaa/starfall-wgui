@@ -30,11 +30,9 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
 local math_max = math.max
 local math_min = math.min
-local render = render
 local render_setRGBA = render.setRGBA
 local render_drawRectFast = render.drawRectFast
 local render_setFont = render.setFont

@@ -71,14 +71,12 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
 local math_clamp = math.clamp
 local math_abs = math.abs
 local math_sin = math.sin
 local math_min = math.min
 local math_max = math.max
-local render = render
 local render_setRGBA = render.setRGBA
 local render_drawRectFast = render.drawRectFast
 local render_drawRectOutline = render.drawRectOutline
@@ -108,97 +106,122 @@ Element.sysValidate = function( self )
 end
 
 
--- Системная функция перерасчета элемента
+-- Системная функция перерасчета элемента ( а точнее его дочерних элементов )
+local self_data, self_pgx, self_pgy
+local children, child_data, child_margin, cx, cy, cw, ch, coLeft, coTop, coRight, coBottom
+local spaceLeft, spaceTop, spaceRight, spaceBottom
+
 Element.sysRecalculation = function( self )
+    self_data = self.data
+    self_pgx = self_data.positionGlobal.x
+    self_pgy = self_data.positionGlobal.y
 
+    children = self_data.children
 
-    -- ВСЁ ПЕРЕПИСАТЬ!
-    local fill = {}
-    local space = {
-        left = self.data.dockPadding.left,
-        top = self.data.dockPadding.top,
-        right = self.data.sizeGlobal.w - self.data.dockPadding.right,
-        bottom = self.data.sizeGlobal.h - self.data.dockPadding.bottom
-    }
+    spaceLeft = self_data.dockPadding.left
+    spaceTop = self_data.dockPadding.top
+    spaceRight = self_data.sizeGlobal.w - self_data.dockPadding.right
+    spaceBottom = self_data.sizeGlobal.h - self_data.dockPadding.bottom
 
-    for _, child in pairs( self.data.children ) do
-        if child.data.dock == DOCK.NODOCK then
-            child.data.positionGlobal.x = self.data.positionGlobal.x + child.data.positionLocal.x
-            child.data.positionGlobal.y = self.data.positionGlobal.y + child.data.positionLocal.y
+    for _, child in pairs( children ) do
+        child_data = child.data
+        child_margin = child_data.dockMargin
 
-            child.data.sizeGlobal.w = child.data.sizeLocal.w
-            child.data.sizeGlobal.h = child.data.sizeLocal.h
-        elseif child.data.dock == DOCK.FILL then
-            table.insert( fill, child )
-        elseif child.data.dock == DOCK.LEFT then
-            child.data.sizeGlobal.w = math_min( child.data.sizeLocal.w, space.right - space.left )
-            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
+        if child_data.dock == DOCK.NODOCK then
+            child_data.sizeGlobal.w = child_data.sizeLocal.w
+            child_data.sizeGlobal.h = child_data.sizeLocal.h
 
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
+            child_data.positionGlobal.x = self_pgx + child_data.positionLocal.x
+            child_data.positionGlobal.y = self_pgy + child_data.positionLocal.y
+        else
+            -- DOCK.FILL в следующем цикле
+            if child_data.dock == DOCK.LEFT then
+                child_data.sizeGlobal.w = math_max( 0, math_min( child_data.sizeLocal.w, spaceRight - spaceLeft ) )
+                child_data.sizeGlobal.h = math_max( 0, spaceBottom - spaceTop - child_margin.top - child_margin.bottom )
 
-            space.left = space.left + child.data.sizeGlobal.w + child.data.dockMargin.left + child.data.dockMargin.right
-        elseif child.data.dock == DOCK.TOP then
-            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math_min( child.data.sizeLocal.h, space.bottom - space.top )
+                child_data.positionGlobal.x = self_pgx + spaceLeft + child_margin.left
+                child_data.positionGlobal.y = self_pgy + spaceTop + child_margin.top
 
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
+                spaceLeft = spaceLeft + child_data.sizeGlobal.w + child_margin.left + child_margin.right
+            elseif child_data.dock == DOCK.TOP then
+                child_data.sizeGlobal.w = math_max( 0, spaceRight - spaceLeft - child_margin.left - child_margin.right )
+                child_data.sizeGlobal.h = math_max( 0, math_min( child_data.sizeLocal.h, spaceBottom - spaceTop ) )
 
-            space.top = space.top + child.data.sizeGlobal.h + child.data.dockMargin.top + child.data.dockMargin.bottom
-        elseif child.data.dock == DOCK.RIGHT then
-            child.data.sizeGlobal.w = math_min( child.data.sizeLocal.w, space.right - space.left )
-            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
+                child_data.positionGlobal.x = self_pgx + spaceLeft + child_margin.left
+                child_data.positionGlobal.y = self_pgy + spaceTop + child_margin.top
 
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.right - child.data.sizeGlobal.w - child.data.dockMargin.right
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
+                spaceTop = spaceTop + child_data.sizeGlobal.h + child_margin.top + child_margin.bottom
+            elseif child_data.dock == DOCK.RIGHT then
+                child_data.sizeGlobal.w = math_max( 0, math_min( child_data.sizeLocal.w, spaceRight - spaceLeft ) )
+                child_data.sizeGlobal.h = math_max( 0, spaceBottom - spaceTop - child_margin.top - child_margin.bottom )
 
-            space.right = space.right - child.data.sizeGlobal.w - child.data.dockMargin.left - child.data.dockMargin.right
-        elseif child.data.dock == DOCK.BOTTOM then
-            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = math_min( child.data.sizeLocal.h, space.bottom - space.top )
+                child_data.positionGlobal.x = self_pgx + spaceRight - child_data.sizeGlobal.w - child_margin.right
+                child_data.positionGlobal.y = self_pgy + spaceTop + child_margin.top
 
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.bottom
+                spaceRight = spaceRight - child_data.sizeGlobal.w - child_margin.left - child_margin.right
+            elseif child_data.dock == DOCK.BOTTOM then
+                child_data.sizeGlobal.w = math_max( 0, spaceRight - spaceLeft - child_margin.left - child_margin.right )
+                child_data.sizeGlobal.h = math_max( 0, math_min( child_data.sizeLocal.h, spaceBottom - spaceTop ) )
 
-            space.bottom = space.bottom - child.data.sizeGlobal.h - child.data.dockMargin.top - child.data.dockMargin.bottom
+                child_data.positionGlobal.x = self_pgx + spaceLeft + child_margin.left
+                child_data.positionGlobal.y = self_pgy + spaceBottom - child_data.sizeGlobal.h - child_margin.bottom
+
+                spaceBottom = spaceBottom - child_data.sizeGlobal.h - child_margin.top - child_margin.bottom
+            end
         end
     end
 
-    for _, child in pairs( self.data.children ) do
-        if table.hasValue( fill, child ) then
-            child.data.positionGlobal.x = self.data.positionGlobal.x + space.left + child.data.dockMargin.left
-            child.data.positionGlobal.y = self.data.positionGlobal.y + space.top + child.data.dockMargin.top
-            
-            child.data.sizeGlobal.w = space.right - space.left - child.data.dockMargin.left - child.data.dockMargin.right
-            child.data.sizeGlobal.h = space.bottom - space.top - child.data.dockMargin.top - child.data.dockMargin.bottom
+    for _, child in pairs( children ) do
+        child_data = child.data
+        child_margin = child_data.dockMargin
+
+        if child_data.dock == DOCK.FILL then
+            child_data.sizeGlobal.w = math_max( 0, spaceRight - spaceLeft - child_margin.left - child_margin.right )
+            child_data.sizeGlobal.h = math_max( 0, spaceBottom - spaceTop - child_margin.top - child_margin.bottom )
+
+            child_data.positionGlobal.x = self_pgx + spaceLeft + child_margin.left
+            child_data.positionGlobal.y = self_pgy + spaceTop + child_margin.top
         end
 
-        local x = child.data.positionGlobal.x
-        local y = child.data.positionGlobal.y
-        local w = child.data.sizeGlobal.w
-        local h = child.data.sizeGlobal.h
+        cx = child_data.positionGlobal.x
+        cy = child_data.positionGlobal.y
+        cw = child_data.sizeGlobal.w
+        ch = child_data.sizeGlobal.h
 
-        if child.data.overflow == OVERFLOW.VISIBLE then
-            child.data.overflowBox.left = self.data.overflowBox.left
-            child.data.overflowBox.top = self.data.overflowBox.top
-            child.data.overflowBox.right = self.data.overflowBox.right
-            child.data.overflowBox.bottom = self.data.overflowBox.bottom
+        if child_data.overflow == OVERFLOW.VISIBLE then
+            child_data.overflowBox.left = self_data.overflowBox.left
+            child_data.overflowBox.top = self_data.overflowBox.top
+            child_data.overflowBox.right = self_data.overflowBox.right
+            child_data.overflowBox.bottom = self_data.overflowBox.bottom
         else
-            child.data.overflowBox.left = math_max( x, self.data.overflowBox.left )
-            child.data.overflowBox.top = math_max( y, self.data.overflowBox.top )
-            child.data.overflowBox.right = math_min( x + w, self.data.overflowBox.right )
-            child.data.overflowBox.bottom = math_min( y + h, self.data.overflowBox.bottom )
+            child_data.overflowBox.left = math_clamp( cx, self_data.overflowBox.left, self_data.overflowBox.right )
+            child_data.overflowBox.top = math_clamp( cy, self_data.overflowBox.top, self_data.overflowBox.bottom )
+            child_data.overflowBox.right = math_clamp( cx + cw, self_data.overflowBox.left, self_data.overflowBox.right )
+            child_data.overflowBox.bottom = math_clamp( cy + ch, self_data.overflowBox.top, self_data.overflowBox.bottom )
         end
 
-        child.data.hitbox.left = math_clamp( math_max( x, child.data.overflowBox.left ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.top = math_clamp( math_max( y, child.data.overflowBox.top ), child.data.overflowBox.top, child.data.overflowBox.bottom )
-        child.data.hitbox.right = math_clamp( math_min( x + w, child.data.overflowBox.right ), child.data.overflowBox.left, child.data.overflowBox.right )
-        child.data.hitbox.bottom = math_clamp( math_min( y + h, child.data.overflowBox.bottom ), child.data.overflowBox.top, child.data.overflowBox.bottom )
+        coLeft = child_data.overflowBox.left
+        coTop = child_data.overflowBox.top
+        coRight = child_data.overflowBox.right
+        coBottom = child_data.overflowBox.bottom
 
-        child.data.shouldUseStencil = ( x < child.data.overflowBox.left ) or ( y < child.data.overflowBox.top ) or ( ( x + w ) > child.data.overflowBox.right ) or ( ( y + h ) > child.data.overflowBox.bottom )
-        child.data.shouldDraw = not ( ( x > child.data.overflowBox.right ) or ( y > child.data.overflowBox.bottom ) or ( ( x + w ) < child.data.overflowBox.left ) or ( ( y + h ) < child.data.overflowBox.top ) )
-        child.data.shouldDraw =  not ( child.data.sizeGlobal.w <= 0 or child.data.sizeGlobal.h <= 0 ) and child.data.shouldDraw or false
+        child_data.hitbox.left = math_clamp( math_max( cx, coLeft ), coLeft, coRight )
+        child_data.hitbox.top = math_clamp( math_max( cy, coTop ), coTop, coBottom )
+        child_data.hitbox.right = math_clamp( math_min( cx + cw, coRight ), coLeft, coRight )
+        child_data.hitbox.bottom = math_clamp( math_min( cy + ch, coBottom ), coTop, coBottom )
+
+        child_data.shouldUseStencil = 
+            ( cx < coLeft ) or 
+            ( cy < coTop ) or 
+            ( ( cx + cw ) > coRight ) or 
+            ( ( cy + ch ) > coBottom )
+
+        child_data.shouldDraw = 
+            ( cw >= 0 and ch >= 0 ) and
+            ( cx <= coRight ) and
+            ( cy <= coBottom ) and
+            ( ( cx + cw ) >= coLeft ) and
+            ( ( cy + ch ) >= coTop )
 
         child:sysRecalculation()
     end

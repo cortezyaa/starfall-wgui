@@ -29,7 +29,6 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
 
 

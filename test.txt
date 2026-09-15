@@ -24,18 +24,17 @@ if player() ~= owner() then return end
 
 --@include ./wgui.lua
 require( "./wgui.lua" )
-wgui.debug = true
+wgui.debug = false
 
 enableHud( player(), true )
 
 local e = {}
 
-
 e.rs = wgui.createRenderSpace( RENDERSPACE.SCREEN )
 e.rs:setScreen( chip():getLinkedComponents()[ 1 ] )
 
 
-e.base = wgui.create( "panel", e.rs )
+e.base = wgui.create( "space", e.rs )
 e.base:setPos( 128, 128 )
 e.base:setSize( 1024 - 256, 1024 - 256 )
 e.base:setOverflow( OVERFLOW.HIDDEN )
@@ -80,12 +79,12 @@ e.textbox:addEvent( WGUIEVENTS.VALUECHANGED, function( self, new, old )
     e.buttons:setText( new )
 end )
 
---[[
+
 local p = e.base
 
-for I = 1, 16 do 
+for I = 1, 500 do 
     local r = wgui.create( "buttonSelected", p )
-    r:setPos( 24, 24 )
+    r:setPos( 1, 1 )
     r:setSize( 256, 256 )
     r:setOverflow( OVERFLOW.HIDDEN )
     

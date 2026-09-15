@@ -52,13 +52,11 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
 local math_abs = math.abs
 local math_sin = math.sin
 local math_min = math.min
 local math_max = math.max
-local render = render
 local render_setRGBA = render.setRGBA
 local render_drawRectFast = render.drawRectFast
 local render_setFont = render.setFont

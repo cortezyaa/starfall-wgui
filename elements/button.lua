@@ -24,11 +24,9 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
 local math_max = math.max
 local math_min = math.min
-local render = render
 local render_setRGBA = render.setRGBA
 local render_drawRectFast = render.drawRectFast
 local render_setFont = render.setFont
@@ -145,8 +143,6 @@ Element.render = function( self )
     if self.data.noDraw then return end
 
     oldtransition = self.data.transition
-    realtime = timer.realtime()
-
     self.data.transition = math_lerp( self.data.transition + ( self.data.hover and 1 or -1 ) * ( ( timer.realtime() - self.data.realtime ) / self.data.transitionTime ), 0, 1 )
 
     if self.data.transition ~= oldtransition then

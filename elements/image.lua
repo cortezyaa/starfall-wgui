@@ -27,11 +27,9 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_sin = math.sin
 local math_cos = math.cos
 local math_rad = math.rad
-local render = render
 local render_setRGBA = render.setRGBA
 local render_setMaterial = render.setMaterial
 local render_drawRectFast = render.drawRectFast

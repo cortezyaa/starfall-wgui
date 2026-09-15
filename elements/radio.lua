@@ -36,9 +36,7 @@ end
 
 
 -- Оптимизация?
-local math = math
 local math_lerp = math.lerp
-local render = render
 local render_setRGBA = render.setRGBA
 local render_drawRectFast = render.drawRectFast
 
